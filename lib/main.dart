@@ -209,6 +209,10 @@ class _MainShellState extends State<MainShell> {
       if (_pendingReward != null) {
         _coins += _pendingReward!;
       }
+      _hearts = (_hearts + 1).clamp(0, _maxHearts);
+      if (_hearts >= _maxHearts) {
+        _nextHeartAt = null;
+      }
       _selectedIndex = 1;
       _pendingReward = amount;
       _displayedCoins = _coins;
