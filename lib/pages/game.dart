@@ -9,6 +9,7 @@ import 'package:cannon_physics/cannon_physics.dart' as cannon;
 import 'package:boxbox/widgets/background.dart';
 import 'package:boxbox/widgets/continue.dart';
 import 'package:boxbox/widgets/insettings.dart';
+import 'package:boxbox/widgets/return.dart';
 import 'package:vector_math/vector_math.dart' hide Colors, Sphere;
 
 class GamePage extends StatefulWidget {
@@ -92,6 +93,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   double _outOfBallsTimer = 0;
   bool _exiting = false;
   bool _continueOpen = false;
+  bool _returnOpen = false;
   bool _menuOpen = false;
   bool _music = true;
   bool _sound = true;
@@ -118,7 +120,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   }
 
   void _setMenuOpen(bool open) {
-    if (_exiting || _continueOpen || open == _menuOpen) return;
+    if (_exiting || _continueOpen || _returnOpen || open == _menuOpen) return;
     setState(() => _menuOpen = open);
     if (open) {
       _menuAnim.forward();
@@ -340,6 +342,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     if (_exiting) return;
     _exiting = true;
     _continueOpen = false;
+    _returnOpen = false;
     _ticker.stop();
     if (!mounted) return;
     Navigator.of(context).pop(reward);
@@ -364,6 +367,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
         !_menuAnim.isDismissed ||
         _exiting ||
         _continueOpen ||
+        _returnOpen ||
         _ballsLeft <= 0) {
       return;
     }
@@ -450,7 +454,8 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
                       _setMenuOpen(false);
                       return;
                     }
-                    Navigator.of(context).pop();
+                    if (_exiting || _continueOpen || _returnOpen) return;
+                    setState(() => _returnOpen = true);
                   },
                   child: const Icon(Icons.arrow_back, color: Colors.white),
                 ),
@@ -495,6 +500,11 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
               balls: _continueBalls,
               onClose: () => _exitGame(GamePage.defeatCode),
               onContinue: _buyContinue,
+            ),
+          if (_returnOpen)
+            ReturnPopup(
+              onClose: () => setState(() => _returnOpen = false),
+              onQuit: () => _exitGame(GamePage.defeatCode),
             ),
         ],
         ),

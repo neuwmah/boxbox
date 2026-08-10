@@ -23,4 +23,5 @@ flutter:
     - lib/assets/coin/icon1.png
     - lib/assets/coin/pile.png
     - lib/assets/heart/icon1.png
+    - lib/assets/heart/broken1.png
     - lib/assets/play/icon.png
