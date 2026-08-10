@@ -131,11 +131,12 @@ class _ContinuePopupState extends State<ContinuePopup>
                                           children: [
                                             _StickerLabel(
                                               text: '+${widget.balls}',
-                                              depthColor: const Color(0xFF000000),
+                                              depthColor: const Color(0xFF212121),
                                               offsets: _StickerLabel.offsets4,
+                                              innerBorderColor: const Color(0xFFCCCCCC),
                                               style: const TextStyle(
                                                 fontSize: 80,
-                                                fontWeight: FontWeight.w700,
+                                                fontWeight: FontWeight.w900,
                                                 height: 1,
                                                 letterSpacing: -.4,
                                               ),
@@ -144,7 +145,7 @@ class _ContinuePopupState extends State<ContinuePopup>
                                             _StickerLabel(
                                               text:
                                                   'Add ${widget.balls} balls to continue!',
-                                              depthColor: const Color(0xFF000000),
+                                              depthColor: const Color(0xFF212121),
                                               offsets: _StickerLabel.offsets2,
                                               textAlign: TextAlign.center,
                                               style: const TextStyle(
@@ -327,6 +328,7 @@ class _StickerLabel extends StatelessWidget {
     this.depthColor = const Color(0xFF313131),
     this.offsets = offsets2,
     this.textAlign,
+    this.innerBorderColor,
   });
 
   final String text;
@@ -334,6 +336,7 @@ class _StickerLabel extends StatelessWidget {
   final Color depthColor;
   final List<Offset> offsets;
   final TextAlign? textAlign;
+  final Color? innerBorderColor;
 
   static const offsets2 = [
     Offset(1, 1),
@@ -361,6 +364,12 @@ class _StickerLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fill = Text(
+      text,
+      textAlign: textAlign,
+      style: style.copyWith(color: Colors.white),
+    );
+
     return Padding(
       padding: const EdgeInsets.all(2),
       child: Stack(
@@ -376,11 +385,24 @@ class _StickerLabel extends StatelessWidget {
                 style: style.copyWith(color: depthColor),
               ),
             ),
-          Text(
-            text,
-            textAlign: textAlign,
-            style: style.copyWith(color: Colors.white),
-          ),
+          if (innerBorderColor == null)
+            fill
+          else
+            ShaderMask(
+              blendMode: BlendMode.srcIn,
+              shaderCallback: (bounds) {
+                return LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [
+                    innerBorderColor!,
+                    Colors.white,
+                  ],
+                  stops: const [0.0, 0.28],
+                ).createShader(bounds);
+              },
+              child: fill,
+            ),
         ],
       ),
     );
