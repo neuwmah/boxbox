@@ -504,7 +504,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
           if (_returnOpen)
             ReturnPopup(
               onClose: () => setState(() => _returnOpen = false),
-              onQuit: () => _exitGame(GamePage.defeatCode),
+              onQuit: () => _exitGame(null),
             ),
         ],
         ),
