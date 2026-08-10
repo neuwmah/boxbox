@@ -462,7 +462,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
               ),
             ),
             Positioned(
-              top: 120,
+              top: 80,
               left: 0,
               right: 0,
               height: 48,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:boxbox/widgets/background.dart';
+import 'package:boxbox/widgets/titlebar.dart';
 
 class ReturnPopup extends StatefulWidget {
   const ReturnPopup({
@@ -96,7 +97,7 @@ class _ReturnPopupState extends State<ReturnPopup>
                                   width: double.infinity,
                                   padding: const EdgeInsets.fromLTRB(
                                     16,
-                                    24,
+                                    0,
                                     16,
                                     24,
                                   ),
@@ -110,17 +111,7 @@ class _ReturnPopupState extends State<ReturnPopup>
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Text(
-                                        'Are You Sure?',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.w700,
-                                          height: 1,
-                                          letterSpacing: -.4,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 24),
+                                      const PopupTitleBadge(title: 'Are You Sure?'),
                                       Center(
                                         child: Container(
                                           clipBehavior: Clip.antiAlias,
@@ -232,7 +223,7 @@ class _ReturnPopupState extends State<ReturnPopup>
                         ),
                         Positioned(
                           top: 0,
-                          right: 16,
+                          right: 14,
                           child: GestureDetector(
                             behavior: HitTestBehavior.opaque,
                             onTap: widget.onClose,

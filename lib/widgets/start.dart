@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:boxbox/widgets/background.dart';
+import 'package:boxbox/widgets/titlebar.dart';
 
 class StartPopup extends StatefulWidget {
   const StartPopup({
@@ -96,12 +97,7 @@ class _StartPopupState extends State<StartPopup>
                                     const EdgeInsets.only(right: 4, bottom: 4),
                                 child: Container(
                                   width: double.infinity,
-                                  padding: const EdgeInsets.fromLTRB(
-                                    16,
-                                    24,
-                                    16,
-                                    24,
-                                  ),
+                                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                                   decoration: BoxDecoration(
                                     color: Colors.black,
                                     border: Border.all(
@@ -112,17 +108,7 @@ class _StartPopupState extends State<StartPopup>
                                   child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(
-                                'Level ${widget.level}',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w700,
-                                  height: 1,
-                                  letterSpacing: -.4,
-                                ),
-                              ),
-                              const SizedBox(height: 24),
+                              PopupTitleBadge(title: 'Level ${widget.level}'),
                               Center(
                                 child: Container(
                                   clipBehavior: Clip.antiAlias,
@@ -135,12 +121,7 @@ class _StartPopupState extends State<StartPopup>
                                         child: PopupBackground(),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                          32,
-                                          28,
-                                          32,
-                                          28,
-                                        ),
+                                        padding: const EdgeInsets.fromLTRB(32, 28, 32, 28),
                                         child: SizedBox(
                                           width: _heartSize,
                                           height: _heartSize,
@@ -226,7 +207,7 @@ class _StartPopupState extends State<StartPopup>
                       ),
                       Positioned(
                         top: 0,
-                        right: 16,
+                        right: 14,
                         child: GestureDetector(
                           behavior: HitTestBehavior.opaque,
                           onTap: widget.onClose,

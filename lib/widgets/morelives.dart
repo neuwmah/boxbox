@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:boxbox/widgets/background.dart';
+import 'package:boxbox/widgets/titlebar.dart';
 
 class MoreLivesPopup extends StatefulWidget {
   const MoreLivesPopup({
@@ -104,12 +105,7 @@ class _MoreLivesPopupState extends State<MoreLivesPopup>
                                     const EdgeInsets.only(right: 4, bottom: 4),
                                 child: Container(
                                   width: double.infinity,
-                                  padding: const EdgeInsets.fromLTRB(
-                                    0,
-                                    24,
-                                    0,
-                                    24,
-                                  ),
+                                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 24),
                                   decoration: BoxDecoration(
                                     color: Colors.black,
                                     border: Border.all(
@@ -120,20 +116,7 @@ class _MoreLivesPopupState extends State<MoreLivesPopup>
                                   child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 16),
-                                child: Text(
-                                  'More Lives!',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.w700,
-                                    height: 1,
-                                    letterSpacing: -.4,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 24),
+                              const PopupTitleBadge(title: 'More Lives!'),
                               Padding(
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 16),
@@ -423,7 +406,7 @@ class _MoreLivesPopupState extends State<MoreLivesPopup>
                       ),
                       Positioned(
                         top: 0,
-                        right: 16,
+                        right: 14,
                         child: GestureDetector(
                           behavior: HitTestBehavior.opaque,
                           onTap: widget.onClose,

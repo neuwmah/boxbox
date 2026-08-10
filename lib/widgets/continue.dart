@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:boxbox/widgets/background.dart';
 import 'package:boxbox/widgets/status.dart';
+import 'package:boxbox/widgets/titlebar.dart';
 
 class ContinuePopup extends StatefulWidget {
   const ContinuePopup({
@@ -116,7 +117,7 @@ class _ContinuePopupState extends State<ContinuePopup>
                                   width: double.infinity,
                                   padding: const EdgeInsets.fromLTRB(
                                     16,
-                                    24,
+                                    0,
                                     16,
                                     24,
                                   ),
@@ -130,17 +131,7 @@ class _ContinuePopupState extends State<ContinuePopup>
                                   child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Text(
-                                'Continue?',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w700,
-                                  height: 1,
-                                  letterSpacing: -.4,
-                                ),
-                              ),
-                              const SizedBox(height: 24),
+                              const PopupTitleBadge(title: 'Continue?'),
                               Center(
                                 child: Container(
                                   clipBehavior: Clip.antiAlias,
@@ -290,7 +281,7 @@ class _ContinuePopupState extends State<ContinuePopup>
                       ),
                         Positioned(
                           top: 0,
-                          right: 16,
+                          right: 14,
                           child: GestureDetector(
                             behavior: HitTestBehavior.opaque,
                             onTap: widget.onClose,

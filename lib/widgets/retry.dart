@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:boxbox/widgets/background.dart';
+import 'package:boxbox/widgets/titlebar.dart';
 
 class RetryPopup extends StatefulWidget {
   const RetryPopup({
@@ -98,7 +99,7 @@ class _RetryPopupState extends State<RetryPopup>
                                   width: double.infinity,
                                   padding: const EdgeInsets.fromLTRB(
                                     16,
-                                    24,
+                                    0,
                                     16,
                                     24,
                                   ),
@@ -112,17 +113,7 @@ class _RetryPopupState extends State<RetryPopup>
                                   child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(
-                                'Level ${widget.level}',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w700,
-                                  height: 1,
-                                  letterSpacing: -.4,
-                                ),
-                              ),
-                              const SizedBox(height: 24),
+                              PopupTitleBadge(title: 'Level ${widget.level}'),
                               Center(
                                 child: Container(
                                   clipBehavior: Clip.antiAlias,
@@ -226,7 +217,7 @@ class _RetryPopupState extends State<RetryPopup>
                       ),
                       Positioned(
                         top: 0,
-                        right: 16,
+                        right: 14,
                         child: GestureDetector(
                           behavior: HitTestBehavior.opaque,
                           onTap: widget.onClose,
