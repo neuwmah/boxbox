@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 class RectBackground extends StatefulWidget {
@@ -69,6 +71,81 @@ class _RectBackgroundState extends State<RectBackground>
         ),
         if (widget.child != null) widget.child!,
       ],
+    );
+  }
+}
+
+/// Rotating highlight used inside popup content panels only.
+class PopupBackground extends StatefulWidget {
+  const PopupBackground({
+    super.key,
+    this.offset = Offset.zero,
+  });
+
+  /// Shifts the burst center (e.g. up behind heart icons).
+  final Offset offset;
+
+  @override
+  State<PopupBackground> createState() => _PopupBackgroundState();
+}
+
+class _PopupBackgroundState extends State<PopupBackground>
+    with SingleTickerProviderStateMixin {
+  static const _asset = 'lib/assets/background/highlight.png';
+  static const _duration = Duration(seconds: 16);
+
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: _duration)
+      ..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final w = constraints.maxWidth;
+        final h = constraints.maxHeight;
+        final size =
+            math.sqrt(w * w + h * h) + widget.offset.distance * 2;
+
+        return AnimatedBuilder(
+          animation: _controller,
+          child: OverflowBox(
+            alignment: Alignment.center,
+            maxWidth: size,
+            maxHeight: size,
+            child: SizedBox(
+              width: size,
+              height: size,
+              child: Image.asset(
+                _asset,
+                fit: BoxFit.cover,
+                filterQuality: FilterQuality.medium,
+                gaplessPlayback: true,
+              ),
+            ),
+          ),
+          builder: (context, child) {
+            return Transform.translate(
+              offset: widget.offset,
+              child: Transform.rotate(
+                angle: _controller.value * 2 * math.pi,
+                child: child,
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

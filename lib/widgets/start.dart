@@ -132,7 +132,7 @@ class _StartPopupState extends State<StartPopup>
                                   child: Stack(
                                     children: [
                                       const Positioned.fill(
-                                        child: RectBackground(),
+                                        child: PopupBackground(),
                                       ),
                                       Padding(
                                         padding: const EdgeInsets.fromLTRB(

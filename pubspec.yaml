@@ -19,6 +19,7 @@ flutter:
   uses-material-design: true
   assets:
     - lib/assets/background/sample.png
+    - lib/assets/background/highlight.png
     - lib/assets/background/giphy.webp
     - lib/assets/coin/icon1.png
     - lib/assets/coin/pile.png

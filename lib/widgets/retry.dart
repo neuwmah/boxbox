@@ -132,7 +132,7 @@ class _RetryPopupState extends State<RetryPopup>
                                   child: Stack(
                                     children: [
                                       const Positioned.fill(
-                                        child: RectBackground(),
+                                        child: PopupBackground(),
                                       ),
                                       Padding(
                                         padding: const EdgeInsets.fromLTRB(

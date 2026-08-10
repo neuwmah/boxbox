@@ -146,7 +146,9 @@ class _MoreLivesPopupState extends State<MoreLivesPopup>
                                     child: Stack(
                                       children: [
                                         const Positioned.fill(
-                                          child: RectBackground(),
+                                          child: PopupBackground(
+                                            offset: Offset(0, -36),
+                                          ),
                                         ),
                                         Padding(
                                           padding: const EdgeInsets.fromLTRB(

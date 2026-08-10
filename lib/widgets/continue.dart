@@ -150,7 +150,9 @@ class _ContinuePopupState extends State<ContinuePopup>
                                   child: Stack(
                                     children: [
                                       const Positioned.fill(
-                                        child: RectBackground(),
+                                        child: PopupBackground(
+                                          offset: Offset(0, -12),
+                                        ),
                                       ),
                                       Padding(
                                         padding: const EdgeInsets.fromLTRB(32, 12, 32, 20),

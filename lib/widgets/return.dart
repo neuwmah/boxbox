@@ -131,7 +131,9 @@ class _ReturnPopupState extends State<ReturnPopup>
                                           child: Stack(
                                             children: [
                                               const Positioned.fill(
-                                                child: RectBackground(),
+                                                child: PopupBackground(
+                                                  offset: Offset(0, -22),
+                                                ),
                                               ),
                                               Padding(
                                                 padding:
