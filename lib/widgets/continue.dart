@@ -77,7 +77,7 @@ class _ContinuePopupState extends State<ContinuePopup>
             ),
             Center(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 0),
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
                 child: Opacity(
                   opacity: appear,
                   child: Material(
@@ -87,14 +87,47 @@ class _ContinuePopupState extends State<ContinuePopup>
                       children: [
                         Padding(
                           padding: const EdgeInsets.only(top: 16),
-                          child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
-                          decoration: BoxDecoration(
-                            color: Colors.black,
-                            border: Border.all(color: _border, width: 1.6),
-                          ),
-                          child: Column(
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              for (final o in [4.0, 3.0, 2.0, 1.0])
+                                Positioned(
+                                  left: o,
+                                  top: o,
+                                  right: 4 - o,
+                                  bottom: 4 - o,
+                                  child: const DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                          Color(0xFF101010),
+                                          Color(0xFF050505),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(right: 4, bottom: 4),
+                                child: Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.fromLTRB(
+                                    16,
+                                    24,
+                                    16,
+                                    24,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black,
+                                    border: Border.all(
+                                      color: _border,
+                                      width: 1.6,
+                                    ),
+                                  ),
+                                  child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               const Text(
@@ -246,10 +279,13 @@ class _ContinuePopupState extends State<ContinuePopup>
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        ),
+                      ),
                         Positioned(
                           top: 0,
                           right: 16,
