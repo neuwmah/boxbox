@@ -89,7 +89,7 @@ class PopupTitleBadge extends StatelessWidget {
   const PopupTitleBadge({
     super.key,
     required this.title,
-    this.fontSize = 24,
+    this.fontSize = 20,
   });
 
   final String title;

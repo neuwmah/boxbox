@@ -223,7 +223,7 @@ class _ReturnPopupState extends State<ReturnPopup>
                         ),
                         Positioned(
                           top: 0,
-                          right: 14,
+                          right: 16,
                           child: GestureDetector(
                             behavior: HitTestBehavior.opaque,
                             onTap: widget.onClose,
