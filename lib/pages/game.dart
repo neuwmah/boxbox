@@ -18,6 +18,8 @@ class GamePage extends StatefulWidget {
     this.onSpendCoins,
   });
 
+  static const defeatCode = -1;
+
   final int coins;
   final bool Function(int amount)? onSpendCoins;
 
@@ -313,7 +315,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
 
   void _offerContinueOrExit() {
     if (_coins < _continueCost) {
-      _exitGame(null);
+      _exitGame(GamePage.defeatCode);
       return;
     }
     if (_menuOpen) _setMenuOpen(false);
@@ -323,7 +325,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   void _buyContinue() {
     final spend = widget.onSpendCoins;
     if (spend == null || !spend(_continueCost)) {
-      _exitGame(null);
+      _exitGame(GamePage.defeatCode);
       return;
     }
     setState(() {
@@ -491,7 +493,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
               coins: _coins,
               price: _continueCost,
               balls: _continueBalls,
-              onClose: () => _exitGame(null),
+              onClose: () => _exitGame(GamePage.defeatCode),
               onContinue: _buyContinue,
             ),
         ],

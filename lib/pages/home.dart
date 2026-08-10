@@ -9,11 +9,15 @@ class HomePage extends StatelessWidget {
     required this.coins,
     this.onReward,
     this.onSpendCoins,
+    this.onBeforePlay,
+    this.onDefeat,
   });
 
   final int coins;
   final ValueChanged<int>? onReward;
   final bool Function(int amount)? onSpendCoins;
+  final bool Function()? onBeforePlay;
+  final VoidCallback? onDefeat;
 
   static const _scale = 1.1;
   static const _bgOpacity = 0.08;
@@ -25,6 +29,8 @@ class HomePage extends StatelessWidget {
   ]);
 
   Future<void> _openGame(BuildContext context) async {
+    if (onBeforePlay != null && !onBeforePlay!()) return;
+
     final reward = await Navigator.of(context).push<int>(
       PageRouteBuilder(
         pageBuilder: (_, __, ___) => GamePage(
@@ -36,6 +42,10 @@ class HomePage extends StatelessWidget {
       ),
     );
     if (!context.mounted) return;
+    if (reward == GamePage.defeatCode) {
+      onDefeat?.call();
+      return;
+    }
     if (reward != null && reward > 0) {
       onReward?.call(reward);
     }

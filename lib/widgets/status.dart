@@ -139,22 +139,7 @@ class _StatusCounter extends StatelessWidget {
                     fit: BoxFit.contain,
                   ),
                   if (iconLabel != null)
-                    Text(
-                      iconLabel!,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        height: 1,
-                        shadows: [
-                          Shadow(
-                            color: Color(0x99000000),
-                            blurRadius: 2,
-                            offset: Offset(0, 0),
-                          ),
-                        ],
-                      ),
-                    ),
+                    _HeartValueLabel(text: iconLabel!),
                   if (showPlus)
                     Positioned(
                       right: -4,
@@ -190,6 +175,46 @@ class _StatusCounter extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: content,
+    );
+  }
+}
+
+class _HeartValueLabel extends StatelessWidget {
+  const _HeartValueLabel({required this.text});
+
+  final String text;
+
+  static const _depthColor = Color(0xFF5A1018);
+  static const _style = TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.w700,
+    height: 1,
+  );
+  static const _offsets = [
+    Offset(1, 1),
+    Offset(0, 1),
+    Offset(1, 0),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      alignment: Alignment.center,
+      children: [
+        for (final offset in _offsets)
+          Transform.translate(
+            offset: offset,
+            child: Text(
+              text,
+              style: _style.copyWith(color: _depthColor),
+            ),
+          ),
+        Text(
+          text,
+          style: _style.copyWith(color: Colors.white),
+        ),
+      ],
     );
   }
 }
