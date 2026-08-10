@@ -4,6 +4,7 @@ import 'package:boxbox/widgets/background.dart';
 class MoreLivesPopup extends StatefulWidget {
   const MoreLivesPopup({
     super.key,
+    required this.hearts,
     required this.heartTimer,
     required this.refillPrice,
     required this.onClose,
@@ -11,6 +12,7 @@ class MoreLivesPopup extends StatefulWidget {
     required this.onWatchAd,
   });
 
+  final int hearts;
   final String heartTimer;
   final int refillPrice;
   final VoidCallback onClose;
@@ -133,13 +135,14 @@ class _MoreLivesPopupState extends State<MoreLivesPopup>
                                                       height: _heartSize,
                                                       fit: BoxFit.contain,
                                                     ),
-                                                    const _StickerLabel(
-                                                      text: '0',
+                                                    _StickerLabel(
+                                                      text: '${widget.hearts}',
                                                       depthColor:
-                                                          Color(0xFF5A1018),
-                                                      style: TextStyle(
+                                                          const Color(0xFF5A1018),
+                                                      style: const TextStyle(
                                                         fontSize: 24,
-                                                        fontWeight: FontWeight.w900,
+                                                        fontWeight:
+                                                            FontWeight.w900,
                                                         height: 1,
                                                       ),
                                                     ),

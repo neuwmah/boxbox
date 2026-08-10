@@ -8,8 +8,10 @@ class StatusCounters extends StatelessWidget {
     this.heartTimer = '20:00',
     this.showHearts = true,
     this.showCoinPlus = true,
+    this.showHeartPlus = true,
     this.gap = 72,
     this.onCoinsTap,
+    this.onHeartsTap,
     this.coinIconKey,
   });
 
@@ -18,8 +20,10 @@ class StatusCounters extends StatelessWidget {
   final String heartTimer;
   final bool showHearts;
   final bool showCoinPlus;
+  final bool showHeartPlus;
   final double gap;
   final VoidCallback? onCoinsTap;
+  final VoidCallback? onHeartsTap;
   final GlobalKey? coinIconKey;
 
   @override
@@ -46,6 +50,8 @@ class StatusCounters extends StatelessWidget {
               iconAsset: 'lib/assets/heart/icon1.png',
               value: heartTimer,
               iconLabel: '$hearts',
+              onTap: onHeartsTap,
+              showPlus: showHeartPlus,
             ),
           ),
         ),

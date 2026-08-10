@@ -115,9 +115,6 @@ class _MainShellState extends State<MainShell> {
       } else {
         _nextHeartAt = DateTime.now().add(_heartRegen);
       }
-      if (_homePopup == _HomePopup.moreLives && _hearts >= 1) {
-        _homePopup = _HomePopup.retry;
-      }
     });
   }
 
@@ -286,12 +283,22 @@ class _MainShellState extends State<MainShell> {
                     heartTimer: _heartTimerLabel,
                     showHearts: onHome,
                     showCoinPlus: onHome,
+                    showHeartPlus: onHome && _hearts < _maxHearts,
                     gap: onHome ? 32 : 72,
                     coinIconKey: onHome ? _coinIconKey : null,
                     onCoinsTap: onHome
                         ? () {
                             if (blocking) return;
                             setState(() => _selectedIndex = 0);
+                          }
+                        : null,
+                    onHeartsTap: onHome
+                        ? () {
+                            if (blocking) return;
+                            if (_hearts >= _maxHearts) return;
+                            setState(
+                              () => _homePopup = _HomePopup.moreLives,
+                            );
                           }
                         : null,
                   ),
@@ -317,6 +324,7 @@ class _MainShellState extends State<MainShell> {
         if (_homePopup == _HomePopup.moreLives)
           Positioned.fill(
             child: MoreLivesPopup(
+              hearts: _hearts,
               heartTimer: _heartTimerLabel,
               refillPrice: _refillPrice,
               onClose: _closeHomePopup,
