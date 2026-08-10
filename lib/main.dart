@@ -49,8 +49,8 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   int _selectedIndex = 1;
-  int _coins = 0;
-  int _displayedCoins = 0;
+  int _coins = 500;
+  int _displayedCoins = 500;
   int? _pendingReward;
   final GlobalKey _coinIconKey = GlobalKey();
 
@@ -76,6 +76,15 @@ class _MainShellState extends State<MainShell> {
     });
   }
 
+  bool _spendCoins(int amount) {
+    if (amount <= 0 || _coins < amount) return false;
+    setState(() {
+      _coins -= amount;
+      _displayedCoins = _coins;
+    });
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     final showStatus = _selectedIndex == 0 || _selectedIndex == 1;
@@ -96,7 +105,11 @@ class _MainShellState extends State<MainShell> {
                       Expanded(child: ShopPage()),
                     ],
                   ),
-                  HomePage(onReward: _onReward),
+                  HomePage(
+                    coins: _coins,
+                    onReward: _onReward,
+                    onSpendCoins: _spendCoins,
+                  ),
                   const Column(
                     children: [
                       AppTitleBar(title: 'Settings'),

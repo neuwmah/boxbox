@@ -4,9 +4,16 @@ import 'package:boxbox/pages/game.dart';
 import 'package:boxbox/widgets/titlebar.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key, this.onReward});
+  const HomePage({
+    super.key,
+    required this.coins,
+    this.onReward,
+    this.onSpendCoins,
+  });
 
+  final int coins;
   final ValueChanged<int>? onReward;
+  final bool Function(int amount)? onSpendCoins;
 
   static const _scale = 1.1;
   static const _bgOpacity = 0.08;
@@ -20,7 +27,10 @@ class HomePage extends StatelessWidget {
   Future<void> _openGame(BuildContext context) async {
     final reward = await Navigator.of(context).push<int>(
       PageRouteBuilder(
-        pageBuilder: (_, __, ___) => const GamePage(),
+        pageBuilder: (_, __, ___) => GamePage(
+          coins: coins,
+          onSpendCoins: onSpendCoins,
+        ),
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
       ),

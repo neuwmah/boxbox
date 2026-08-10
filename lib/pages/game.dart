@@ -6,11 +6,20 @@ import 'package:flutter/scheduler.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'package:cannon_physics/cannon_physics.dart' as cannon;
+import 'package:boxbox/widgets/background.dart';
+import 'package:boxbox/widgets/continue.dart';
 import 'package:boxbox/widgets/insettings.dart';
 import 'package:vector_math/vector_math.dart' hide Colors, Sphere;
 
 class GamePage extends StatefulWidget {
-  const GamePage({super.key});
+  const GamePage({
+    super.key,
+    required this.coins,
+    this.onSpendCoins,
+  });
+
+  final int coins;
+  final bool Function(int amount)? onSpendCoins;
 
   @override
   State<GamePage> createState() => _GamePageState();
@@ -44,6 +53,11 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   static const _camY = 3.4;
   static const _focal = 320.0;
   static const _horizon = 0.56;
+  static const _maxBalls = 10;
+  static const _continueBalls = 5;
+  static const _continueCost = 500;
+  static const _clearDelay = 3.0;
+  static const _outOfBallsDelay = 3.0;
 
   static const _ballMass = 2.4;
   static const _cubeMass = 2.2;
@@ -56,11 +70,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   static const _platformTop = 2.4;
   static const _platformThickness = 0.08;
   static const _groundY = -1.0;
-  static const _groundHalfW = 5.2;
   static const _groundFar = 13.5;
-  static const _groundVisualHalfW = 48.0;
-  static const _groundVisualNear = -20.0;
-  static const _groundVisualFar = 80.0;
   static const _pyramidZ = _platformDistance;
 
   late final Ticker _ticker;
@@ -74,8 +84,12 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   final List<cannon.Body> _balls = [];
   Duration _lastElapsed = Duration.zero;
   Size _viewSize = Size.zero;
+  int _ballsLeft = _maxBalls;
+  late int _coins;
   double _clearTimer = 0;
+  double _outOfBallsTimer = 0;
   bool _exiting = false;
+  bool _continueOpen = false;
   bool _menuOpen = false;
   bool _music = true;
   bool _sound = true;
@@ -84,6 +98,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    _coins = widget.coins;
     _initWorld();
     _buildLevel();
     _ticker = createTicker(_onTick)..start();
@@ -101,7 +116,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   }
 
   void _setMenuOpen(bool open) {
-    if (_exiting || open == _menuOpen) return;
+    if (_exiting || _continueOpen || open == _menuOpen) return;
     setState(() => _menuOpen = open);
     if (open) {
       _menuAnim.forward();
@@ -255,6 +270,8 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     if (dt <= 0) return;
     dt = dt.clamp(0.0, 1 / 30);
 
+    if (_exiting || _continueOpen) return;
+
     _world.step(1 / 120, dt, 5);
 
     _balls.removeWhere((ball) {
@@ -271,21 +288,59 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
           p.y >= _platformTop;
     });
 
-    if (_exiting) return;
-
     if (anyOnPlatform) {
       _clearTimer = 0;
     } else {
       _clearTimer += dt;
-      if (_clearTimer >= 3) {
-        _exiting = true;
-        _ticker.stop();
-        if (mounted) Navigator.of(context).pop(50);
+      if (_clearTimer >= _clearDelay) {
+        _exitGame(50);
         return;
       }
     }
 
+    if (_ballsLeft <= 0 && anyOnPlatform) {
+      _outOfBallsTimer += dt;
+      if (_outOfBallsTimer >= _outOfBallsDelay) {
+        _offerContinueOrExit();
+        return;
+      }
+    } else {
+      _outOfBallsTimer = 0;
+    }
+
     setState(() {});
+  }
+
+  void _offerContinueOrExit() {
+    if (_coins < _continueCost) {
+      _exitGame(null);
+      return;
+    }
+    if (_menuOpen) _setMenuOpen(false);
+    setState(() => _continueOpen = true);
+  }
+
+  void _buyContinue() {
+    final spend = widget.onSpendCoins;
+    if (spend == null || !spend(_continueCost)) {
+      _exitGame(null);
+      return;
+    }
+    setState(() {
+      _coins -= _continueCost;
+      _ballsLeft = _continueBalls;
+      _continueOpen = false;
+      _outOfBallsTimer = 0;
+    });
+  }
+
+  void _exitGame(int? reward) {
+    if (_exiting) return;
+    _exiting = true;
+    _continueOpen = false;
+    _ticker.stop();
+    if (!mounted) return;
+    Navigator.of(context).pop(reward);
   }
 
   Vector3 _screenToWorld(Offset local) {
@@ -303,7 +358,13 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   }
 
   void _throwBall(Offset local) {
-    if (_viewSize == Size.zero || !_menuAnim.isDismissed || _exiting) return;
+    if (_viewSize == Size.zero ||
+        !_menuAnim.isDismissed ||
+        _exiting ||
+        _continueOpen ||
+        _ballsLeft <= 0) {
+      return;
+    }
 
     final target = _screenToWorld(local);
     final origin = Vector3(0, 2.0, 1.4);
@@ -320,6 +381,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     final vy = (dy + 0.5 * _gravity * t * t) / t;
 
     setState(() {
+      _ballsLeft -= 1;
       _balls.add(_createBall(origin, Vector3(vx, vy, vz)));
     });
   }
@@ -327,11 +389,12 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          LayoutBuilder(
+      backgroundColor: Colors.transparent,
+      body: RectBackground(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            LayoutBuilder(
             builder: (context, constraints) {
               _viewSize = Size(constraints.maxWidth, constraints.maxHeight);
               return GestureDetector(
@@ -363,10 +426,6 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
                     platformFar: _platformFar,
                     platformTop: _platformTop,
                     platformThickness: _platformThickness,
-                    groundY: _groundY,
-                    groundHalfW: _groundVisualHalfW,
-                    groundNear: _groundVisualNear,
-                    groundFar: _groundVisualFar,
                     cubeHalf: _cubeHalf,
                     ballRadius: _ballRadius,
                   ),
@@ -384,6 +443,10 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: () {
+                  if (_continueOpen) {
+                    _exitGame(null);
+                    return;
+                  }
                   if (_menuOpen) {
                     _setMenuOpen(false);
                     return;
@@ -394,6 +457,27 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
               ),
             ),
           ),
+          if (_ballsLeft > 0 && !_continueOpen)
+            Positioned(
+              top: 120,
+              left: 0,
+              right: 0,
+              height: 48,
+              child: IgnorePointer(
+                child: Center(
+                  child: Text(
+                    '$_ballsLeft',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w700,
+                      height: 1,
+                      letterSpacing: -.4,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           InSettingsMenu(
             animation: _menuAnim,
             music: _music,
@@ -405,7 +489,16 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
             onSound: () => setState(() => _sound = !_sound),
             onVibration: () => setState(() => _vibration = !_vibration),
           ),
+          if (_continueOpen)
+            ContinuePopup(
+              coins: _coins,
+              price: _continueCost,
+              balls: _continueBalls,
+              onClose: () => _exitGame(null),
+              onContinue: _buyContinue,
+            ),
         ],
+        ),
       ),
     );
   }
@@ -420,10 +513,6 @@ class _ScenePainter extends CustomPainter {
     required this.platformFar,
     required this.platformTop,
     required this.platformThickness,
-    required this.groundY,
-    required this.groundHalfW,
-    required this.groundNear,
-    required this.groundFar,
     required this.cubeHalf,
     required this.ballRadius,
   });
@@ -435,10 +524,6 @@ class _ScenePainter extends CustomPainter {
   final double platformFar;
   final double platformTop;
   final double platformThickness;
-  final double groundY;
-  final double groundHalfW;
-  final double groundNear;
-  final double groundFar;
   final double cubeHalf;
   final double ballRadius;
 
@@ -538,8 +623,6 @@ class _ScenePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    _paintGround(canvas, size);
-
     final behindBalls = <_Vec3>[];
     final frontBalls = <_Vec3>[];
     for (final ball in balls) {
@@ -563,29 +646,6 @@ class _ScenePainter extends CustomPainter {
     _paintDepthLayer(canvas, size, behindCubes, behindBalls);
     _paintPlatform(canvas, size);
     _paintDepthLayer(canvas, size, frontCubes, frontBalls);
-  }
-
-  void _paintGround(Canvas canvas, Size size) {
-    final path = Path()
-      ..moveTo(
-        _project(_Vec3(-groundHalfW, groundY, groundNear), size).dx,
-        _project(_Vec3(-groundHalfW, groundY, groundNear), size).dy,
-      )
-      ..lineTo(
-        _project(_Vec3(groundHalfW, groundY, groundNear), size).dx,
-        _project(_Vec3(groundHalfW, groundY, groundNear), size).dy,
-      )
-      ..lineTo(
-        _project(_Vec3(groundHalfW, groundY, groundFar), size).dx,
-        _project(_Vec3(groundHalfW, groundY, groundFar), size).dy,
-      )
-      ..lineTo(
-        _project(_Vec3(-groundHalfW, groundY, groundFar), size).dx,
-        _project(_Vec3(-groundHalfW, groundY, groundFar), size).dy,
-      )
-      ..close();
-
-    canvas.drawPath(path, Paint()..color = Colors.black);
   }
 
   void _paintPlatform(Canvas canvas, Size size) {
