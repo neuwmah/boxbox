@@ -163,7 +163,7 @@ class _ReturnPopupState extends State<ReturnPopup>
                                                         fontSize: 14,
                                                         fontWeight:
                                                             FontWeight.w600,
-                                                        height: 1.2,
+                                                        height: 1.4,
                                                       ),
                                                     ),
                                                   ],

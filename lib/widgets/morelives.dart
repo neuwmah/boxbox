@@ -192,7 +192,7 @@ class _MoreLivesPopupState extends State<MoreLivesPopup>
                                                 style: TextStyle(
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.w600,
-                                                  height: 1.2,
+                                                  height: 1.4,
                                                 ),
                                               ),
                                               const SizedBox(height: 10),

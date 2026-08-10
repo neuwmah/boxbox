@@ -179,7 +179,7 @@ class _ContinuePopupState extends State<ContinuePopup>
                                               style: const TextStyle(
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w600,
-                                                height: 1.2,
+                                                height: 1.4,
                                               ),
                                             ),
                                           ],
