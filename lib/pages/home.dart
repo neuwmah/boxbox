@@ -1,23 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
-import 'package:boxbox/pages/game.dart';
 import 'package:boxbox/widgets/titlebar.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({
     super.key,
-    required this.coins,
-    this.onReward,
-    this.onSpendCoins,
-    this.onBeforePlay,
-    this.onDefeat,
+    this.onLevelTap,
   });
 
-  final int coins;
-  final ValueChanged<int>? onReward;
-  final bool Function(int amount)? onSpendCoins;
-  final bool Function()? onBeforePlay;
-  final VoidCallback? onDefeat;
+  final VoidCallback? onLevelTap;
 
   static const _scale = 1.1;
   static const _bgOpacity = 0.08;
@@ -27,29 +18,6 @@ class HomePage extends StatelessWidget {
     0.2126, 0.7152, 0.0722, 0, 0,
     0, 0, 0, 1, 0,
   ]);
-
-  Future<void> _openGame(BuildContext context) async {
-    if (onBeforePlay != null && !onBeforePlay!()) return;
-
-    final reward = await Navigator.of(context).push<int>(
-      PageRouteBuilder(
-        pageBuilder: (_, __, ___) => GamePage(
-          coins: coins,
-          onSpendCoins: onSpendCoins,
-        ),
-        transitionDuration: Duration.zero,
-        reverseTransitionDuration: Duration.zero,
-      ),
-    );
-    if (!context.mounted) return;
-    if (reward == GamePage.defeatCode) {
-      onDefeat?.call();
-      return;
-    }
-    if (reward != null && reward > 0) {
-      onReward?.call(reward);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +43,7 @@ class HomePage extends StatelessWidget {
           child: Transform.translate(
             offset: const Offset(0, 40),
             child: GestureDetector(
-              onTap: () => _openGame(context),
+              onTap: onLevelTap,
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 30,

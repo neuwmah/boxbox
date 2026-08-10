@@ -10,6 +10,7 @@ import 'package:boxbox/widgets/morelives.dart';
 import 'package:boxbox/widgets/reward.dart';
 import 'package:boxbox/widgets/navbar.dart';
 import 'package:boxbox/widgets/retry.dart';
+import 'package:boxbox/widgets/start.dart';
 import 'package:boxbox/widgets/status.dart';
 import 'package:boxbox/widgets/titlebar.dart';
 
@@ -45,7 +46,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-enum _HomePopup { none, retry, moreLives }
+enum _HomePopup { none, start, retry, moreLives }
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -131,13 +132,12 @@ class _MainShellState extends State<MainShell> {
     return true;
   }
 
-  bool _onBeforePlay() {
-    if (_homePopup != _HomePopup.none || _pendingReward != null) return false;
-    if (_hearts <= 0) {
-      setState(() => _homePopup = _HomePopup.moreLives);
-      return false;
-    }
-    return _consumeHeart();
+  void _onLevelTap() {
+    if (_homePopup != _HomePopup.none || _pendingReward != null) return;
+    setState(() {
+      _homePopup =
+          _hearts > 0 ? _HomePopup.start : _HomePopup.moreLives;
+    });
   }
 
   void _onDefeat() {
@@ -151,7 +151,7 @@ class _MainShellState extends State<MainShell> {
     setState(() => _homePopup = _HomePopup.none);
   }
 
-  Future<void> _retryLevel() async {
+  Future<void> _playLevel() async {
     if (!_consumeHeart()) {
       setState(() => _homePopup = _HomePopup.moreLives);
       return;
@@ -258,11 +258,7 @@ class _MainShellState extends State<MainShell> {
                     ],
                   ),
                   HomePage(
-                    coins: _coins,
-                    onReward: _onReward,
-                    onSpendCoins: _spendCoins,
-                    onBeforePlay: _onBeforePlay,
-                    onDefeat: _onDefeat,
+                    onLevelTap: _onLevelTap,
                   ),
                   const Column(
                     children: [
@@ -313,12 +309,20 @@ class _MainShellState extends State<MainShell> {
             },
           ),
         ),
+        if (_homePopup == _HomePopup.start)
+          Positioned.fill(
+            child: StartPopup(
+              level: 1,
+              onClose: _closeHomePopup,
+              onStart: _playLevel,
+            ),
+          ),
         if (_homePopup == _HomePopup.retry)
           Positioned.fill(
             child: RetryPopup(
               level: 1,
               onClose: _closeHomePopup,
-              onRetry: _retryLevel,
+              onRetry: _playLevel,
             ),
           ),
         if (_homePopup == _HomePopup.moreLives)
