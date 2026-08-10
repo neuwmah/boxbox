@@ -434,30 +434,26 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
               );
             },
           ),
-          Positioned(
-            top: 40,
-            left: 38,
-            height: 48,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  if (_continueOpen) {
-                    _exitGame(null);
-                    return;
-                  }
-                  if (_menuOpen) {
-                    _setMenuOpen(false);
-                    return;
-                  }
-                  Navigator.of(context).pop();
-                },
-                child: const Icon(Icons.arrow_back, color: Colors.white),
+          if (_ballsLeft > 0) ...[
+            Positioned(
+              top: 40,
+              left: 38,
+              height: 48,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    if (_menuOpen) {
+                      _setMenuOpen(false);
+                      return;
+                    }
+                    Navigator.of(context).pop();
+                  },
+                  child: const Icon(Icons.arrow_back, color: Colors.white),
+                ),
               ),
             ),
-          ),
-          if (_ballsLeft > 0 && !_continueOpen)
             Positioned(
               top: 120,
               left: 0,
@@ -478,17 +474,18 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
                 ),
               ),
             ),
-          InSettingsMenu(
-            animation: _menuAnim,
-            music: _music,
-            sound: _sound,
-            vibration: _vibration,
-            onToggleMenu: () => _setMenuOpen(!_menuOpen),
-            onClose: () => _setMenuOpen(false),
-            onMusic: () => setState(() => _music = !_music),
-            onSound: () => setState(() => _sound = !_sound),
-            onVibration: () => setState(() => _vibration = !_vibration),
-          ),
+            InSettingsMenu(
+              animation: _menuAnim,
+              music: _music,
+              sound: _sound,
+              vibration: _vibration,
+              onToggleMenu: () => _setMenuOpen(!_menuOpen),
+              onClose: () => _setMenuOpen(false),
+              onMusic: () => setState(() => _music = !_music),
+              onSound: () => setState(() => _sound = !_sound),
+              onVibration: () => setState(() => _vibration = !_vibration),
+            ),
+          ],
           if (_continueOpen)
             ContinuePopup(
               coins: _coins,
