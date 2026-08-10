@@ -89,7 +89,7 @@ class _ContinuePopupState extends State<ContinuePopup>
                           padding: const EdgeInsets.only(top: 16),
                           child: Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                          padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
                           decoration: BoxDecoration(
                             color: Colors.black,
                             border: Border.all(color: _border, width: 1.6),
@@ -107,7 +107,7 @@ class _ContinuePopupState extends State<ContinuePopup>
                                   letterSpacing: -.4,
                                 ),
                               ),
-                              const SizedBox(height: 16),
+                              const SizedBox(height: 24),
                               Center(
                                 child: Container(
                                   clipBehavior: Clip.antiAlias,
@@ -160,7 +160,7 @@ class _ContinuePopupState extends State<ContinuePopup>
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 16),
+                              const SizedBox(height: 24),
                               Center(
                                 child: GestureDetector(
                                   behavior: HitTestBehavior.opaque,
