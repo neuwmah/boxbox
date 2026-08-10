@@ -199,7 +199,7 @@ class _MainShellState extends State<MainShell> {
       } else {
         _scheduleHeartRegen();
       }
-      _homePopup = _HomePopup.retry;
+      _homePopup = _HomePopup.start;
     });
   }
 
