@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:boxbox/widgets/background.dart';
 import 'package:boxbox/widgets/status.dart';
 
 class ContinuePopup extends StatefulWidget {
@@ -115,19 +116,8 @@ class _ContinuePopupState extends State<ContinuePopup>
                                   ),
                                   child: Stack(
                                     children: [
-                                      Positioned.fill(
-                                        child: ColorFiltered(
-                                          colorFilter: const ColorFilter.matrix(<double>[
-                                            1, 0, 0, 0, 4,
-                                            0, 1, 0, 0, 4,
-                                            0, 0, 1, 0, 4,
-                                            0, 0, 0, 1, 0,
-                                          ]),
-                                          child: Image.asset(
-                                            'lib/assets/background/rect.gif',
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
+                                      const Positioned.fill(
+                                        child: RectBackground(),
                                       ),
                                       Padding(
                                         padding: const EdgeInsets.fromLTRB(
