@@ -63,11 +63,13 @@ class _RetryPopupState extends State<RetryPopup>
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
                 child: Opacity(
                   opacity: appear,
-                  child: Material(
-                    color: Colors.transparent,
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 220),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
                         Padding(
                           padding: const EdgeInsets.only(top: 16),
                           child: Stack(
@@ -244,7 +246,8 @@ class _RetryPopupState extends State<RetryPopup>
                     ],
                   ),
                 ),
-              ),
+                  ),
+                ),
               ),
             ),
           ],
