@@ -163,7 +163,7 @@ class _ContinuePopupState extends State<ContinuePopup>
                                               offsets: _StickerLabel.offsets4,
                                               innerBorderColor: const Color(0xFFCCCCCC),
                                               style: const TextStyle(
-                                                fontSize: 80,
+                                                fontSize: 72,
                                                 fontWeight: FontWeight.w900,
                                                 height: 1,
                                                 letterSpacing: -.4,
