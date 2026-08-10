@@ -56,7 +56,7 @@ class HomePage extends StatelessWidget {
                     width: 1.6,
                   ),
                 ),
-                child: const StickerTitle(title: 'Lv. 1'),
+                child: const StickerTitle(title: 'Play'),
               ),
             ),
           ),
