@@ -463,22 +463,12 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
               ),
             ),
             Positioned(
-              top: 80,
+              top: 52,
               left: 0,
               right: 0,
-              height: 48,
               child: IgnorePointer(
                 child: Center(
-                  child: Text(
-                    '$_ballsLeft',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                      height: 1,
-                      letterSpacing: -.4,
-                    ),
-                  ),
+                  child: _BallsBadge(value: _ballsLeft),
                 ),
               ),
             ),
@@ -520,6 +510,120 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
             ),
         ],
         ),
+      ),
+    );
+  }
+}
+
+class _BallsBadge extends StatefulWidget {
+  const _BallsBadge({required this.value});
+
+  final int value;
+
+  @override
+  State<_BallsBadge> createState() => _BallsBadgeState();
+}
+
+class _BallsBadgeState extends State<_BallsBadge>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _hue;
+
+  @override
+  void initState() {
+    super.initState();
+    _hue = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 5),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _hue.dispose();
+    super.dispose();
+  }
+
+  static List<double> _hueMatrix(double turns) {
+    final rad = turns * 2 * math.pi;
+    final c = math.cos(rad);
+    final s = math.sin(rad);
+    const lumR = 0.213;
+    const lumG = 0.715;
+    const lumB = 0.072;
+    return <double>[
+      lumR + c * (1 - lumR) + s * (-lumR),
+      lumG + c * (-lumG) + s * (-lumG),
+      lumB + c * (-lumB) + s * (1 - lumB),
+      0,
+      0,
+      lumR + c * (-lumR) + s * 0.143,
+      lumG + c * (1 - lumG) + s * 0.140,
+      lumB + c * (-lumB) + s * (-0.283),
+      0,
+      0,
+      lumR + c * (-lumR) + s * (-(1 - lumR)),
+      lumG + c * (-lumG) + s * lumG,
+      lumB + c * (1 - lumB) + s * lumB,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 88,
+      height: 90,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          AnimatedBuilder(
+            animation: _hue,
+            builder: (context, child) {
+              return ColorFiltered(
+                colorFilter: ColorFilter.matrix(_hueMatrix(_hue.value)),
+                child: child,
+              );
+            },
+            child: Image.asset(
+              'lib/assets/play/balls.png',
+              fit: BoxFit.contain,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: ShaderMask(
+              blendMode: BlendMode.srcIn,
+              shaderCallback: (bounds) {
+                return const LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.white,
+                    Color(0xFFF8F8F8),
+                    Color(0xFFF1F1F1),
+                  ],
+                  stops: [0.0, 0.4, 1.0],
+                ).createShader(bounds);
+              },
+              child: Text(
+                '${widget.value}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                  height: 1,
+                  letterSpacing: -.4,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
