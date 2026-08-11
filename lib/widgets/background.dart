@@ -75,14 +75,12 @@ class _RectBackgroundState extends State<RectBackground>
   }
 }
 
-/// Rotating highlight used inside popup content panels only.
 class PopupBackground extends StatefulWidget {
   const PopupBackground({
     super.key,
     this.offset = Offset.zero,
   });
 
-  /// Shifts the burst center (e.g. up behind heart icons).
   final Offset offset;
 
   @override

@@ -56,7 +56,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   static const _camY = 3.4;
   static const _focal = 320.0;
   static const _horizon = 0.56;
-  static const _maxBalls = 10;
+  static const _maxBalls = 20;
   static const _continueBalls = 5;
   static const _continueCost = 500;
   static const _clearDelay = 3.0;
@@ -64,11 +64,14 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   static const _outOfBallsDelay = 3.0;
 
   static const _ballMass = 2.4;
-  static const _cubeMass = 2.2;
 
-  static const _platformHalfW = 1.6;
+  static const _cubeGap = _cubeHalf * 2 + 0.004;
+  static const _baseCubes = 5;
+  static const _baseHalfSpan =
+      (_baseCubes - 1) * _cubeGap / 2 + _cubeHalf;
+  static const _platformHalfW = _baseHalfSpan;
   static const _platformDistance = 8.0;
-  static const _platformDepth = 1.0;
+  static const _platformDepth = 2 * _cubeHalf;
   static const _platformNear = _platformDistance - _platformDepth / 2;
   static const _platformFar = _platformDistance + _platformDepth / 2;
   static const _platformTop = 2.4;
@@ -79,12 +82,16 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
 
   late final Ticker _ticker;
   late final AnimationController _menuAnim;
+  late final AnimationController _hueAnim;
   late cannon.World _world;
-  late cannon.Material _cubeMaterial;
+  late cannon.Material _cubeSoftMaterial;
+  late cannon.Material _cubeMidMaterial;
+  late cannon.Material _cubeHardMaterial;
   late cannon.Material _ballMaterial;
   late cannon.Material _staticMaterial;
 
   final List<cannon.Body> _cubes = [];
+  final List<Color> _cubeColors = [];
   final List<cannon.Body> _balls = [];
   Duration _lastElapsed = Duration.zero;
   Size _viewSize = Size.zero;
@@ -111,10 +118,15 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
       vsync: this,
       duration: const Duration(milliseconds: 280),
     );
+    _hueAnim = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 5),
+    )..repeat();
   }
 
   @override
   void dispose() {
+    _hueAnim.dispose();
     _menuAnim.dispose();
     _ticker.dispose();
     super.dispose();
@@ -141,41 +153,33 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     _world.defaultContactMaterial.restitution = 0.08;
 
     _staticMaterial = cannon.Material(friction: 0.75, restitution: 0.02);
-    _cubeMaterial = cannon.Material(friction: 0.6, restitution: 0.05);
+    _cubeSoftMaterial = cannon.Material(friction: 0.45, restitution: 0.12);
+    _cubeMidMaterial = cannon.Material(friction: 0.65, restitution: 0.05);
+    _cubeHardMaterial = cannon.Material(friction: 0.9, restitution: 0.01);
     _ballMaterial = cannon.Material(friction: 0.35, restitution: 0.18);
 
-    _world.addContactMaterial(
-      cannon.ContactMaterial(
-        _ballMaterial,
-        _cubeMaterial,
-        friction: 0.35,
-        restitution: 0.22,
-      ),
-    );
-    _world.addContactMaterial(
-      cannon.ContactMaterial(
-        _cubeMaterial,
-        _cubeMaterial,
-        friction: 0.65,
-        restitution: 0.02,
-      ),
-    );
-    _world.addContactMaterial(
-      cannon.ContactMaterial(
-        _cubeMaterial,
-        _staticMaterial,
-        friction: 0.7,
-        restitution: 0.02,
-      ),
-    );
-    _world.addContactMaterial(
-      cannon.ContactMaterial(
-        _ballMaterial,
-        _staticMaterial,
-        friction: 0.35,
-        restitution: 0.15,
-      ),
-    );
+    void contact(cannon.Material a, cannon.Material b, {
+      required double friction,
+      required double restitution,
+    }) {
+      _world.addContactMaterial(
+        cannon.ContactMaterial(a, b, friction: friction, restitution: restitution),
+      );
+    }
+
+    contact(_ballMaterial, _cubeSoftMaterial, friction: 0.3, restitution: 0.28);
+    contact(_ballMaterial, _cubeMidMaterial, friction: 0.35, restitution: 0.18);
+    contact(_ballMaterial, _cubeHardMaterial, friction: 0.45, restitution: 0.08);
+    contact(_cubeSoftMaterial, _cubeSoftMaterial, friction: 0.5, restitution: 0.06);
+    contact(_cubeMidMaterial, _cubeMidMaterial, friction: 0.7, restitution: 0.03);
+    contact(_cubeHardMaterial, _cubeHardMaterial, friction: 0.9, restitution: 0.01);
+    contact(_cubeSoftMaterial, _cubeMidMaterial, friction: 0.55, restitution: 0.04);
+    contact(_cubeSoftMaterial, _cubeHardMaterial, friction: 0.65, restitution: 0.02);
+    contact(_cubeMidMaterial, _cubeHardMaterial, friction: 0.8, restitution: 0.015);
+    contact(_cubeSoftMaterial, _staticMaterial, friction: 0.55, restitution: 0.04);
+    contact(_cubeMidMaterial, _staticMaterial, friction: 0.75, restitution: 0.02);
+    contact(_cubeHardMaterial, _staticMaterial, friction: 0.9, restitution: 0.01);
+    contact(_ballMaterial, _staticMaterial, friction: 0.35, restitution: 0.15);
   }
 
   void _clearWorldBodies() {
@@ -183,6 +187,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
       _world.removeBody(body);
     }
     _cubes.clear();
+    _cubeColors.clear();
     _balls.clear();
   }
 
@@ -216,25 +221,38 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     );
     _world.addBody(platform);
 
-    const gap = _cubeHalf * 2 + 0.004;
+    const gap = _cubeGap;
     const baseY = _platformTop + _cubeHalf + 0.002;
-    const counts = [5, 3, 1];
-    for (var row = 0; row < counts.length; row++) {
-      final count = counts[row];
+    const rows = [
+      (_CubeKind.heavy, _baseCubes),
+      (_CubeKind.medium, 3),
+      (_CubeKind.light, 1),
+    ];
+    for (var row = 0; row < rows.length; row++) {
+      final kind = rows[row].$1;
+      final count = rows[row].$2;
       final y = baseY + row * gap;
       final startX = -(count - 1) * gap / 2;
       for (var i = 0; i < count; i++) {
         _cubes.add(
-          _createCube(Vector3(startX + i * gap, y, _pyramidZ)),
+          _createCube(
+            Vector3(startX + i * gap, y, _pyramidZ),
+            kind: kind,
+          ),
         );
+        _cubeColors.add(kind.color);
       }
     }
   }
 
-  cannon.Body _createCube(Vector3 position) {
+  cannon.Body _createCube(Vector3 position, {required _CubeKind kind}) {
     final body = cannon.Body(
-      mass: _cubeMass,
-      material: _cubeMaterial,
+      mass: kind.mass,
+      material: switch (kind) {
+        _CubeKind.light => _cubeSoftMaterial,
+        _CubeKind.medium => _cubeMidMaterial,
+        _ => _cubeHardMaterial,
+      },
       shape: cannon.Box(Vector3(_cubeHalf, _cubeHalf, _cubeHalf)),
       position: position,
       linearDamping: 0.12,
@@ -407,36 +425,43 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
               return GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTapDown: (details) => _throwBall(details.localPosition),
-                child: CustomPaint(
-                  painter: _ScenePainter(
-                    cubes: [
-                      for (final cube in _cubes)
-                        (
-                          pos: _Vec3(
-                            cube.position.x,
-                            cube.position.y,
-                            cube.position.z,
-                          ),
-                          rot: Quaternion.copy(cube.quaternion),
-                        ),
-                    ],
-                    balls: [
-                      for (final ball in _balls)
-                        _Vec3(
-                          ball.position.x,
-                          ball.position.y,
-                          ball.position.z,
-                        ),
-                    ],
-                    platformHalfW: _platformHalfW,
-                    platformNear: _platformNear,
-                    platformFar: _platformFar,
-                    platformTop: _platformTop,
-                    platformThickness: _platformThickness,
-                    cubeHalf: _cubeHalf,
-                    ballRadius: _ballRadius,
-                  ),
-                  child: const SizedBox.expand(),
+                child: AnimatedBuilder(
+                  animation: _hueAnim,
+                  builder: (context, child) {
+                    return CustomPaint(
+                      painter: _ScenePainter(
+                        cubes: [
+                          for (var i = 0; i < _cubes.length; i++)
+                            (
+                              pos: _Vec3(
+                                _cubes[i].position.x,
+                                _cubes[i].position.y,
+                                _cubes[i].position.z,
+                              ),
+                              rot: Quaternion.copy(_cubes[i].quaternion),
+                              color: _cubeColors[i],
+                            ),
+                        ],
+                        balls: [
+                          for (final ball in _balls)
+                            _Vec3(
+                              ball.position.x,
+                              ball.position.y,
+                              ball.position.z,
+                            ),
+                        ],
+                        platformHalfW: _platformHalfW,
+                        platformNear: _platformNear,
+                        platformFar: _platformFar,
+                        platformTop: _platformTop,
+                        platformThickness: _platformThickness,
+                        cubeHalf: _cubeHalf,
+                        ballRadius: _ballRadius,
+                        platformHue: _hueAnim.value,
+                      ),
+                      child: const SizedBox.expand(),
+                    );
+                  },
                 ),
               );
             },
@@ -468,7 +493,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
               right: 0,
               child: IgnorePointer(
                 child: Center(
-                  child: _BallsBadge(value: _ballsLeft),
+                  child: _BallsBadge(value: _ballsLeft, hue: _hueAnim),
                 ),
               ),
             ),
@@ -515,64 +540,39 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   }
 }
 
-class _BallsBadge extends StatefulWidget {
-  const _BallsBadge({required this.value});
+class _CubeKind {
+  const _CubeKind._({
+    required this.color,
+    required this.mass,
+  });
 
-  final int value;
+  final Color color;
+  final double mass;
 
-  @override
-  State<_BallsBadge> createState() => _BallsBadgeState();
+  static const light = _CubeKind._(
+    color: Color(0xFFF1F1F1),
+    mass: 1.5,
+  );
+
+  static const medium = _CubeKind._(
+    color: Color(0xFF515151),
+    mass: 3.0,
+  );
+
+  static const heavy = _CubeKind._(
+    color: Color(0xFF000000),
+    mass: 5.0,
+  );
 }
 
-class _BallsBadgeState extends State<_BallsBadge>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _hue;
+class _BallsBadge extends StatelessWidget {
+  const _BallsBadge({
+    required this.value,
+    required this.hue,
+  });
 
-  @override
-  void initState() {
-    super.initState();
-    _hue = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 5),
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _hue.dispose();
-    super.dispose();
-  }
-
-  static List<double> _hueMatrix(double turns) {
-    final rad = turns * 2 * math.pi;
-    final c = math.cos(rad);
-    final s = math.sin(rad);
-    const lumR = 0.213;
-    const lumG = 0.715;
-    const lumB = 0.072;
-    return <double>[
-      lumR + c * (1 - lumR) + s * (-lumR),
-      lumG + c * (-lumG) + s * (-lumG),
-      lumB + c * (-lumB) + s * (1 - lumB),
-      0,
-      0,
-      lumR + c * (-lumR) + s * 0.143,
-      lumG + c * (1 - lumG) + s * 0.140,
-      lumB + c * (-lumB) + s * (-0.283),
-      0,
-      0,
-      lumR + c * (-lumR) + s * (-(1 - lumR)),
-      lumG + c * (-lumG) + s * lumG,
-      lumB + c * (1 - lumB) + s * lumB,
-      0,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-    ];
-  }
+  final int value;
+  final Animation<double> hue;
 
   @override
   Widget build(BuildContext context) {
@@ -583,10 +583,10 @@ class _BallsBadgeState extends State<_BallsBadge>
         alignment: Alignment.center,
         children: [
           AnimatedBuilder(
-            animation: _hue,
+            animation: hue,
             builder: (context, child) {
               return ColorFiltered(
-                colorFilter: ColorFilter.matrix(_hueMatrix(_hue.value)),
+                colorFilter: ColorFilter.matrix(_hueRotateMatrix(hue.value)),
                 child: child,
               );
             },
@@ -612,7 +612,7 @@ class _BallsBadgeState extends State<_BallsBadge>
                 ).createShader(bounds);
               },
               child: Text(
-                '${widget.value}',
+                '$value',
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 28,
@@ -627,6 +627,37 @@ class _BallsBadgeState extends State<_BallsBadge>
       ),
     );
   }
+}
+
+List<double> _hueRotateMatrix(double turns) {
+  final rad = turns * 2 * math.pi;
+  final c = math.cos(rad);
+  final s = math.sin(rad);
+  const lumR = 0.213;
+  const lumG = 0.715;
+  const lumB = 0.072;
+  return <double>[
+    lumR + c * (1 - lumR) + s * (-lumR),
+    lumG + c * (-lumG) + s * (-lumG),
+    lumB + c * (-lumB) + s * (1 - lumB),
+    0,
+    0,
+    lumR + c * (-lumR) + s * 0.143,
+    lumG + c * (1 - lumG) + s * 0.140,
+    lumB + c * (-lumB) + s * (-0.283),
+    0,
+    0,
+    lumR + c * (-lumR) + s * (-(1 - lumR)),
+    lumG + c * (-lumG) + s * lumG,
+    lumB + c * (1 - lumB) + s * lumB,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+  ];
 }
 
 class _ClearBanner extends StatelessWidget {
@@ -759,9 +790,10 @@ class _ScenePainter extends CustomPainter {
     required this.platformThickness,
     required this.cubeHalf,
     required this.ballRadius,
+    required this.platformHue,
   });
 
-  final List<({_Vec3 pos, Quaternion rot})> cubes;
+  final List<({_Vec3 pos, Quaternion rot, Color color})> cubes;
   final List<_Vec3> balls;
   final double platformHalfW;
   final double platformNear;
@@ -770,20 +802,23 @@ class _ScenePainter extends CustomPainter {
   final double platformThickness;
   final double cubeHalf;
   final double ballRadius;
+  final double platformHue;
 
   static const _camY = 3.4;
   static const _camZ = 0.0;
   static const _focal = 320.0;
   static const _horizon = 0.56;
 
-  static const _cubeColors = [
-    Color(0xFFBDBDBD),
-    Color(0xFF757575),
-    Color(0xFF9E9E9E),
-    Color(0xFFE0E0E0),
-    Color(0xFF8D8D8D),
-    Color(0xFFA8A8A8),
-  ];
+  static List<Color> _shadeCube(Color base) {
+    return [
+      Color.lerp(base, Colors.white, 0.08)!,
+      Color.lerp(base, Colors.black, 0.22)!,
+      Color.lerp(base, Colors.black, 0.34)!,
+      Color.lerp(base, Colors.white, 0.32)!,
+      Color.lerp(base, Colors.black, 0.14)!,
+      Color.lerp(base, Colors.white, 0.06)!,
+    ];
+  }
 
   Offset _project(_Vec3 p, Size size) {
     final z = math.max(0.8, p.z - _camZ);
@@ -820,10 +855,11 @@ class _ScenePainter extends CustomPainter {
   void _paintDepthLayer(
     Canvas canvas,
     Size size,
-    List<({_Vec3 pos, Quaternion rot})> layerCubes,
+    List<({_Vec3 pos, Quaternion rot, Color color})> layerCubes,
     List<_Vec3> layerBalls,
   ) {
-    final items = <({double depth, Path? path, Color? color, _Vec3? ball})>[];
+    final items =
+        <({double depth, Path? path, Color? color, _Vec3? ball, bool shiny})>[];
 
     for (final cube in layerCubes) {
       _collectBoxFaces(
@@ -832,7 +868,8 @@ class _ScenePainter extends CustomPainter {
         center: cube.pos,
         half: _Vec3(cubeHalf, cubeHalf, cubeHalf),
         rot: cube.rot,
-        colors: _cubeColors,
+        colors: _shadeCube(cube.color),
+        shinyTop: true,
       );
     }
 
@@ -842,6 +879,7 @@ class _ScenePainter extends CustomPainter {
         path: null,
         color: null,
         ball: ball,
+        shiny: false,
       ));
     }
 
@@ -850,8 +888,10 @@ class _ScenePainter extends CustomPainter {
     final fill = Paint()..style = PaintingStyle.fill;
     final stroke = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1
-      ..color = const Color(0xFF111111);
+      ..strokeWidth = 1.7
+      ..strokeJoin = StrokeJoin.round
+      ..color = const Color(0xFF050505);
+    final gloss = Paint()..style = PaintingStyle.fill;
 
     for (final item in items) {
       final ball = item.ball;
@@ -859,9 +899,40 @@ class _ScenePainter extends CustomPainter {
         _paintBall(canvas, size, ball);
         continue;
       }
-      fill.color = item.color!;
-      canvas.drawPath(item.path!, fill);
-      canvas.drawPath(item.path!, stroke);
+
+      final path = item.path!;
+      final color = item.color!;
+      final bounds = path.getBounds();
+      fill.shader = LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Color.lerp(color, Colors.white, 0.42)!,
+          color,
+          Color.lerp(color, Colors.black, 0.14)!,
+        ],
+        stops: const [0.0, 0.52, 1.0],
+      ).createShader(bounds);
+      canvas.drawPath(path, fill);
+      fill.shader = null;
+
+      if (item.shiny && bounds.shortestSide > 4) {
+        final r = bounds.shortestSide * 0.2;
+        gloss.color = Colors.white.withValues(alpha: 0.38);
+        canvas.drawOval(
+          Rect.fromCenter(
+            center: Offset(
+              bounds.left + bounds.width * 0.3,
+              bounds.top + bounds.height * 0.28,
+            ),
+            width: r * 1.7,
+            height: r,
+          ),
+          gloss,
+        );
+      }
+
+      canvas.drawPath(path, stroke);
     }
   }
 
@@ -877,8 +948,8 @@ class _ScenePainter extends CustomPainter {
       }
     }
 
-    final behindCubes = <({_Vec3 pos, Quaternion rot})>[];
-    final frontCubes = <({_Vec3 pos, Quaternion rot})>[];
+    final behindCubes = <({_Vec3 pos, Quaternion rot, Color color})>[];
+    final frontCubes = <({_Vec3 pos, Quaternion rot, Color color})>[];
     for (final cube in cubes) {
       if (_isBehindPlatform(cube.pos)) {
         behindCubes.add(cube);
@@ -888,7 +959,13 @@ class _ScenePainter extends CustomPainter {
     }
 
     _paintDepthLayer(canvas, size, behindCubes, behindBalls);
+    canvas.saveLayer(
+      Offset.zero & size,
+      Paint()
+        ..colorFilter = ColorFilter.matrix(_hueRotateMatrix(platformHue)),
+    );
     _paintPlatform(canvas, size);
+    canvas.restore();
     _paintDepthLayer(canvas, size, frontCubes, frontBalls);
   }
 
@@ -905,23 +982,25 @@ class _ScenePainter extends CustomPainter {
       half: _Vec3(hx, hy, hz),
       rot: Quaternion.identity(),
       colors: const [
-        Color(0xFF2A2A2A),
-        Color(0xFF151515),
-        Color(0xFF222222),
-        Color(0xFF3A3A3A),
-        Color(0xFF1C1C1C),
-        Color(0xFF252525),
+        Color(0xFF8B6CFF),
+        Color(0xFF4A2DB0),
+        Color(0xFF6A45D4),
+        Color(0xFFB49AFF),
+        Color(0xFF5C35C4),
+        Color(0xFF7A55E8),
       ],
     );
   }
 
   void _collectBoxFaces(
-    List<({double depth, Path? path, Color? color, _Vec3? ball})> out,
+    List<({double depth, Path? path, Color? color, _Vec3? ball, bool shiny})>
+        out,
     Size size, {
     required _Vec3 center,
     required _Vec3 half,
     required Quaternion rot,
     required List<Color> colors,
+    bool shinyTop = false,
   }) {
     final locals = [
       _Vec3(-half.x, -half.y, -half.z),
@@ -981,6 +1060,7 @@ class _ScenePainter extends CustomPainter {
         path: path,
         color: colors[index],
         ball: null,
+        shiny: shinyTop && index == 3,
       ));
     }
   }
@@ -993,7 +1073,8 @@ class _ScenePainter extends CustomPainter {
     required Quaternion rot,
     required List<Color> colors,
   }) {
-    final items = <({double depth, Path? path, Color? color, _Vec3? ball})>[];
+    final items =
+        <({double depth, Path? path, Color? color, _Vec3? ball, bool shiny})>[];
     _collectBoxFaces(
       items,
       size,
