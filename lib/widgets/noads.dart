@@ -136,7 +136,7 @@ class _NoAdsPopupState extends State<NoAdsPopup>
                                                 padding:
                                                     const EdgeInsets.fromLTRB(
                                                   24,
-                                                  20,
+                                                  24,
                                                   24,
                                                   20,
                                                 ),

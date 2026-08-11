@@ -130,9 +130,9 @@ class _RetryPopupState extends State<RetryPopup>
                                       Padding(
                                         padding: const EdgeInsets.fromLTRB(
                                           32,
-                                          28,
+                                          20,
                                           32,
-                                          28,
+                                          20,
                                         ),
                                         child: SizedBox(
                                           width: _heartSize,

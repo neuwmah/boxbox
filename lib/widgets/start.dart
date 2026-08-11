@@ -123,7 +123,7 @@ class _StartPopupState extends State<StartPopup>
                                         child: PopupBackground(),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsets.fromLTRB(32, 28, 32, 28),
+                                        padding: const EdgeInsets.fromLTRB(32, 20, 32, 20),
                                         child: SizedBox(
                                           width: _heartSize,
                                           height: _heartSize,
