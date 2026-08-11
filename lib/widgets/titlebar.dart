@@ -99,6 +99,7 @@ class PopupTitleBadge extends StatelessWidget {
   static const _borderWidth = 1.0;
   static const _borderColor = Color(0xFF101010);
   static const _gapBelow = 24.0;
+  static const _shadeSteps = [4.0, 3.0, 2.0, 1.0];
 
   static double boxHeight([double fontSize = 24]) =>
       _padding * 2 + fontSize + _borderWidth * 2;
@@ -118,20 +119,108 @@ class PopupTitleBadge extends StatelessWidget {
         children: [
           Positioned(
             top: -half - 1,
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-              decoration: BoxDecoration(
-                color: Colors.black,
-                border: Border.all(
-                  color: _borderColor,
-                  width: _borderWidth,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                for (final o in _shadeSteps)
+                  Positioned.fill(
+                    child: Transform.translate(
+                      offset: Offset(o, o),
+                      child: const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Color(0xFF101010),
+                              Color(0xFF050505),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                Container(
+                  padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    border: Border.all(
+                      color: _borderColor,
+                      width: _borderWidth,
+                    ),
+                  ),
+                  child: StickerTitle(title: title, fontSize: fontSize),
                 ),
-              ),
-              child: StickerTitle(title: title, fontSize: fontSize),
+              ],
             ),
           ),
         ],
       ),
     );
+  }
+}
+
+class PopupCloseButton extends StatelessWidget {
+  const PopupCloseButton({
+    super.key,
+    required this.onTap,
+  });
+
+  final VoidCallback onTap;
+
+  static const _size = 32.0;
+  static const _border = Color(0xFF101010);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
+        width: _size,
+        height: _size,
+        decoration: BoxDecoration(
+          color: Colors.black,
+          shape: BoxShape.circle,
+          border: Border.all(color: _border, width: 1.6),
+        ),
+        child: const Center(
+          child: CustomPaint(
+            size: Size(8, 8),
+            painter: _CloseIconPainter(
+              color: Colors.white,
+              strokeWidth: 2.4,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CloseIconPainter extends CustomPainter {
+  const _CloseIconPainter({
+    required this.color,
+    required this.strokeWidth,
+  });
+
+  final Color color;
+  final double strokeWidth;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+    canvas.drawLine(Offset.zero, Offset(size.width, size.height), paint);
+    canvas.drawLine(Offset(size.width, 0), Offset(0, size.height), paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _CloseIconPainter oldDelegate) {
+    return oldDelegate.color != color ||
+        oldDelegate.strokeWidth != strokeWidth;
   }
 }

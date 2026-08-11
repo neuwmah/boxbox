@@ -206,7 +206,7 @@ class _ContinuePopupState extends State<ContinuePopup>
                                       ),
                                       border: Border.all(
                                         color: const Color(0xFF2F6B0C),
-                                        width: 1.4,
+                                        width: 4,
                                       ),
                                       boxShadow: const [
                                         BoxShadow(
@@ -280,30 +280,9 @@ class _ContinuePopupState extends State<ContinuePopup>
                         ),
                       ),
                         Positioned(
-                          top: 0,
-                          right: 16,
-                          child: GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onTap: widget.onClose,
-                            child: Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                color: Colors.black,
-                                shape: BoxShape.circle,
-                                border: Border.all(color: _border, width: 1.6),
-                              ),
-                              child: const Center(
-                                child: CustomPaint(
-                                  size: Size(8, 8),
-                                  painter: _CloseIconPainter(
-                                    color: Colors.white,
-                                    strokeWidth: 2.4,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
+                          top: 24,
+                          right: 12,
+                          child: PopupCloseButton(onTap: widget.onClose),
                         ),
                       ],
                     ),
@@ -315,33 +294,6 @@ class _ContinuePopupState extends State<ContinuePopup>
         );
       },
     );
-  }
-}
-
-class _CloseIconPainter extends CustomPainter {
-  const _CloseIconPainter({
-    required this.color,
-    required this.strokeWidth,
-  });
-
-  final Color color;
-  final double strokeWidth;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
-    canvas.drawLine(Offset.zero, Offset(size.width, size.height), paint);
-    canvas.drawLine(Offset(size.width, 0), Offset(0, size.height), paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _CloseIconPainter oldDelegate) {
-    return oldDelegate.color != color ||
-        oldDelegate.strokeWidth != strokeWidth;
   }
 }
 
