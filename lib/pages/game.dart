@@ -72,10 +72,12 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   static const _platformHalfW = _baseHalfSpan;
   static const _platformDistance = 8.0;
   static const _platformDepth = 2 * _cubeHalf;
+  static const _platformHalfZ = _platformDepth / 2;
   static const _platformNear = _platformDistance - _platformDepth / 2;
   static const _platformFar = _platformDistance + _platformDepth / 2;
   static const _platformTop = 2.4;
   static const _platformThickness = 0.08;
+  static const _platformSpin = 0.55;
   static const _groundY = -1.0;
   static const _groundFar = 13.5;
   static const _pyramidZ = _platformDistance;
@@ -90,9 +92,12 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   late cannon.Material _ballMaterial;
   late cannon.Material _staticMaterial;
 
+  late cannon.Body _platform;
   final List<cannon.Body> _cubes = [];
   final List<Color> _cubeColors = [];
+  final List<bool> _cubeDrawBehind = [];
   final List<cannon.Body> _balls = [];
+  final List<bool> _ballDrawBehind = [];
   Duration _lastElapsed = Duration.zero;
   Size _viewSize = Size.zero;
   int _ballsLeft = _maxBalls;
@@ -188,7 +193,9 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     }
     _cubes.clear();
     _cubeColors.clear();
+    _cubeDrawBehind.clear();
     _balls.clear();
+    _ballDrawBehind.clear();
   }
 
   void _buildLevel() {
@@ -204,22 +211,22 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     ground.quaternion.setFromEuler(-math.pi / 2, 0, 0);
     _world.addBody(ground);
 
-    final platformHalfZ = (_platformFar - _platformNear) / 2;
     final platformZ = (_platformFar + _platformNear) / 2;
-    final platform = cannon.Body(
+    _platform = cannon.Body(
       mass: 0,
       material: _staticMaterial,
       shape: cannon.Box(
-        Vector3(_platformHalfW, _platformThickness / 2, platformHalfZ),
+        Vector3(_platformHalfW, _platformThickness / 2, _platformHalfZ),
       ),
       position: Vector3(
         0,
         _platformTop - _platformThickness / 2,
         platformZ,
       ),
-      type: cannon.BodyTypes.static,
+      type: cannon.BodyTypes.kinematic,
+      angularVelocity: Vector3(0, _platformSpin, 0),
     );
-    _world.addBody(platform);
+    _world.addBody(_platform);
 
     const gap = _cubeGap;
     const baseY = _platformTop + _cubeHalf + 0.002;
@@ -234,13 +241,15 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
       final y = baseY + row * gap;
       final startX = -(count - 1) * gap / 2;
       for (var i = 0; i < count; i++) {
-        _cubes.add(
-          _createCube(
-            Vector3(startX + i * gap, y, _pyramidZ),
-            kind: kind,
-          ),
-        );
+        final pos = Vector3(startX + i * gap, y, _pyramidZ);
+        final cube = _createCube(pos, kind: kind);
+        final rx = pos.x;
+        final rz = pos.z - platformZ;
+        cube.velocity.setValues(_platformSpin * rz, 0, -_platformSpin * rx);
+        cube.angularVelocity.setValues(0, _platformSpin, 0);
+        _cubes.add(cube);
         _cubeColors.add(kind.color);
+        _cubeDrawBehind.add(false);
       }
     }
   }
@@ -257,9 +266,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
       position: position,
       linearDamping: 0.12,
       angularDamping: 0.22,
-      allowSleep: true,
-      sleepSpeedLimit: 0.18,
-      sleepTimeLimit: 0.4,
+      allowSleep: false,
     );
     _world.addBody(body);
     return body;
@@ -295,21 +302,22 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
 
     if (_exiting || _continueOpen) return;
 
+    _platform.angularVelocity.setValues(0, _platformSpin, 0);
+
     _world.step(1 / 120, dt, 5);
+    _syncRestingCubesToPlatform();
 
-    _balls.removeWhere((ball) {
-      final out = ball.position.y < -8;
-      if (out) _world.removeBody(ball);
-      return out;
-    });
+    for (var i = _balls.length - 1; i >= 0; i--) {
+      if (_balls[i].position.y < -8) {
+        _world.removeBody(_balls[i]);
+        _balls.removeAt(i);
+        _ballDrawBehind.removeAt(i);
+      }
+    }
 
-    final anyOnPlatform = _cubes.any((cube) {
-      final p = cube.position;
-      return p.x.abs() <= _platformHalfW &&
-          p.z >= _platformNear &&
-          p.z <= _platformFar &&
-          p.y >= _platformTop;
-    });
+    _updateDrawBehindFlags();
+
+    final anyOnPlatform = _cubes.any(_isCubeOnPlatform);
 
     if (anyOnPlatform) {
       _clearTimer = 0;
@@ -332,6 +340,85 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     }
 
     setState(() {});
+  }
+
+  bool _isCubeOnPlatform(cannon.Body cube) {
+    final local = Vector3.copy(cube.position)..sub(_platform.position);
+    final inv = Quaternion.copy(_platform.quaternion)..conjugate();
+    inv.vmult(local, local);
+    return local.x.abs() <= _platformHalfW + 0.04 &&
+        local.z.abs() <= _platformHalfZ + 0.04 &&
+        local.y >= _platformThickness / 2 - 0.02;
+  }
+
+  double _platformWorldZExtent() {
+    Vector3 axis(double x, double y, double z) =>
+        _platform.quaternion.vmult(Vector3(x, y, z));
+    final hx = axis(_platformHalfW, 0, 0);
+    final hy = axis(0, _platformThickness / 2, 0);
+    final hz = axis(0, 0, _platformHalfZ);
+    return hx.z.abs() + hy.z.abs() + hz.z.abs();
+  }
+
+  double _cubeBottomY(cannon.Body cube) {
+    final inv = Quaternion.copy(cube.quaternion)..conjugate();
+    final localDown = inv.vmult(Vector3(0, -1, 0));
+    final support = _cubeHalf *
+        (localDown.x.abs() + localDown.y.abs() + localDown.z.abs());
+    return cube.position.y - support;
+  }
+
+  bool _drawsInFrontOfPlatform(Vector3 pos, {required double bottomY}) {
+    final center = _platform.position;
+    final nearZ = center.z - _platformWorldZExtent();
+    if (pos.z < nearZ - 0.1) return true;
+
+    final local = Vector3.copy(pos)..sub(center);
+    final inv = Quaternion.copy(_platform.quaternion)..conjugate();
+    inv.vmult(local, local);
+    final inFootprint = local.x.abs() <= _platformHalfW + 0.12 &&
+        local.z.abs() <= _platformHalfZ + 0.12;
+    if (inFootprint && local.y >= -_platformThickness / 2 - 0.02) {
+      return true;
+    }
+
+    if (bottomY >= _platformTop - 0.03) return true;
+    return false;
+  }
+
+  void _updateDrawBehindFlags() {
+    for (var i = 0; i < _cubes.length; i++) {
+      final pos = _cubes[i].position;
+      _cubeDrawBehind[i] = !_drawsInFrontOfPlatform(
+        pos,
+        bottomY: _cubeBottomY(_cubes[i]),
+      );
+    }
+    for (var i = 0; i < _balls.length; i++) {
+      final pos = _balls[i].position;
+      _ballDrawBehind[i] = !_drawsInFrontOfPlatform(
+        pos,
+        bottomY: pos.y - _ballRadius,
+      );
+    }
+  }
+
+  void _syncRestingCubesToPlatform() {
+    final cx = _platform.position.x;
+    final cz = _platform.position.z;
+    final omega = _platformSpin;
+    for (final cube in _cubes) {
+      if (!_isCubeOnPlatform(cube)) continue;
+      final relative = Vector3.copy(cube.velocity)
+        ..x -= omega * (cube.position.z - cz)
+        ..z -= -omega * (cube.position.x - cx);
+      if (relative.length2 > 1.2) continue;
+      final rx = cube.position.x - cx;
+      final rz = cube.position.z - cz;
+      cube.velocity.x = omega * rz;
+      cube.velocity.z = -omega * rx;
+      cube.angularVelocity.setValues(0, omega, 0);
+    }
   }
 
   void _offerContinueOrExit() {
@@ -408,6 +495,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     setState(() {
       _ballsLeft -= 1;
       _balls.add(_createBall(origin, Vector3(vx, vy, vz)));
+      _ballDrawBehind.add(false);
     });
   }
 
@@ -440,21 +528,27 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
                               ),
                               rot: Quaternion.copy(_cubes[i].quaternion),
                               color: _cubeColors[i],
+                              behind: _cubeDrawBehind[i],
                             ),
                         ],
                         balls: [
-                          for (final ball in _balls)
-                            _Vec3(
-                              ball.position.x,
-                              ball.position.y,
-                              ball.position.z,
+                          for (var i = 0; i < _balls.length; i++)
+                            (
+                              pos: _Vec3(
+                                _balls[i].position.x,
+                                _balls[i].position.y,
+                                _balls[i].position.z,
+                              ),
+                              behind: _ballDrawBehind[i],
                             ),
                         ],
                         platformHalfW: _platformHalfW,
+                        platformHalfZ: _platformHalfZ,
                         platformNear: _platformNear,
                         platformFar: _platformFar,
                         platformTop: _platformTop,
                         platformThickness: _platformThickness,
+                        platformRot: Quaternion.copy(_platform.quaternion),
                         cubeHalf: _cubeHalf,
                         ballRadius: _ballRadius,
                         platformHue: _hueAnim.value,
@@ -784,22 +878,26 @@ class _ScenePainter extends CustomPainter {
     required this.cubes,
     required this.balls,
     required this.platformHalfW,
+    required this.platformHalfZ,
     required this.platformNear,
     required this.platformFar,
     required this.platformTop,
     required this.platformThickness,
+    required this.platformRot,
     required this.cubeHalf,
     required this.ballRadius,
     required this.platformHue,
   });
 
-  final List<({_Vec3 pos, Quaternion rot, Color color})> cubes;
-  final List<_Vec3> balls;
+  final List<({_Vec3 pos, Quaternion rot, Color color, bool behind})> cubes;
+  final List<({_Vec3 pos, bool behind})> balls;
   final double platformHalfW;
+  final double platformHalfZ;
   final double platformNear;
   final double platformFar;
   final double platformTop;
   final double platformThickness;
+  final Quaternion platformRot;
   final double cubeHalf;
   final double ballRadius;
   final double platformHue;
@@ -843,47 +941,28 @@ class _ScenePainter extends CustomPainter {
     return _Vec3(out.x, out.y, out.z);
   }
 
-  bool _isBehindPlatform(_Vec3 pos) {
-    if (pos.z > platformFar) return true;
-    final inFootprint = pos.x.abs() <= platformHalfW &&
-        pos.z >= platformNear &&
-        pos.z <= platformFar;
-    final platformBottom = platformTop - platformThickness;
-    return inFootprint && pos.y < platformBottom + 0.02;
-  }
+  _Vec3 get _platformCenter => _Vec3(
+        0,
+        platformTop - platformThickness / 2,
+        (platformNear + platformFar) / 2,
+      );
 
   void _paintDepthLayer(
     Canvas canvas,
     Size size,
-    List<({_Vec3 pos, Quaternion rot, Color color})> layerCubes,
+    List<({_Vec3 pos, Quaternion rot, Color color, bool behind})> layerCubes,
     List<_Vec3> layerBalls,
   ) {
-    final items =
-        <({double depth, Path? path, Color? color, _Vec3? ball, bool shiny})>[];
-
-    for (final cube in layerCubes) {
-      _collectBoxFaces(
-        items,
-        size,
-        center: cube.pos,
-        half: _Vec3(cubeHalf, cubeHalf, cubeHalf),
-        rot: cube.rot,
-        colors: _shadeCube(cube.color),
-        shinyTop: true,
-      );
-    }
-
-    for (final ball in layerBalls) {
-      items.add((
-        depth: _camDist2(ball),
-        path: null,
-        color: null,
-        ball: ball,
-        shiny: false,
-      ));
-    }
-
-    items.sort((a, b) => b.depth.compareTo(a.depth));
+    final objects = <({
+      double depth,
+      ({_Vec3 pos, Quaternion rot, Color color, bool behind})? cube,
+      _Vec3? ball,
+    })>[
+      for (final cube in layerCubes)
+        (depth: _camDist2(cube.pos), cube: cube, ball: null),
+      for (final ball in layerBalls)
+        (depth: _camDist2(ball), cube: null, ball: ball),
+    ]..sort((a, b) => b.depth.compareTo(a.depth));
 
     final fill = Paint()..style = PaintingStyle.fill;
     final stroke = Paint()
@@ -893,70 +972,88 @@ class _ScenePainter extends CustomPainter {
       ..color = const Color(0xFF050505);
     final gloss = Paint()..style = PaintingStyle.fill;
 
-    for (final item in items) {
-      final ball = item.ball;
+    for (final object in objects) {
+      final ball = object.ball;
       if (ball != null) {
         _paintBall(canvas, size, ball);
         continue;
       }
 
-      final path = item.path!;
-      final color = item.color!;
-      final bounds = path.getBounds();
-      fill.shader = LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [
-          Color.lerp(color, Colors.white, 0.42)!,
-          color,
-          Color.lerp(color, Colors.black, 0.14)!,
-        ],
-        stops: const [0.0, 0.52, 1.0],
-      ).createShader(bounds);
-      canvas.drawPath(path, fill);
-      fill.shader = null;
+      final cube = object.cube!;
+      final faces = <({
+        double depth,
+        Path? path,
+        Color? color,
+        _Vec3? ball,
+        bool shiny,
+      })>[];
+      _collectBoxFaces(
+        faces,
+        size,
+        center: cube.pos,
+        half: _Vec3(cubeHalf, cubeHalf, cubeHalf),
+        rot: cube.rot,
+        colors: _shadeCube(cube.color),
+        shinyTop: true,
+      );
+      faces.sort((a, b) => b.depth.compareTo(a.depth));
 
-      if (item.shiny && bounds.shortestSide > 4) {
-        final r = bounds.shortestSide * 0.2;
-        gloss.color = Colors.white.withValues(alpha: 0.38);
-        canvas.drawOval(
-          Rect.fromCenter(
-            center: Offset(
-              bounds.left + bounds.width * 0.3,
-              bounds.top + bounds.height * 0.28,
+      for (final item in faces) {
+        final path = item.path!;
+        final color = item.color!;
+        final bounds = path.getBounds();
+        fill.shader = LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color.lerp(color, Colors.white, 0.42)!,
+            color,
+            Color.lerp(color, Colors.black, 0.14)!,
+          ],
+          stops: const [0.0, 0.52, 1.0],
+        ).createShader(bounds);
+        canvas.drawPath(path, fill);
+        fill.shader = null;
+
+        if (item.shiny && bounds.shortestSide > 4) {
+          final r = bounds.shortestSide * 0.2;
+          gloss.color = Colors.white.withValues(alpha: 0.38);
+          canvas.drawOval(
+            Rect.fromCenter(
+              center: Offset(
+                bounds.left + bounds.width * 0.3,
+                bounds.top + bounds.height * 0.28,
+              ),
+              width: r * 1.7,
+              height: r,
             ),
-            width: r * 1.7,
-            height: r,
-          ),
-          gloss,
-        );
-      }
+            gloss,
+          );
+        }
 
-      canvas.drawPath(path, stroke);
+        canvas.drawPath(path, stroke);
+      }
     }
   }
 
   @override
   void paint(Canvas canvas, Size size) {
-    final behindBalls = <_Vec3>[];
-    final frontBalls = <_Vec3>[];
-    for (final ball in balls) {
-      if (_isBehindPlatform(ball)) {
-        behindBalls.add(ball);
-      } else {
-        frontBalls.add(ball);
-      }
-    }
-
-    final behindCubes = <({_Vec3 pos, Quaternion rot, Color color})>[];
-    final frontCubes = <({_Vec3 pos, Quaternion rot, Color color})>[];
-    for (final cube in cubes) {
-      if (_isBehindPlatform(cube.pos)) {
-        behindCubes.add(cube);
-      } else {
-        frontCubes.add(cube);
-      }
-    }
+    final behindCubes = [
+      for (final cube in cubes)
+        if (cube.behind) cube,
+    ];
+    final frontCubes = [
+      for (final cube in cubes)
+        if (!cube.behind) cube,
+    ];
+    final behindBalls = [
+      for (final ball in balls)
+        if (ball.behind) ball.pos,
+    ];
+    final frontBalls = [
+      for (final ball in balls)
+        if (!ball.behind) ball.pos,
+    ];
 
     _paintDepthLayer(canvas, size, behindCubes, behindBalls);
     canvas.saveLayer(
@@ -970,17 +1067,20 @@ class _ScenePainter extends CustomPainter {
   }
 
   void _paintPlatform(Canvas canvas, Size size) {
-    final cx = 0.0;
-    final cz = (platformNear + platformFar) / 2;
-    final hx = platformHalfW;
-    final hz = (platformFar - platformNear) / 2;
     final hy = platformThickness / 2;
-    _paintBox(
-      canvas,
+    final items = <({
+      double depth,
+      Path? path,
+      Color? color,
+      _Vec3? ball,
+      bool shiny,
+    })>[];
+    _collectBoxFaces(
+      items,
       size,
-      center: _Vec3(cx, platformTop - hy, cz),
-      half: _Vec3(hx, hy, hz),
-      rot: Quaternion.identity(),
+      center: _platformCenter,
+      half: _Vec3(platformHalfW, hy, platformHalfZ),
+      rot: platformRot,
       colors: const [
         Color(0xFF8B6CFF),
         Color(0xFF4A2DB0),
@@ -990,6 +1090,19 @@ class _ScenePainter extends CustomPainter {
         Color(0xFF7A55E8),
       ],
     );
+    items.sort((a, b) => b.depth.compareTo(a.depth));
+
+    final fill = Paint()..style = PaintingStyle.fill;
+    final stroke = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1
+      ..color = const Color(0xFF111111);
+
+    for (final item in items) {
+      fill.color = item.color!;
+      canvas.drawPath(item.path!, fill);
+      canvas.drawPath(item.path!, stroke);
+    }
   }
 
   void _collectBoxFaces(
@@ -1062,39 +1175,6 @@ class _ScenePainter extends CustomPainter {
         ball: null,
         shiny: shinyTop && index == 3,
       ));
-    }
-  }
-
-  void _paintBox(
-    Canvas canvas,
-    Size size, {
-    required _Vec3 center,
-    required _Vec3 half,
-    required Quaternion rot,
-    required List<Color> colors,
-  }) {
-    final items =
-        <({double depth, Path? path, Color? color, _Vec3? ball, bool shiny})>[];
-    _collectBoxFaces(
-      items,
-      size,
-      center: center,
-      half: half,
-      rot: rot,
-      colors: colors,
-    );
-    items.sort((a, b) => b.depth.compareTo(a.depth));
-
-    final fill = Paint()..style = PaintingStyle.fill;
-    final stroke = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1
-      ..color = const Color(0xFF111111);
-
-    for (final item in items) {
-      fill.color = item.color!;
-      canvas.drawPath(item.path!, fill);
-      canvas.drawPath(item.path!, stroke);
     }
   }
 
