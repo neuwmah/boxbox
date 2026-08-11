@@ -219,7 +219,7 @@ class _PilePainter extends CustomPainter {
             Color(0x2EFFFFFF),
             Color(0x00FFFFFF),
           ],
-          const [0.0, 0.35, 0.5, 0.65, 1.0],
+          const [0.0, 0.22, 0.5, 0.78, 1.0],
         ),
     );
     canvas.restore();
