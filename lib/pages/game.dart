@@ -60,6 +60,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   static const _continueBalls = 5;
   static const _continueCost = 500;
   static const _clearDelay = 3.0;
+  static const _clearBannerDuration = 3.0;
   static const _outOfBallsDelay = 3.0;
 
   static const _ballMass = 2.4;
@@ -493,6 +494,17 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
               onVibration: () => setState(() => _vibration = !_vibration),
             ),
           ],
+          if (_clearTimer > 0 && _clearTimer < _clearBannerDuration)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: Align(
+                  alignment: const Alignment(0, 0),
+                  child: _ClearBanner(
+                    t: (_clearTimer / _clearBannerDuration).clamp(0.0, 1.0),
+                  ),
+                ),
+              ),
+            ),
           if (_continueOpen)
             ContinuePopup(
               coins: _coins,
@@ -507,6 +519,125 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
               onQuit: () => _exitGame(null),
             ),
         ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ClearBanner extends StatelessWidget {
+  const _ClearBanner({required this.t});
+
+  final double t;
+
+  static const _style = TextStyle(
+    fontSize: 40,
+    fontWeight: FontWeight.w900,
+    fontStyle: FontStyle.italic,
+    height: 1,
+    letterSpacing: -1.2,
+  );
+
+  static const _outline = [
+    Offset(-3, 0),
+    Offset(3, 0),
+    Offset(0, -3),
+    Offset(0, 3),
+    Offset(-2.5, -2.5),
+    Offset(2.5, -2.5),
+    Offset(-2.5, 2.5),
+    Offset(2.5, 2.5),
+    Offset(-3, -1.5),
+    Offset(3, -1.5),
+    Offset(-3, 1.5),
+    Offset(3, 1.5),
+    Offset(-1.5, -3),
+    Offset(1.5, -3),
+    Offset(-1.5, 3),
+    Offset(1.5, 3),
+  ];
+
+  static const _depth = [
+    Offset(2, 2),
+    Offset(3, 3),
+    Offset(1, 2),
+    Offset(2, 1),
+    Offset(2, 3),
+    Offset(3, 2),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    late final double opacity;
+    late final double dy;
+
+    if (t < 0.18) {
+      final p = Curves.easeOutCubic.transform(t / 0.18);
+      opacity = p;
+      dy = ui.lerpDouble(48, 0, p)!;
+    } else if (t < 0.38) {
+      opacity = 1;
+      dy = 0;
+    } else if (t < 0.56) {
+      final p = Curves.easeInCubic.transform((t - 0.38) / 0.18);
+      opacity = 1 - p;
+      dy = ui.lerpDouble(0, -48, p)!;
+    } else {
+      opacity = 0;
+      dy = -48;
+    }
+
+    return Opacity(
+      opacity: opacity.clamp(0.0, 1.0),
+      child: Transform.translate(
+        offset: Offset(0, dy),
+        child: Stack(
+          alignment: Alignment.center,
+          clipBehavior: Clip.none,
+          children: [
+            for (final offset in _depth)
+              Transform.translate(
+                offset: offset,
+                child: Text(
+                  'GG!',
+                  style: _style.copyWith(color: const Color(0xFF101010)),
+                ),
+              ),
+            for (final offset in _outline)
+              Transform.translate(
+                offset: offset,
+                child: Text(
+                  'GG!',
+                  style: _style.copyWith(color: Colors.black),
+                ),
+              ),
+            ShaderMask(
+              blendMode: BlendMode.srcIn,
+              shaderCallback: (bounds) {
+                return const LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.white,
+                    Color(0xFFF8F8F8),
+                    Color(0xFFF1F1F1),
+                  ],
+                  stops: [0.0, 0.4, 1.0],
+                ).createShader(bounds);
+              },
+              child: const Text(
+                'GG!',
+                style: TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.w900,
+                  fontStyle: FontStyle.italic,
+                  height: 1,
+                  letterSpacing: -1.2,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

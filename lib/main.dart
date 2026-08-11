@@ -58,11 +58,13 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   static const _maxHearts = 5;
+  static const _maxLevel = 500;
   static const _heartRegen = Duration(minutes: 20);
   static const _refillPrice = 900;
   static const _noAdsPriceLabel = 'BRL 59.90';
 
   int _selectedIndex = 1;
+  int _level = 1;
   int _coins = 500;
   int _displayedCoins = 500;
   int _hearts = _maxHearts;
@@ -238,6 +240,10 @@ class _MainShellState extends State<MainShell> {
       _coins += amount;
       _displayedCoins = _coins;
       _pendingReward = null;
+      if (_level < _maxLevel) {
+        _level += 1;
+      }
+      _homePopup = _HomePopup.start;
     });
   }
 
@@ -328,7 +334,7 @@ class _MainShellState extends State<MainShell> {
         if (_homePopup == _HomePopup.start)
           Positioned.fill(
             child: StartPopup(
-              level: 1,
+              level: _level,
               onClose: _closeHomePopup,
               onStart: _playLevel,
             ),
@@ -336,7 +342,7 @@ class _MainShellState extends State<MainShell> {
         if (_homePopup == _HomePopup.retry)
           Positioned.fill(
             child: RetryPopup(
-              level: 1,
+              level: _level,
               onClose: _closeHomePopup,
               onRetry: _playLevel,
             ),
