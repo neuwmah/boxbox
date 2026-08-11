@@ -6,12 +6,15 @@ class HomePage extends StatelessWidget {
   const HomePage({
     super.key,
     this.onLevelTap,
+    this.onAdsTap,
   });
 
   final VoidCallback? onLevelTap;
+  final VoidCallback? onAdsTap;
 
   static const _scale = 1.1;
   static const _bgOpacity = 0.08;
+  static const _adsIconSize = 72.0;
   static const _grayscale = ColorFilter.matrix(<double>[
     0.2126, 0.7152, 0.0722, 0, 0,
     0.2126, 0.7152, 0.0722, 0, 0,
@@ -61,6 +64,21 @@ class HomePage extends StatelessWidget {
             ),
           ),
         ),
+        if (onAdsTap != null)
+          Positioned(
+            top: 120,
+            right: 32,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: onAdsTap,
+              child: Image.asset(
+                'lib/assets/ad/icon.png',
+                width: _adsIconSize,
+                height: _adsIconSize,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
         const Positioned(
           top: 0,
           left: 0,

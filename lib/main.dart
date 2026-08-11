@@ -7,6 +7,7 @@ import 'package:boxbox/pages/home.dart';
 import 'package:boxbox/pages/settings.dart';
 import 'package:boxbox/pages/shop.dart';
 import 'package:boxbox/widgets/morelives.dart';
+import 'package:boxbox/widgets/noads.dart';
 import 'package:boxbox/widgets/reward.dart';
 import 'package:boxbox/widgets/navbar.dart';
 import 'package:boxbox/widgets/retry.dart';
@@ -46,7 +47,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-enum _HomePopup { none, start, retry, moreLives }
+enum _HomePopup { none, start, retry, moreLives, noAds }
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -59,6 +60,7 @@ class _MainShellState extends State<MainShell> {
   static const _maxHearts = 5;
   static const _heartRegen = Duration(minutes: 20);
   static const _refillPrice = 900;
+  static const _noAdsPriceLabel = 'BRL 59.90';
 
   int _selectedIndex = 1;
   int _coins = 500;
@@ -138,6 +140,15 @@ class _MainShellState extends State<MainShell> {
       _homePopup =
           _hearts > 0 ? _HomePopup.start : _HomePopup.moreLives;
     });
+  }
+
+  void _onAdsTap() {
+    if (_homePopup != _HomePopup.none || _pendingReward != null) return;
+    setState(() => _homePopup = _HomePopup.noAds);
+  }
+
+  void _onPurchaseNoAds() {
+    setState(() => _homePopup = _HomePopup.none);
   }
 
   void _onDefeat() {
@@ -263,6 +274,7 @@ class _MainShellState extends State<MainShell> {
                   ),
                   HomePage(
                     onLevelTap: _onLevelTap,
+                    onAdsTap: _onAdsTap,
                   ),
                   const Column(
                     children: [
@@ -338,6 +350,14 @@ class _MainShellState extends State<MainShell> {
               onClose: _closeHomePopup,
               onRefill: _onRefillLives,
               onWatchAd: _onWatchAdForLife,
+            ),
+          ),
+        if (_homePopup == _HomePopup.noAds)
+          Positioned.fill(
+            child: NoAdsPopup(
+              priceLabel: _noAdsPriceLabel,
+              onClose: _closeHomePopup,
+              onPurchase: _onPurchaseNoAds,
             ),
           ),
         if (_pendingReward != null)
