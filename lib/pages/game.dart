@@ -66,24 +66,22 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   static const _clearDelay = 3.0;
   static const _clearBannerDuration = 3.0;
   static const _outOfBallsDelay = 3.0;
-
   static const _ballMass = 2.4;
-
   static const _cubeGap = _cubeHalf * 2;
   static const _startX = -(levelSize - 1) * _cubeGap / 2;
   static const _platformX = 0.0;
-  static const _platformHalfW =
-      (levelSize - 1) * _cubeGap / 2 + _cubeHalf;
+  static const _platformHalfW = (levelSize - 1) * _cubeGap / 2 + _cubeHalf;
   static const _platformDistance = 8.0;
-  static const _platformDepth = 4 * _cubeHalf;
+  static const _platformDepth = 6 * _cubeHalf;
   static const _platformNear = _platformDistance - _platformDepth / 2;
   static const _platformFar = _platformDistance + _platformDepth / 2;
   static const _platformTop = 1.6;
   static const _platformThickness = _cubeGap;
   static const _groundY = -1.0;
   static const _groundFar = 13.5;
-  static const _frontLayerZ = _platformDistance - _cubeHalf;
-  static const _backLayerZ = _platformDistance + _cubeHalf;
+  static const _layer1Z = _platformDistance - 2 * _cubeHalf;
+  static const _layer2Z = _platformDistance;
+  static const _layer3Z = _platformDistance + 2 * _cubeHalf;
 
   late final Ticker _ticker;
   late final AnimationController _menuAnim;
@@ -283,8 +281,10 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
         _cubeHalves.add(half);
       }
 
-      if (block.layer == 1 || block.layer == 3) place(_frontLayerZ);
-      if (block.layer == 2 || block.layer == 3) place(_backLayerZ);
+      final layers = block.layer.toString();
+      if (layers.contains('1')) place(_layer1Z);
+      if (layers.contains('2')) place(_layer2Z);
+      if (layers.contains('3')) place(_layer3Z);
     }
   }
 
