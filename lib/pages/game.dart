@@ -252,7 +252,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
         if (painted == null) continue;
 
         final shape = painted.shape;
-        final coneRadius = _cubeHalf * 1.18;
+        final coneRadius = _cubeHalf * 1.05;
         final coneHeight = coneRadius * 1.55;
         final half = switch (shape) {
           _BlockShape.rect => _Vec3(_cubeHalf, _cubeHalf * 2, _cubeHalf),
