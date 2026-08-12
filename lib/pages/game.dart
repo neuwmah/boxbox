@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'package:cannon_physics/cannon_physics.dart' as cannon;
+import 'package:boxbox/game/level.dart';
 import 'package:boxbox/widgets/background.dart';
 import 'package:boxbox/widgets/continue.dart';
 import 'package:boxbox/widgets/insettings.dart';
@@ -17,12 +18,14 @@ class GamePage extends StatefulWidget {
   const GamePage({
     super.key,
     required this.coins,
+    required this.level,
     this.onSpendCoins,
   });
 
   static const defeatCode = -1;
 
   final int coins;
+  final int level;
   final bool Function(int amount)? onSpendCoins;
 
   @override
@@ -67,37 +70,20 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   static const _ballMass = 2.4;
 
   static const _cubeGap = _cubeHalf * 2;
-  static const _pikachuMask = [
-    '000P0P0000',
-    '0001010000',
-    '0011110000',
-    '01414100T0',
-    'Z311130R1Z',
-    'ZZ111100ZZ',
-    'ZZ11112ZZZ',
-    'ZZ1ZZ1ZZZZ',
-  ];
-  static const _gridWidth = 10;
-  static const _startX = -(_gridWidth - 1) * _cubeGap / 2;
+  static const _startX = -(levelSize - 1) * _cubeGap / 2;
   static const _platformX = 0.0;
   static const _platformHalfW =
-      (_gridWidth - 1) * _cubeGap / 2 + _cubeHalf;
+      (levelSize - 1) * _cubeGap / 2 + _cubeHalf;
   static const _platformDistance = 8.0;
   static const _platformDepth = 4 * _cubeHalf;
   static const _platformNear = _platformDistance - _platformDepth / 2;
   static const _platformFar = _platformDistance + _platformDepth / 2;
-  static const _platformTop = 2.0;
+  static const _platformTop = 1.6;
   static const _platformThickness = _cubeGap;
   static const _groundY = -1.0;
   static const _groundFar = 13.5;
   static const _frontLayerZ = _platformDistance - _cubeHalf;
   static const _backLayerZ = _platformDistance + _cubeHalf;
-
-  static const _colorYellow = Color(0xFFFFE800);
-  static const _colorOrange = Color(0xFFD38100);
-  static const _colorRed = Color(0xFFF92F3C);
-  static const _colorEye = Color(0xFF343341);
-  static const _colorBlack = Color(0xFF000000);
 
   late final Ticker _ticker;
   late final AnimationController _menuAnim;
@@ -111,7 +97,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
 
   final List<cannon.Body> _cubes = [];
   final List<Color> _cubeColors = [];
-  final List<_BlockShape> _cubeShapes = [];
+  final List<BlockShape> _cubeShapes = [];
   final List<_Vec3> _cubeHalves = [];
   final List<cannon.Body> _balls = [];
   Duration _lastElapsed = Duration.zero;
@@ -256,82 +242,71 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     _world.addBody(platform);
 
     const gap = _cubeGap;
-    final height = _pikachuMask.length;
-    for (var row = 0; row < height; row++) {
-      final maskRow = _pikachuMask[height - 1 - row];
-      for (var col = 0; col < _gridWidth; col++) {
-        final cell = maskRow[col];
-        final painted = _paintForCell(cell);
-        if (painted == null) continue;
-
-        final shape = painted.shape;
-        final coneRadius = _cubeHalf * 1.05;
-        final coneHeight = coneRadius * 1.55;
-        final half = switch (shape) {
-          _BlockShape.rect => _Vec3(_cubeHalf, _cubeHalf * 2, _cubeHalf),
-          _BlockShape.pyramid => _Vec3(coneRadius, coneHeight / 2, coneRadius),
-          _BlockShape.cube => _Vec3(_cubeHalf, _cubeHalf, _cubeHalf),
-        };
-        final y = switch (shape) {
-          _BlockShape.rect =>
-            _platformTop + _cubeHalf + (row - 1) * gap + gap / 2,
-          _BlockShape.pyramid => _platformTop + row * gap + coneHeight / 2,
-          _BlockShape.cube => _platformTop + _cubeHalf + row * gap,
-        };
-        final x = _startX + col * gap;
-
-        void place(double z) {
-          _cubes.add(
-            _createBlock(
-              Vector3(x, y, z),
-              kind: painted.kind,
-              shape: shape,
-              half: half,
-            ),
-          );
-          _cubeColors.add(painted.color);
-          _cubeShapes.add(shape);
-          _cubeHalves.add(half);
-        }
-
-        place(_backLayerZ);
-        if (cell == 'Z') place(_frontLayerZ);
+    for (final block in levelAt(widget.level)) {
+      if (block.x < 0 ||
+          block.x >= levelSize ||
+          block.y < 0 ||
+          block.y >= levelSize) {
+        continue;
       }
+
+      final shape = block.type;
+      final color = Color(block.color);
+      final row = block.y;
+      final col = block.x;
+      final coneRadius = _cubeHalf * 1.05;
+      final coneHeight = coneRadius * 1.55;
+      final half = switch (shape) {
+        BlockShape.rect => _Vec3(_cubeHalf, _cubeHalf * 2, _cubeHalf),
+        BlockShape.triangle => _Vec3(coneRadius, coneHeight / 2, coneRadius),
+        BlockShape.box => _Vec3(_cubeHalf, _cubeHalf, _cubeHalf),
+      };
+      final y = switch (shape) {
+        BlockShape.rect =>
+          _platformTop + _cubeHalf + (row - 1) * gap + gap / 2,
+        BlockShape.triangle => _platformTop + row * gap + coneHeight / 2,
+        BlockShape.box => _platformTop + _cubeHalf + row * gap,
+      };
+      final x = _startX + col * gap;
+
+      void place(double z) {
+        _cubes.add(
+          _createBlock(
+            Vector3(x, y, z),
+            color: color,
+            shape: shape,
+            half: half,
+          ),
+        );
+        _cubeColors.add(color);
+        _cubeShapes.add(shape);
+        _cubeHalves.add(half);
+      }
+
+      if (block.layer == 1 || block.layer == 3) place(_frontLayerZ);
+      if (block.layer == 2 || block.layer == 3) place(_backLayerZ);
     }
   }
 
-  static ({Color color, _CubeKind kind, _BlockShape shape})? _paintForCell(
-    String cell,
-  ) {
-    return switch (cell) {
-      '1' => (color: _colorYellow, kind: _CubeKind.light, shape: _BlockShape.cube),
-      '2' => (color: _colorOrange, kind: _CubeKind.medium, shape: _BlockShape.cube),
-      '3' => (color: _colorRed, kind: _CubeKind.light, shape: _BlockShape.cube),
-      '4' => (color: _colorEye, kind: _CubeKind.heavy, shape: _BlockShape.cube),
-      'Z' => (color: _colorBlack, kind: _CubeKind.heavy, shape: _BlockShape.cube),
-      'P' => (color: _colorEye, kind: _CubeKind.heavy, shape: _BlockShape.pyramid),
-      'T' => (color: _colorYellow, kind: _CubeKind.light, shape: _BlockShape.pyramid),
-      'R' => (color: _colorYellow, kind: _CubeKind.light, shape: _BlockShape.rect),
-      _ => null,
-    };
+  cannon.Material _materialForMass(double mass) {
+    if (mass < 1.75) return _cubeSoftMaterial;
+    if (mass < 2.5) return _cubeMidMaterial;
+    return _cubeHardMaterial;
   }
 
   cannon.Body _createBlock(
     Vector3 position, {
-    required _CubeKind kind,
-    required _BlockShape shape,
+    required Color color,
+    required BlockShape shape,
     required _Vec3 half,
   }) {
-    final mass = shape == _BlockShape.rect ? kind.mass * 2 : kind.mass;
+    final baseMass = massForColor(color);
+    final mass = shape == BlockShape.rect ? baseMass * 2 : baseMass;
     final body = cannon.Body(
       mass: mass,
-      material: switch (kind) {
-        _CubeKind.light => _cubeSoftMaterial,
-        _CubeKind.medium => _cubeMidMaterial,
-        _ => _cubeHardMaterial,
-      },
+      material: _materialForMass(baseMass),
       shape: switch (shape) {
-        _BlockShape.pyramid => cannon.Cone(
+        BlockShape.triangle => cannon.Cone(
             radius: half.x,
             height: half.y * 2,
             numSegments: 20,
@@ -627,33 +602,6 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   }
 }
 
-enum _BlockShape { cube, rect, pyramid }
-
-class _CubeKind {
-  const _CubeKind._({
-    required this.color,
-    required this.mass,
-  });
-
-  final Color color;
-  final double mass;
-
-  static const light = _CubeKind._(
-    color: Color(0xFFF1F1F1),
-    mass: 1.5,
-  );
-
-  static const medium = _CubeKind._(
-    color: Color(0xFF515151),
-    mass: 2.0,
-  );
-
-  static const heavy = _CubeKind._(
-    color: Color(0xFF000000),
-    mass: 3.0,
-  );
-}
-
 class _BallsBadge extends StatelessWidget {
   const _BallsBadge({
     required this.value,
@@ -887,7 +835,7 @@ class _ScenePainter extends CustomPainter {
         _Vec3 pos,
         Quaternion rot,
         Color color,
-        _BlockShape shape,
+        BlockShape shape,
         _Vec3 half,
       })> cubes;
   final List<_Vec3> balls;
@@ -959,7 +907,7 @@ class _ScenePainter extends CustomPainter {
               _Vec3 pos,
               Quaternion rot,
               Color color,
-              _BlockShape shape,
+              BlockShape shape,
               _Vec3 half,
             })>
         layerCubes,
@@ -977,7 +925,7 @@ class _ScenePainter extends CustomPainter {
 
     for (final cube in layerCubes) {
       final colors = _shadeCube(cube.color);
-      if (cube.shape == _BlockShape.pyramid) {
+      if (cube.shape == BlockShape.triangle) {
         _collectPyramidFaces(
           items,
           size,
@@ -1085,7 +1033,7 @@ class _ScenePainter extends CustomPainter {
           _Vec3 pos,
           Quaternion rot,
           Color color,
-          _BlockShape shape,
+          BlockShape shape,
           _Vec3 half,
         })>[];
     final frontCubes = <
@@ -1093,7 +1041,7 @@ class _ScenePainter extends CustomPainter {
           _Vec3 pos,
           Quaternion rot,
           Color color,
-          _BlockShape shape,
+          BlockShape shape,
           _Vec3 half,
         })>[];
     for (final cube in cubes) {

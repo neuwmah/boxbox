@@ -179,6 +179,7 @@ class _MainShellState extends State<MainShell> {
       PageRouteBuilder(
         pageBuilder: (_, __, ___) => GamePage(
           coins: _coins,
+          level: _level,
           onSpendCoins: _spendCoins,
         ),
         transitionDuration: Duration.zero,
