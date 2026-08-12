@@ -86,7 +86,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   static const _platformDepth = 4 * _cubeHalf;
   static const _platformNear = _platformDistance - _platformDepth / 2;
   static const _platformFar = _platformDistance + _platformDepth / 2;
-  static const _platformTop = 1.44;
+  static const _platformTop = 2.0;
   static const _platformThickness = _cubeGap;
   static const _groundY = -1.0;
   static const _groundFar = 13.5;
