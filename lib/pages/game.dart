@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'package:cannon_physics/cannon_physics.dart' as cannon;
@@ -10,7 +11,7 @@ import 'package:boxbox/widgets/background.dart';
 import 'package:boxbox/widgets/continue.dart';
 import 'package:boxbox/widgets/insettings.dart';
 import 'package:boxbox/widgets/return.dart';
-import 'package:vector_math/vector_math.dart' hide Colors, Sphere;
+import 'package:vector_math/vector_math.dart' hide Colors, Sphere, Matrix4;
 
 class GamePage extends StatefulWidget {
   const GamePage({
@@ -86,7 +87,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   static const _platformNear = _platformDistance - _platformDepth / 2;
   static const _platformFar = _platformDistance + _platformDepth / 2;
   static const _platformTop = 1.44;
-  static const _platformThickness = 0.08;
+  static const _platformThickness = _cubeGap;
   static const _groundY = -1.0;
   static const _groundFar = 13.5;
   static const _frontLayerZ = _platformDistance - _cubeHalf;
@@ -117,6 +118,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   Size _viewSize = Size.zero;
   int _ballsLeft = _maxBalls;
   late int _coins;
+  ui.Image? _grassImage;
   double _clearTimer = 0;
   double _outOfBallsTimer = 0;
   bool _exiting = false;
@@ -142,10 +144,20 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
       vsync: this,
       duration: const Duration(seconds: 5),
     )..repeat();
+    _loadGrassTexture();
+  }
+
+  Future<void> _loadGrassTexture() async {
+    final data = await rootBundle.load('lib/assets/floor/grass.png');
+    final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
+    final frame = await codec.getNextFrame();
+    if (!mounted) return;
+    setState(() => _grassImage = frame.image);
   }
 
   @override
   void dispose() {
+    _grassImage?.dispose();
     _hueAnim.dispose();
     _menuAnim.dispose();
     _ticker.dispose();
@@ -532,7 +544,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
                         platformFar: _platformFar,
                         platformThickness: _platformThickness,
                         ballRadius: _ballRadius,
-                        platformHue: _hueAnim.value,
+                        grassImage: _grassImage,
                       ),
                       child: const SizedBox.expand(),
                     );
@@ -867,7 +879,7 @@ class _ScenePainter extends CustomPainter {
     required this.platformFar,
     required this.platformThickness,
     required this.ballRadius,
-    required this.platformHue,
+    required this.grassImage,
   });
 
   final List<
@@ -886,7 +898,7 @@ class _ScenePainter extends CustomPainter {
   final double platformFar;
   final double platformThickness;
   final double ballRadius;
-  final double platformHue;
+  final ui.Image? grassImage;
 
   static const _camY = 3.4;
   static const _camZ = 0.0;
@@ -1093,13 +1105,7 @@ class _ScenePainter extends CustomPainter {
     }
 
     _paintDepthLayer(canvas, size, behindCubes, behindBalls);
-    canvas.saveLayer(
-      Offset.zero & size,
-      Paint()
-        ..colorFilter = ColorFilter.matrix(_hueRotateMatrix(platformHue)),
-    );
     _paintPlatform(canvas, size);
-    canvas.restore();
     _paintDepthLayer(canvas, size, frontCubes, frontBalls);
   }
 
@@ -1108,24 +1114,179 @@ class _ScenePainter extends CustomPainter {
     final hx = platformHalfW;
     final hz = (platformFar - platformNear) / 2;
     final hy = platformThickness / 2;
-    const colors = [
-      Color(0xFF8B6CFF),
-      Color(0xFF4A2DB0),
-      Color(0xFF6A45D4),
-      Color(0xFFB49AFF),
-      Color(0xFF5C35C4),
-      Color(0xFF7A55E8),
+    const topColor = Color(0xFF8DE364);
+    const bottomColor = Color(0xFF6B4A2E);
+    const sideFallback = [
+      Color(0xFF7BCF55),
+      Color(0xFF5A8F3A),
+      Color(0xFF6B4A2E),
+      Color(0xFF8DE364),
+      Color(0xFF6B4A2E),
+      Color(0xFF5A8F3A),
     ];
+
     for (var i = 0; i < platformXs.length; i++) {
-      _paintBox(
-        canvas,
-        size,
-        center: _Vec3(platformXs[i], platformTops[i] - hy, cz),
-        half: _Vec3(hx, hy, hz),
-        rot: Quaternion.identity(),
-        colors: colors,
-      );
+      final center = _Vec3(platformXs[i], platformTops[i] - hy, cz);
+      final half = _Vec3(hx, hy, hz);
+      final locals = [
+        _Vec3(-half.x, -half.y, -half.z),
+        _Vec3(half.x, -half.y, -half.z),
+        _Vec3(half.x, half.y, -half.z),
+        _Vec3(-half.x, half.y, -half.z),
+        _Vec3(-half.x, -half.y, half.z),
+        _Vec3(half.x, -half.y, half.z),
+        _Vec3(half.x, half.y, half.z),
+        _Vec3(-half.x, half.y, half.z),
+      ];
+      final vertices = [for (final local in locals) center + local];
+      final projected = [for (final v in vertices) _project(v, size)];
+
+      const faces = [
+        [0, 3, 2, 1],
+        [4, 5, 6, 7],
+        [0, 1, 5, 4],
+        [3, 7, 6, 2],
+        [0, 4, 7, 3],
+        [1, 2, 6, 5],
+      ];
+      final faceSpanU = [
+        half.x * 2,
+        half.x * 2,
+        0.0,
+        0.0,
+        half.z * 2,
+        half.z * 2,
+      ];
+
+      final items = <({double depth, int index, Path path})>[];
+      for (var index = 0; index < faces.length; index++) {
+        final face = faces[index];
+        final a = vertices[face[0]];
+        final b = vertices[face[1]];
+        final c = vertices[face[2]];
+        final ab = b - a;
+        final ac = c - a;
+        final normal = ab.cross(ac);
+        final faceCenter = _Vec3(
+          (a.x + b.x + c.x + vertices[face[3]].x) / 4,
+          (a.y + b.y + c.y + vertices[face[3]].y) / 4,
+          (a.z + b.z + c.z + vertices[face[3]].z) / 4,
+        );
+        final toCam = _Vec3(
+          -faceCenter.x,
+          _camY - faceCenter.y,
+          _camZ - faceCenter.z,
+        );
+        if (normal.dot(toCam) <= 0) continue;
+
+        final path = Path()
+          ..moveTo(projected[face[0]].dx, projected[face[0]].dy)
+          ..lineTo(projected[face[1]].dx, projected[face[1]].dy)
+          ..lineTo(projected[face[2]].dx, projected[face[2]].dy)
+          ..lineTo(projected[face[3]].dx, projected[face[3]].dy)
+          ..close();
+
+        items.add((
+          depth: _camDist2(faceCenter),
+          index: index,
+          path: path,
+        ));
+      }
+
+      items.sort((a, b) => b.depth.compareTo(a.depth));
+
+      final fill = Paint()..style = PaintingStyle.fill;
+      final stroke = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1
+        ..color = const Color(0xFF111111);
+
+      final cubeSize = platformThickness;
+      final image = grassImage;
+
+      for (final item in items) {
+        final index = item.index;
+        final face = faces[index];
+        final pts = [
+          projected[face[0]],
+          projected[face[1]],
+          projected[face[2]],
+          projected[face[3]],
+        ];
+
+        final isSide = index == 0 || index == 1 || index == 4 || index == 5;
+        if (isSide && image != null) {
+          final tilesU = faceSpanU[index] / cubeSize;
+          final uv = switch (index) {
+            0 || 5 => const [
+                Offset(0, 1),
+                Offset(0, 0),
+                Offset(1, 0),
+                Offset(1, 1),
+              ],
+            _ => const [
+                Offset(0, 1),
+                Offset(1, 1),
+                Offset(1, 0),
+                Offset(0, 0),
+              ],
+          };
+          _paintTexturedQuad(
+            canvas,
+            pts,
+            image,
+            tilesU: tilesU,
+            tilesV: 1,
+            uv: uv,
+          );
+        } else {
+          fill.color = switch (index) {
+            3 => topColor,
+            2 => bottomColor,
+            _ => sideFallback[index],
+          };
+          canvas.drawPath(item.path, fill);
+        }
+        canvas.drawPath(item.path, stroke);
+      }
     }
+  }
+
+  void _paintTexturedQuad(
+    Canvas canvas,
+    List<Offset> pts,
+    ui.Image image, {
+    required double tilesU,
+    required double tilesV,
+    required List<Offset> uv,
+  }) {
+    final w = image.width.toDouble();
+    final h = image.height.toDouble();
+    final paint = Paint()
+      ..isAntiAlias = false
+      ..filterQuality = FilterQuality.none
+      ..shader = ImageShader(
+        image,
+        TileMode.repeated,
+        TileMode.repeated,
+        Matrix4.identity().storage,
+      );
+
+    Offset tex(Offset u) => Offset(u.dx * tilesU * w, u.dy * tilesV * h);
+
+    final vertices = ui.Vertices(
+      ui.VertexMode.triangles,
+      [pts[0], pts[1], pts[2], pts[0], pts[2], pts[3]],
+      textureCoordinates: [
+        tex(uv[0]),
+        tex(uv[1]),
+        tex(uv[2]),
+        tex(uv[0]),
+        tex(uv[2]),
+        tex(uv[3]),
+      ],
+    );
+    canvas.drawVertices(vertices, BlendMode.srcOver, paint);
   }
 
   void _collectBoxFaces(
@@ -1337,50 +1498,6 @@ class _ScenePainter extends CustomPainter {
     lower.removeLast();
     upper.removeLast();
     return [...lower, ...upper];
-  }
-
-  void _paintBox(
-    Canvas canvas,
-    Size size, {
-    required _Vec3 center,
-    required _Vec3 half,
-    required Quaternion rot,
-    required List<Color> colors,
-  }) {
-    final items = <
-        ({
-          double depth,
-          Path? path,
-          Color? color,
-          _Vec3? ball,
-          bool shiny,
-          bool stroke,
-        })>[];
-    _collectBoxFaces(
-      items,
-      size,
-      center: center,
-      half: half,
-      rot: rot,
-      colors: colors,
-    );
-    items.sort((a, b) => b.depth.compareTo(a.depth));
-
-    final fill = Paint()..style = PaintingStyle.fill;
-    final stroke = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1
-      ..color = const Color(0xFF111111);
-
-    for (final item in items) {
-      if (item.color != null) {
-        fill.color = item.color!;
-        canvas.drawPath(item.path!, fill);
-      }
-      if (item.stroke) {
-        canvas.drawPath(item.path!, stroke);
-      }
-    }
   }
 
   void _paintBall(Canvas canvas, Size size, _Vec3 ball) {
