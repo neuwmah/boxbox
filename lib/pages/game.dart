@@ -72,7 +72,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     '0011110000',
     '01414100T0',
     'Z311130R1Z',
-    'ZZ1111Z0ZZ',
+    'ZZ111100ZZ',
     'ZZ11112ZZZ',
     'ZZ1ZZ1ZZZZ',
   ];
@@ -82,14 +82,15 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   static const _platformHalfW =
       (_gridWidth - 1) * _cubeGap / 2 + _cubeHalf;
   static const _platformDistance = 8.0;
-  static const _platformDepth = 2 * _cubeHalf;
+  static const _platformDepth = 4 * _cubeHalf;
   static const _platformNear = _platformDistance - _platformDepth / 2;
   static const _platformFar = _platformDistance + _platformDepth / 2;
   static const _platformTop = 1.44;
   static const _platformThickness = 0.08;
   static const _groundY = -1.0;
   static const _groundFar = 13.5;
-  static const _pyramidZ = _platformDistance;
+  static const _frontLayerZ = _platformDistance - _cubeHalf;
+  static const _backLayerZ = _platformDistance + _cubeHalf;
 
   static const _colorYellow = Color(0xFFFFE800);
   static const _colorOrange = Color(0xFFD38100);
@@ -265,18 +266,24 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
           _BlockShape.pyramid => _platformTop + row * gap + coneHeight / 2,
           _BlockShape.cube => _platformTop + _cubeHalf + row * gap,
         };
+        final x = _startX + col * gap;
 
-        _cubes.add(
-          _createBlock(
-            Vector3(_startX + col * gap, y, _pyramidZ),
-            kind: painted.kind,
-            shape: shape,
-            half: half,
-          ),
-        );
-        _cubeColors.add(painted.color);
-        _cubeShapes.add(shape);
-        _cubeHalves.add(half);
+        void place(double z) {
+          _cubes.add(
+            _createBlock(
+              Vector3(x, y, z),
+              kind: painted.kind,
+              shape: shape,
+              half: half,
+            ),
+          );
+          _cubeColors.add(painted.color);
+          _cubeShapes.add(shape);
+          _cubeHalves.add(half);
+        }
+
+        place(_backLayerZ);
+        if (cell == 'Z') place(_frontLayerZ);
       }
     }
   }
@@ -626,12 +633,12 @@ class _CubeKind {
 
   static const medium = _CubeKind._(
     color: Color(0xFF515151),
-    mass: 3.0,
+    mass: 2.0,
   );
 
   static const heavy = _CubeKind._(
     color: Color(0xFF000000),
-    mass: 5.0,
+    mass: 3.0,
   );
 }
 
