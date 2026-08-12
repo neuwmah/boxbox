@@ -66,30 +66,36 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   static const _ballMass = 2.4;
 
   static const _cubeGap = _cubeHalf * 2;
-  static const _sideCubes = 4;
-  static const _gapCubes = 1;
-  static const _stackHeight = 7;
-  static const _totalSlots = _sideCubes * 2 + _gapCubes;
-  static const _startX = -(_totalSlots - 1) * _cubeGap / 2;
-  static const _sideHalfW =
-      (_sideCubes - 1) * _cubeGap / 2 + _cubeHalf;
-  static const _leftPlatformX =
-      _startX + (_sideCubes - 1) * _cubeGap / 2;
-  static const _rightPlatformX = _startX +
-      (_sideCubes + _gapCubes) * _cubeGap +
-      (_sideCubes - 1) * _cubeGap / 2;
+  static const _pikachuMask = [
+    '000P0P0000',
+    '0001010000',
+    '0011110000',
+    '01414100T0',
+    'Z311130R1Z',
+    'ZZ1111Z0ZZ',
+    'ZZ11112ZZZ',
+    'ZZ1ZZ1ZZZZ',
+  ];
+  static const _gridWidth = 10;
+  static const _startX = -(_gridWidth - 1) * _cubeGap / 2;
+  static const _platformX = 0.0;
+  static const _platformHalfW =
+      (_gridWidth - 1) * _cubeGap / 2 + _cubeHalf;
   static const _platformDistance = 8.0;
   static const _platformDepth = 2 * _cubeHalf;
   static const _platformNear = _platformDistance - _platformDepth / 2;
   static const _platformFar = _platformDistance + _platformDepth / 2;
-  static const _platformTop = 2.0;
-  static const _platformStepY = _cubeGap;
-  static const _leftPlatformTop = _platformTop - _platformStepY;
-  static const _rightPlatformTop = _platformTop + _platformStepY;
+  static const _platformTop = 1.44;
   static const _platformThickness = 0.08;
   static const _groundY = -1.0;
   static const _groundFar = 13.5;
   static const _pyramidZ = _platformDistance;
+
+  static const _colorYellow = Color(0xFFFFE800);
+  static const _colorOrange = Color(0xFFD38100);
+  static const _colorRed = Color(0xFFF92F3C);
+  static const _colorEye = Color(0xFF343341);
+  static const _colorBlack = Color(0xFF000000);
 
   late final Ticker _ticker;
   late final AnimationController _menuAnim;
@@ -103,6 +109,8 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
 
   final List<cannon.Body> _cubes = [];
   final List<Color> _cubeColors = [];
+  final List<_BlockShape> _cubeShapes = [];
+  final List<_Vec3> _cubeHalves = [];
   final List<cannon.Body> _balls = [];
   Duration _lastElapsed = Duration.zero;
   Size _viewSize = Size.zero;
@@ -199,6 +207,8 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     }
     _cubes.clear();
     _cubeColors.clear();
+    _cubeShapes.clear();
+    _cubeHalves.clear();
     _balls.clear();
   }
 
@@ -217,59 +227,98 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
 
     final platformHalfZ = (_platformFar - _platformNear) / 2;
     final platformZ = (_platformFar + _platformNear) / 2;
-    const platforms = [
-      (_leftPlatformX, _leftPlatformTop),
-      (_rightPlatformX, _rightPlatformTop),
-    ];
-    for (final (platformX, platformTop) in platforms) {
-      final platform = cannon.Body(
-        mass: 0,
-        material: _staticMaterial,
-        shape: cannon.Box(
-          Vector3(_sideHalfW, _platformThickness / 2, platformHalfZ),
-        ),
-        position: Vector3(
-          platformX,
-          platformTop - _platformThickness / 2,
-          platformZ,
-        ),
-        type: cannon.BodyTypes.static,
-      );
-      _world.addBody(platform);
-    }
+    final platform = cannon.Body(
+      mass: 0,
+      material: _staticMaterial,
+      shape: cannon.Box(
+        Vector3(_platformHalfW, _platformThickness / 2, platformHalfZ),
+      ),
+      position: Vector3(
+        _platformX,
+        _platformTop - _platformThickness / 2,
+        platformZ,
+      ),
+      type: cannon.BodyTypes.static,
+    );
+    _world.addBody(platform);
 
     const gap = _cubeGap;
-    for (var row = 0; row < _stackHeight; row++) {
-      final kind = switch (row) {
-        < 3 => _CubeKind.heavy,
-        < 5 => _CubeKind.medium,
-        _ => _CubeKind.light,
-      };
-      for (var i = 0; i < _totalSlots; i++) {
-        if (i >= _sideCubes && i < _sideCubes + _gapCubes) continue;
-        final platformTop =
-            i < _sideCubes ? _leftPlatformTop : _rightPlatformTop;
-        final y = platformTop + _cubeHalf + row * gap;
+    final height = _pikachuMask.length;
+    for (var row = 0; row < height; row++) {
+      final maskRow = _pikachuMask[height - 1 - row];
+      for (var col = 0; col < _gridWidth; col++) {
+        final cell = maskRow[col];
+        final painted = _paintForCell(cell);
+        if (painted == null) continue;
+
+        final shape = painted.shape;
+        final coneRadius = _cubeHalf * 1.18;
+        final coneHeight = coneRadius * 1.55;
+        final half = switch (shape) {
+          _BlockShape.rect => _Vec3(_cubeHalf, _cubeHalf * 2, _cubeHalf),
+          _BlockShape.pyramid => _Vec3(coneRadius, coneHeight / 2, coneRadius),
+          _BlockShape.cube => _Vec3(_cubeHalf, _cubeHalf, _cubeHalf),
+        };
+        final y = switch (shape) {
+          _BlockShape.rect =>
+            _platformTop + _cubeHalf + (row - 1) * gap + gap / 2,
+          _BlockShape.pyramid => _platformTop + row * gap + coneHeight / 2,
+          _BlockShape.cube => _platformTop + _cubeHalf + row * gap,
+        };
+
         _cubes.add(
-          _createCube(
-            Vector3(_startX + i * gap, y, _pyramidZ),
-            kind: kind,
+          _createBlock(
+            Vector3(_startX + col * gap, y, _pyramidZ),
+            kind: painted.kind,
+            shape: shape,
+            half: half,
           ),
         );
-        _cubeColors.add(kind.color);
+        _cubeColors.add(painted.color);
+        _cubeShapes.add(shape);
+        _cubeHalves.add(half);
       }
     }
   }
 
-  cannon.Body _createCube(Vector3 position, {required _CubeKind kind}) {
+  static ({Color color, _CubeKind kind, _BlockShape shape})? _paintForCell(
+    String cell,
+  ) {
+    return switch (cell) {
+      '1' => (color: _colorYellow, kind: _CubeKind.light, shape: _BlockShape.cube),
+      '2' => (color: _colorOrange, kind: _CubeKind.medium, shape: _BlockShape.cube),
+      '3' => (color: _colorRed, kind: _CubeKind.light, shape: _BlockShape.cube),
+      '4' => (color: _colorEye, kind: _CubeKind.heavy, shape: _BlockShape.cube),
+      'Z' => (color: _colorBlack, kind: _CubeKind.heavy, shape: _BlockShape.cube),
+      'P' => (color: _colorEye, kind: _CubeKind.heavy, shape: _BlockShape.pyramid),
+      'T' => (color: _colorYellow, kind: _CubeKind.light, shape: _BlockShape.pyramid),
+      'R' => (color: _colorYellow, kind: _CubeKind.light, shape: _BlockShape.rect),
+      _ => null,
+    };
+  }
+
+  cannon.Body _createBlock(
+    Vector3 position, {
+    required _CubeKind kind,
+    required _BlockShape shape,
+    required _Vec3 half,
+  }) {
+    final mass = shape == _BlockShape.rect ? kind.mass * 2 : kind.mass;
     final body = cannon.Body(
-      mass: kind.mass,
+      mass: mass,
       material: switch (kind) {
         _CubeKind.light => _cubeSoftMaterial,
         _CubeKind.medium => _cubeMidMaterial,
         _ => _cubeHardMaterial,
       },
-      shape: cannon.Box(Vector3(_cubeHalf, _cubeHalf, _cubeHalf)),
+      shape: switch (shape) {
+        _BlockShape.pyramid => cannon.Cone(
+            radius: half.x,
+            height: half.y * 2,
+            numSegments: 20,
+          ),
+        _ => cannon.Box(Vector3(half.x, half.y, half.z)),
+      },
       position: position,
       linearDamping: 0.12,
       angularDamping: 0.22,
@@ -322,11 +371,8 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
 
     final anyOnPlatform = _cubes.any((cube) {
       final p = cube.position;
-      final onLeft = (p.x - _leftPlatformX).abs() <= _sideHalfW &&
-          p.y >= _leftPlatformTop;
-      final onRight = (p.x - _rightPlatformX).abs() <= _sideHalfW &&
-          p.y >= _rightPlatformTop;
-      return (onLeft || onRight) &&
+      return (p.x - _platformX).abs() <= _platformHalfW &&
+          p.y >= _platformTop &&
           p.z >= _platformNear &&
           p.z <= _platformFar;
     });
@@ -460,6 +506,8 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
                               ),
                               rot: Quaternion.copy(_cubes[i].quaternion),
                               color: _cubeColors[i],
+                              shape: _cubeShapes[i],
+                              half: _cubeHalves[i],
                             ),
                         ],
                         balls: [
@@ -470,16 +518,12 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
                               ball.position.z,
                             ),
                         ],
-                        platformXs: const [_leftPlatformX, _rightPlatformX],
-                        platformTops: const [
-                          _leftPlatformTop,
-                          _rightPlatformTop,
-                        ],
-                        platformHalfW: _sideHalfW,
+                        platformXs: const [_platformX],
+                        platformTops: const [_platformTop],
+                        platformHalfW: _platformHalfW,
                         platformNear: _platformNear,
                         platformFar: _platformFar,
                         platformThickness: _platformThickness,
-                        cubeHalf: _cubeHalf,
                         ballRadius: _ballRadius,
                         platformHue: _hueAnim.value,
                       ),
@@ -563,6 +607,8 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     );
   }
 }
+
+enum _BlockShape { cube, rect, pyramid }
 
 class _CubeKind {
   const _CubeKind._({
@@ -813,12 +859,18 @@ class _ScenePainter extends CustomPainter {
     required this.platformNear,
     required this.platformFar,
     required this.platformThickness,
-    required this.cubeHalf,
     required this.ballRadius,
     required this.platformHue,
   });
 
-  final List<({_Vec3 pos, Quaternion rot, Color color})> cubes;
+  final List<
+      ({
+        _Vec3 pos,
+        Quaternion rot,
+        Color color,
+        _BlockShape shape,
+        _Vec3 half,
+      })> cubes;
   final List<_Vec3> balls;
   final List<double> platformXs;
   final List<double> platformTops;
@@ -826,7 +878,6 @@ class _ScenePainter extends CustomPainter {
   final double platformNear;
   final double platformFar;
   final double platformThickness;
-  final double cubeHalf;
   final double ballRadius;
   final double platformHue;
 
@@ -834,6 +885,7 @@ class _ScenePainter extends CustomPainter {
   static const _camZ = 0.0;
   static const _focal = 320.0;
   static const _horizon = 0.56;
+  static const _coneSegments = 20;
 
   static List<Color> _shadeCube(Color base) {
     return [
@@ -883,22 +935,49 @@ class _ScenePainter extends CustomPainter {
   void _paintDepthLayer(
     Canvas canvas,
     Size size,
-    List<({_Vec3 pos, Quaternion rot, Color color})> layerCubes,
+    List<
+            ({
+              _Vec3 pos,
+              Quaternion rot,
+              Color color,
+              _BlockShape shape,
+              _Vec3 half,
+            })>
+        layerCubes,
     List<_Vec3> layerBalls,
   ) {
-    final items =
-        <({double depth, Path? path, Color? color, _Vec3? ball, bool shiny})>[];
+    final items = <
+        ({
+          double depth,
+          Path? path,
+          Color? color,
+          _Vec3? ball,
+          bool shiny,
+          bool stroke,
+        })>[];
 
     for (final cube in layerCubes) {
-      _collectBoxFaces(
-        items,
-        size,
-        center: cube.pos,
-        half: _Vec3(cubeHalf, cubeHalf, cubeHalf),
-        rot: cube.rot,
-        colors: _shadeCube(cube.color),
-        shinyTop: true,
-      );
+      final colors = _shadeCube(cube.color);
+      if (cube.shape == _BlockShape.pyramid) {
+        _collectPyramidFaces(
+          items,
+          size,
+          center: cube.pos,
+          half: cube.half,
+          rot: cube.rot,
+          colors: colors,
+        );
+      } else {
+        _collectBoxFaces(
+          items,
+          size,
+          center: cube.pos,
+          half: cube.half,
+          rot: cube.rot,
+          colors: colors,
+          shinyTop: true,
+        );
+      }
     }
 
     for (final ball in layerBalls) {
@@ -908,16 +987,18 @@ class _ScenePainter extends CustomPainter {
         color: null,
         ball: ball,
         shiny: false,
+        stroke: false,
       ));
     }
 
     items.sort((a, b) => b.depth.compareTo(a.depth));
 
     final fill = Paint()..style = PaintingStyle.fill;
-    final stroke = Paint()
+    final strokePaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.7
       ..strokeJoin = StrokeJoin.round
+      ..strokeCap = StrokeCap.round
       ..color = const Color(0xFF050505);
     final gloss = Paint()..style = PaintingStyle.fill;
 
@@ -929,38 +1010,42 @@ class _ScenePainter extends CustomPainter {
       }
 
       final path = item.path!;
-      final color = item.color!;
-      final bounds = path.getBounds();
-      fill.shader = LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [
-          Color.lerp(color, Colors.white, 0.42)!,
-          color,
-          Color.lerp(color, Colors.black, 0.14)!,
-        ],
-        stops: const [0.0, 0.52, 1.0],
-      ).createShader(bounds);
-      canvas.drawPath(path, fill);
-      fill.shader = null;
+      final color = item.color;
+      if (color != null) {
+        final bounds = path.getBounds();
+        fill.shader = LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color.lerp(color, Colors.white, 0.42)!,
+            color,
+            Color.lerp(color, Colors.black, 0.14)!,
+          ],
+          stops: const [0.0, 0.52, 1.0],
+        ).createShader(bounds);
+        canvas.drawPath(path, fill);
+        fill.shader = null;
 
-      if (item.shiny && bounds.shortestSide > 4) {
-        final r = bounds.shortestSide * 0.2;
-        gloss.color = Colors.white.withValues(alpha: 0.38);
-        canvas.drawOval(
-          Rect.fromCenter(
-            center: Offset(
-              bounds.left + bounds.width * 0.3,
-              bounds.top + bounds.height * 0.28,
+        if (item.shiny && bounds.shortestSide > 4) {
+          final r = bounds.shortestSide * 0.2;
+          gloss.color = Colors.white.withValues(alpha: 0.38);
+          canvas.drawOval(
+            Rect.fromCenter(
+              center: Offset(
+                bounds.left + bounds.width * 0.3,
+                bounds.top + bounds.height * 0.28,
+              ),
+              width: r * 1.7,
+              height: r,
             ),
-            width: r * 1.7,
-            height: r,
-          ),
-          gloss,
-        );
+            gloss,
+          );
+        }
       }
 
-      canvas.drawPath(path, stroke);
+      if (item.stroke) {
+        canvas.drawPath(path, strokePaint);
+      }
     }
   }
 
@@ -976,8 +1061,22 @@ class _ScenePainter extends CustomPainter {
       }
     }
 
-    final behindCubes = <({_Vec3 pos, Quaternion rot, Color color})>[];
-    final frontCubes = <({_Vec3 pos, Quaternion rot, Color color})>[];
+    final behindCubes = <
+        ({
+          _Vec3 pos,
+          Quaternion rot,
+          Color color,
+          _BlockShape shape,
+          _Vec3 half,
+        })>[];
+    final frontCubes = <
+        ({
+          _Vec3 pos,
+          Quaternion rot,
+          Color color,
+          _BlockShape shape,
+          _Vec3 half,
+        })>[];
     for (final cube in cubes) {
       if (_isBehindPlatform(cube.pos)) {
         behindCubes.add(cube);
@@ -1023,7 +1122,15 @@ class _ScenePainter extends CustomPainter {
   }
 
   void _collectBoxFaces(
-    List<({double depth, Path? path, Color? color, _Vec3? ball, bool shiny})>
+    List<
+            ({
+              double depth,
+              Path? path,
+              Color? color,
+              _Vec3? ball,
+              bool shiny,
+              bool stroke,
+            })>
         out,
     Size size, {
     required _Vec3 center,
@@ -1091,8 +1198,138 @@ class _ScenePainter extends CustomPainter {
         color: colors[index],
         ball: null,
         shiny: shinyTop && index == 3,
+        stroke: true,
       ));
     }
+  }
+
+  void _collectPyramidFaces(
+    List<
+            ({
+              double depth,
+              Path? path,
+              Color? color,
+              _Vec3? ball,
+              bool shiny,
+              bool stroke,
+            })>
+        out,
+    Size size, {
+    required _Vec3 center,
+    required _Vec3 half,
+    required Quaternion rot,
+    required List<Color> colors,
+  }) {
+    final radius = half.x;
+    final hy = half.y;
+    final n = _coneSegments;
+
+    final apexLocal = _Vec3(0, hy, 0);
+    final baseLocals = <_Vec3>[
+      for (var i = 0; i < n; i++)
+        _Vec3(
+          -radius * math.sin(i * 2 * math.pi / n),
+          -hy,
+          radius * math.cos(i * 2 * math.pi / n),
+        ),
+    ];
+
+    final apex = center + _rotate(apexLocal, rot);
+    final base = [
+      for (final local in baseLocals) center + _rotate(local, rot),
+    ];
+    final apexP = _project(apex, size);
+    final baseP = [for (final v in base) _project(v, size)];
+
+    var bx = 0.0, by = 0.0, bz = 0.0;
+    for (final v in base) {
+      bx += v.x;
+      by += v.y;
+      bz += v.z;
+    }
+    final baseCenter = _Vec3(bx / n, by / n, bz / n);
+    final depth = (_camDist2(apex) + _camDist2(baseCenter)) * 0.5;
+
+    final hull = _convexHull([apexP, ...baseP]);
+    if (hull.length < 3) return;
+    final body = Path()..moveTo(hull[0].dx, hull[0].dy);
+    for (var i = 1; i < hull.length; i++) {
+      body.lineTo(hull[i].dx, hull[i].dy);
+    }
+    body.close();
+
+    out.add((
+      depth: depth + 0.001,
+      path: body,
+      color: colors[3],
+      ball: null,
+      shiny: false,
+      stroke: false,
+    ));
+
+    final baseNormal = _rotate(const _Vec3(0, -1, 0), rot);
+    final toCamBase = _Vec3(
+      -baseCenter.x,
+      _camY - baseCenter.y,
+      _camZ - baseCenter.z,
+    );
+    if (baseNormal.dot(toCamBase) > 0) {
+      final ellipse = Path()..moveTo(baseP[0].dx, baseP[0].dy);
+      for (var k = 1; k < n; k++) {
+        ellipse.lineTo(baseP[k].dx, baseP[k].dy);
+      }
+      ellipse.close();
+      out.add((
+        depth: _camDist2(baseCenter),
+        path: ellipse,
+        color: colors[2],
+        ball: null,
+        shiny: false,
+        stroke: true,
+      ));
+    }
+
+    out.add((
+      depth: depth - 0.001,
+      path: body,
+      color: null,
+      ball: null,
+      shiny: false,
+      stroke: true,
+    ));
+  }
+
+  static List<Offset> _convexHull(List<Offset> points) {
+    if (points.length <= 2) return List.of(points);
+    final pts = [...points]..sort((a, b) {
+        final dx = a.dx.compareTo(b.dx);
+        return dx != 0 ? dx : a.dy.compareTo(b.dy);
+      });
+
+    double cross(Offset o, Offset a, Offset b) =>
+        (a.dx - o.dx) * (b.dy - o.dy) - (a.dy - o.dy) * (b.dx - o.dx);
+
+    final lower = <Offset>[];
+    for (final p in pts) {
+      while (lower.length >= 2 &&
+          cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) {
+        lower.removeLast();
+      }
+      lower.add(p);
+    }
+
+    final upper = <Offset>[];
+    for (final p in pts.reversed) {
+      while (upper.length >= 2 &&
+          cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) {
+        upper.removeLast();
+      }
+      upper.add(p);
+    }
+
+    lower.removeLast();
+    upper.removeLast();
+    return [...lower, ...upper];
   }
 
   void _paintBox(
@@ -1103,8 +1340,15 @@ class _ScenePainter extends CustomPainter {
     required Quaternion rot,
     required List<Color> colors,
   }) {
-    final items =
-        <({double depth, Path? path, Color? color, _Vec3? ball, bool shiny})>[];
+    final items = <
+        ({
+          double depth,
+          Path? path,
+          Color? color,
+          _Vec3? ball,
+          bool shiny,
+          bool stroke,
+        })>[];
     _collectBoxFaces(
       items,
       size,
@@ -1122,9 +1366,13 @@ class _ScenePainter extends CustomPainter {
       ..color = const Color(0xFF111111);
 
     for (final item in items) {
-      fill.color = item.color!;
-      canvas.drawPath(item.path!, fill);
-      canvas.drawPath(item.path!, stroke);
+      if (item.color != null) {
+        fill.color = item.color!;
+        canvas.drawPath(item.path!, fill);
+      }
+      if (item.stroke) {
+        canvas.drawPath(item.path!, stroke);
+      }
     }
   }
 
