@@ -321,7 +321,6 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
       sleepTimeLimit: 0.4,
     );
     _world.addBody(body);
-    body.sleep();
     return body;
   }
 
