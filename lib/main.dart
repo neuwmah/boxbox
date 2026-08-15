@@ -1,7 +1,10 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:boxbox/game/level.dart';
 import 'package:boxbox/pages/game.dart';
 import 'package:boxbox/pages/home.dart';
 import 'package:boxbox/pages/settings.dart';
@@ -73,6 +76,8 @@ class _MainShellState extends State<MainShell> {
   _HomePopup _homePopup = _HomePopup.none;
   final GlobalKey _coinIconKey = GlobalKey();
   Timer? _heartTimer;
+  int _playGen = 0;
+  int _debugLevelOffset = 0;
 
   @override
   void initState() {
@@ -81,12 +86,75 @@ class _MainShellState extends State<MainShell> {
       if (!mounted) return;
       _tickHearts();
     });
+    if (kDebugMode) {
+      HardwareKeyboard.instance.addHandler(_onDebugKey);
+    }
   }
 
   @override
   void dispose() {
+    if (kDebugMode) {
+      HardwareKeyboard.instance.removeHandler(_onDebugKey);
+    }
     _heartTimer?.cancel();
     super.dispose();
+  }
+
+  bool _onDebugKey(KeyEvent event) {
+    if (event is! KeyDownEvent) return false;
+    if (event.logicalKey == LogicalKeyboardKey.space) {
+      _debugGoHome();
+      return true;
+    }
+    if (event.logicalKey == LogicalKeyboardKey.quote ||
+        event.logicalKey == LogicalKeyboardKey.backquote) {
+      final next = _debugLevelOffset + 10;
+      _debugLevelOffset = next >= levels.length ? 0 : next;
+      return true;
+    }
+    final level = switch (event.logicalKey) {
+      LogicalKeyboardKey.digit1 => 1,
+      LogicalKeyboardKey.digit2 => 2,
+      LogicalKeyboardKey.digit3 => 3,
+      LogicalKeyboardKey.digit4 => 4,
+      LogicalKeyboardKey.digit5 => 5,
+      LogicalKeyboardKey.digit6 => 6,
+      LogicalKeyboardKey.digit7 => 7,
+      LogicalKeyboardKey.digit8 => 8,
+      LogicalKeyboardKey.digit9 => 9,
+      LogicalKeyboardKey.digit0 => 10,
+      _ => null,
+    };
+    if (level == null) return false;
+    _debugStartLevel(_debugLevelOffset + level);
+    return true;
+  }
+
+  void _debugGoHome() {
+    setState(() {
+      _selectedIndex = 1;
+      _homePopup = _HomePopup.none;
+      _pendingReward = null;
+    });
+    if (Navigator.of(context).canPop()) {
+      _playGen++;
+      Navigator.of(context).pop();
+    }
+  }
+
+  Future<void> _debugStartLevel(int level) async {
+    setState(() {
+      _level = level;
+      _homePopup = _HomePopup.none;
+      _pendingReward = null;
+    });
+    if (Navigator.of(context).canPop()) {
+      _playGen++;
+      Navigator.of(context).pop();
+      await Future<void>.delayed(Duration.zero);
+    }
+    if (!mounted) return;
+    await _playLevel(debug: true);
   }
 
   String get _heartTimerLabel {
@@ -164,12 +232,13 @@ class _MainShellState extends State<MainShell> {
     setState(() => _homePopup = _HomePopup.none);
   }
 
-  Future<void> _playLevel() async {
-    if (!_consumeHeart()) {
+  Future<void> _playLevel({bool debug = false}) async {
+    if (!debug && !_consumeHeart()) {
       setState(() => _homePopup = _HomePopup.moreLives);
       return;
     }
 
+    final gen = ++_playGen;
     setState(() {
       _homePopup = _HomePopup.none;
       _selectedIndex = 1;
@@ -186,7 +255,7 @@ class _MainShellState extends State<MainShell> {
         reverseTransitionDuration: Duration.zero,
       ),
     );
-    if (!mounted) return;
+    if (!mounted || gen != _playGen) return;
     if (reward == GamePage.defeatCode) {
       _onDefeat();
       return;
