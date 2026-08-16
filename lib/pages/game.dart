@@ -66,7 +66,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   static const _clearDelay = 3.0;
   static const _clearBannerDuration = 3.0;
   static const _outOfBallsDelay = 3.0;
-  static const _ballMass = 2.4;
+  static const _ballMass = 3.2;
   static const _cubeGap = _cubeHalf * 2;
   static const _startX = -(levelSize - 1) * _cubeGap / 2;
   static const _platformX = 0.0;
