@@ -851,8 +851,8 @@ class _ClearBanner extends StatelessWidget {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.white,
-                    Color(0xFFF8F8F8),
-                    Color(0xFFF1F1F1),
+                    Colors.white,
+                    Colors.white,
                   ],
                   stops: [0.0, 0.4, 1.0],
                 ).createShader(bounds);
