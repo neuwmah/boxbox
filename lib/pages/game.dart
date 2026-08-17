@@ -476,7 +476,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     } else {
       _clearTimer += dt;
       if (_clearTimer >= _clearDelay) {
-        _exitGame(50);
+        _exitGame(100);
         return;
       }
     }
