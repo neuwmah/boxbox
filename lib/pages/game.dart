@@ -8,7 +8,6 @@ import 'package:window_manager/window_manager.dart';
 
 import 'package:cannon_physics/cannon_physics.dart' as cannon;
 import 'package:boxbox/game/level.dart';
-import 'package:boxbox/widgets/background.dart';
 import 'package:boxbox/widgets/continue.dart';
 import 'package:boxbox/widgets/insettings.dart';
 import 'package:boxbox/widgets/return.dart';
@@ -481,11 +480,29 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: RectBackground(
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            LayoutBuilder(
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Transform.scale(
+            scale: 1.025,
+            child: ColorFiltered(
+              colorFilter: const ColorFilter.mode(
+                Color(0xA0000000),
+                BlendMode.srcATop,
+              ),
+              child: ImageFiltered(
+                imageFilter: ui.ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+                child: const Image(
+                  image: AssetImage('lib/assets/background/kitchen.png'),
+                  fit: BoxFit.cover,
+                  alignment: Alignment.center,
+                  filterQuality: FilterQuality.medium,
+                  gaplessPlayback: true,
+                ),
+              ),
+            ),
+          ),
+          LayoutBuilder(
             builder: (context, constraints) {
               _viewSize = Size(constraints.maxWidth, constraints.maxHeight);
               return GestureDetector(
@@ -604,7 +621,6 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
               onQuit: () => _exitGame(null),
             ),
         ],
-        ),
       ),
     );
   }
