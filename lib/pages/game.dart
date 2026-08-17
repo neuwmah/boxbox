@@ -883,7 +883,7 @@ class _ScenePainter extends CustomPainter {
   static const _coneSegments = 20;
 
   static double _lightLift(Color base) {
-    return base.computeLuminance() < 0.05 ? 0.5 : 1.0;
+    return base.computeLuminance() < 0.05 ? 0.25 : 1.0;
   }
 
   static List<Color> _shadeCube(Color base) {
