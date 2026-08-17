@@ -866,14 +866,19 @@ class _ScenePainter extends CustomPainter {
   static const _horizon = 0.56;
   static const _coneSegments = 20;
 
+  static double _lightLift(Color base) {
+    return base.computeLuminance() < 0.05 ? 0.5 : 1.0;
+  }
+
   static List<Color> _shadeCube(Color base) {
+    final lift = _lightLift(base);
     return [
-      Color.lerp(base, Colors.white, 0.08)!,
+      Color.lerp(base, Colors.white, 0.08 * lift)!,
       Color.lerp(base, Colors.black, 0.22)!,
       Color.lerp(base, Colors.black, 0.34)!,
-      Color.lerp(base, Colors.white, 0.32)!,
+      Color.lerp(base, Colors.white, 0.32 * lift)!,
       Color.lerp(base, Colors.black, 0.14)!,
-      Color.lerp(base, Colors.white, 0.06)!,
+      Color.lerp(base, Colors.white, 0.06 * lift)!,
     ];
   }
 
@@ -992,11 +997,12 @@ class _ScenePainter extends CustomPainter {
       final color = item.color;
       if (color != null) {
         final bounds = path.getBounds();
+        final lift = _lightLift(color);
         fill.shader = LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color.lerp(color, Colors.white, 0.42)!,
+            Color.lerp(color, Colors.white, 0.42 * lift)!,
             color,
             Color.lerp(color, Colors.black, 0.14)!,
           ],
@@ -1007,7 +1013,7 @@ class _ScenePainter extends CustomPainter {
 
         if (item.shiny && bounds.shortestSide > 4) {
           final r = bounds.shortestSide * 0.2;
-          gloss.color = Colors.white.withValues(alpha: 0.38);
+          gloss.color = Colors.white.withValues(alpha: 0.38 * lift);
           canvas.drawOval(
             Rect.fromCenter(
               center: Offset(
