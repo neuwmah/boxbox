@@ -63,7 +63,7 @@ class _StartPopupState extends State<StartPopup>
                 child: PopupAppearScale(
                   t: t,
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 220),
+                    constraints: const BoxConstraints(maxWidth: 240),
                     child: Material(
                       color: Colors.transparent,
                       child: Stack(
@@ -128,12 +128,7 @@ class _StartPopupState extends State<StartPopup>
                                         ),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                          24,
-                                          20,
-                                          24,
-                                          20,
-                                        ),
+                                        padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [

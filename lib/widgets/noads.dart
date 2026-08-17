@@ -100,12 +100,7 @@ class _NoAdsPopupState extends State<NoAdsPopup>
                                 ),
                                 child: Container(
                                   width: double.infinity,
-                                  padding: const EdgeInsets.fromLTRB(
-                                    16,
-                                    0,
-                                    16,
-                                    24,
-                                  ),
+                                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                                   decoration: BoxDecoration(
                                     color: Colors.black,
                                     borderRadius: BorderRadius.circular(8),
@@ -136,12 +131,7 @@ class _NoAdsPopupState extends State<NoAdsPopup>
                                               ),
                                               Padding(
                                                 padding:
-                                                    const EdgeInsets.fromLTRB(
-                                                  24,
-                                                  24,
-                                                  24,
-                                                  20,
-                                                ),
+                                                    const EdgeInsets.fromLTRB(16, 24, 16, 20),
                                                 child: Column(
                                                   mainAxisSize:
                                                       MainAxisSize.min,

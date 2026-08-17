@@ -150,7 +150,7 @@ class _ContinuePopupState extends State<ContinuePopup>
                                         ),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsets.fromLTRB(32, 12, 32, 20),
+                                        padding: const EdgeInsets.fromLTRB(24, 12, 24, 20),
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [

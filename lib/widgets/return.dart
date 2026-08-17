@@ -96,12 +96,7 @@ class _ReturnPopupState extends State<ReturnPopup>
                                     const EdgeInsets.only(right: 4, bottom: 4),
                                 child: Container(
                                   width: double.infinity,
-                                  padding: const EdgeInsets.fromLTRB(
-                                    16,
-                                    0,
-                                    16,
-                                    24,
-                                  ),
+                                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                                   decoration: BoxDecoration(
                                     color: Colors.black,
                                     borderRadius: BorderRadius.circular(8),
@@ -129,13 +124,7 @@ class _ReturnPopupState extends State<ReturnPopup>
                                                 ),
                                               ),
                                               Padding(
-                                                padding:
-                                                    const EdgeInsets.fromLTRB(
-                                                  32,
-                                                  20,
-                                                  32,
-                                                  20,
-                                                ),
+                                                padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
                                                 child: Column(
                                                   mainAxisSize:
                                                       MainAxisSize.min,
