@@ -127,6 +127,8 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
 
   FloorSkin get _floor => floorAt(widget.level);
 
+  BackgroundSkin get _background => backgroundAt(widget.level);
+
   Future<void> _loadFloorTextures() async {
     for (final floor in floors) {
       final data = await rootBundle.load(floor.asset);
@@ -478,7 +480,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
         fit: StackFit.expand,
         children: [
           Transform.scale(
-            scale: 1.025,
+            scale: _background.scale,
             child: ColorFiltered(
               colorFilter: const ColorFilter.mode(
                 Color(0xA0000000),
@@ -486,8 +488,8 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
               ),
               child: ImageFiltered(
                 imageFilter: ui.ImageFilter.blur(sigmaX: 3, sigmaY: 3),
-                child: const Image(
-                  image: AssetImage('lib/assets/background/kitchen.png'),
+                child: Image(
+                  image: AssetImage(_background.asset),
                   fit: BoxFit.cover,
                   alignment: Alignment.center,
                   filterQuality: FilterQuality.medium,

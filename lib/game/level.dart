@@ -65,6 +65,29 @@ String ballsBadgeAt(int level) {
   return ballsBadges[index.clamp(0, ballsBadges.length - 1)];
 }
 
+class BackgroundSkin {
+  const BackgroundSkin({required this.asset, required this.scale});
+
+  final String asset;
+  final double scale;
+}
+
+const backgrounds = <BackgroundSkin>[
+  BackgroundSkin(
+    asset: 'lib/assets/background/kitchen.png',
+    scale: 1.025,
+  ),
+  BackgroundSkin(
+    asset: 'lib/assets/background/forest.png',
+    scale: 1.085,
+  ),
+];
+
+BackgroundSkin backgroundAt(int level) {
+  final index = (level - 1) ~/ 10;
+  return backgrounds[index.clamp(0, backgrounds.length - 1)];
+}
+
 const levels = <List<Block>>[
   // Pizza
   [
