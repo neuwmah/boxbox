@@ -130,7 +130,7 @@ class _RetryPopupState extends State<RetryPopup>
                                         ),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsets.fromLTRB(32, 20, 32, 20),
+                                        padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
                                           crossAxisAlignment: CrossAxisAlignment.center,
