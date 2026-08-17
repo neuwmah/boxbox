@@ -63,7 +63,7 @@ class _RetryPopupState extends State<RetryPopup>
                 child: PopupAppearScale(
                   t: t,
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 220),
+                    constraints: const BoxConstraints(maxWidth: 240),
                     child: Material(
                       color: Colors.transparent,
                       child: Stack(
