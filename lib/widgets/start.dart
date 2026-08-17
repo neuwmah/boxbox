@@ -31,7 +31,7 @@ class _StartPopupState extends State<StartPopup>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 300),
+      duration: PopupAppear.duration,
     )..forward();
   }
 
@@ -47,9 +47,7 @@ class _StartPopupState extends State<StartPopup>
       animation: _controller,
       builder: (context, _) {
         final t = _controller.value;
-        final appear = Curves.easeOut.transform(t);
-        final dim =
-            Curves.easeOut.transform((t / (0.12 / 0.18)).clamp(0.0, 1.0));
+        final dim = PopupAppear.dim(t);
 
         return Stack(
           fit: StackFit.expand,
@@ -62,8 +60,8 @@ class _StartPopupState extends State<StartPopup>
             Center(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
-                child: Opacity(
-                  opacity: appear,
+                child: PopupAppearScale(
+                  t: t,
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 220),
                     child: Material(

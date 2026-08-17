@@ -35,7 +35,7 @@ class _ContinuePopupState extends State<ContinuePopup>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 300),
+      duration: PopupAppear.duration,
     )..forward();
   }
 
@@ -51,8 +51,8 @@ class _ContinuePopupState extends State<ContinuePopup>
       animation: _controller,
       builder: (context, _) {
         final t = _controller.value;
-        final appear = Curves.easeOut.transform(t);
-        final dim = Curves.easeOut.transform((t / (0.12 / 0.18)).clamp(0.0, 1.0));
+        final dim = PopupAppear.dim(t);
+        final appear = PopupAppear.opacity(t);
 
         return Stack(
           fit: StackFit.expand,
@@ -79,8 +79,8 @@ class _ContinuePopupState extends State<ContinuePopup>
             Center(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
-                child: Opacity(
-                  opacity: appear,
+                child: PopupAppearScale(
+                  t: t,
                   child: Material(
                     color: Colors.transparent,
                     child: Stack(

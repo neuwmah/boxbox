@@ -85,6 +85,55 @@ class StickerTitle extends StatelessWidget {
   }
 }
 
+class PopupAppear {
+  PopupAppear._();
+
+  static const duration = Duration(milliseconds: 300);
+
+  static double dim(double t) =>
+      Curves.easeOut.transform((t / 0.36).clamp(0.0, 1.0));
+
+  static double opacity(double t) =>
+      Curves.easeOut.transform((t / 0.32).clamp(0.0, 1.0));
+
+  static double scale(double t) {
+    t = t.clamp(0.0, 1.0);
+    if (t < 0.55) {
+      final p = Curves.easeOutCubic.transform(t / 0.55);
+      return 0.62 + 0.38 * p;
+    }
+    if (t < 0.78) {
+      final p = Curves.easeInOutCubic.transform((t - 0.55) / 0.23);
+      return 1.00 - 0.03 * p;
+    }
+    final p = Curves.easeOutCubic.transform((t - 0.78) / 0.22);
+    return 0.97 + 0.03 * p;
+  }
+}
+
+class PopupAppearScale extends StatelessWidget {
+  const PopupAppearScale({
+    super.key,
+    required this.t,
+    required this.child,
+  });
+
+  final double t;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Opacity(
+      opacity: PopupAppear.opacity(t),
+      child: Transform.scale(
+        scale: PopupAppear.scale(t),
+        alignment: Alignment.center,
+        child: child,
+      ),
+    );
+  }
+}
+
 class PopupTitleBadge extends StatelessWidget {
   const PopupTitleBadge({
     super.key,
