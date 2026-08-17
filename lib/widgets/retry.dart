@@ -101,12 +101,7 @@ class _RetryPopupState extends State<RetryPopup>
                                     const EdgeInsets.only(right: 4, bottom: 4),
                                 child: Container(
                                   width: double.infinity,
-                                  padding: const EdgeInsets.fromLTRB(
-                                    16,
-                                    0,
-                                    16,
-                                    24,
-                                  ),
+                                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                                   decoration: BoxDecoration(
                                     color: Colors.black,
                                     borderRadius: BorderRadius.circular(8),
@@ -121,11 +116,13 @@ class _RetryPopupState extends State<RetryPopup>
                               PopupTitleBadge(title: 'Level ${widget.level}'),
                               Center(
                                 child: Container(
+                                  constraints: const BoxConstraints(minWidth: 150),
                                   clipBehavior: Clip.antiAlias,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Stack(
+                                    alignment: Alignment.center,
                                     children: [
                                       const Positioned.fill(
                                         child: PopupBackground(
@@ -136,6 +133,7 @@ class _RetryPopupState extends State<RetryPopup>
                                         padding: const EdgeInsets.fromLTRB(32, 20, 32, 20),
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
+                                          crossAxisAlignment: CrossAxisAlignment.center,
                                           children: [
                                             SizedBox(
                                               width: _heartSize,

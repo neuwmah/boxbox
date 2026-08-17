@@ -116,11 +116,13 @@ class _StartPopupState extends State<StartPopup>
                               PopupTitleBadge(title: 'Level ${widget.level}'),
                               Center(
                                 child: Container(
+                                  constraints: const BoxConstraints(minWidth: 150),
                                   clipBehavior: Clip.antiAlias,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Stack(
+                                    alignment: Alignment.center,
                                     children: [
                                       const Positioned.fill(
                                         child: PopupBackground(
@@ -131,6 +133,7 @@ class _StartPopupState extends State<StartPopup>
                                         padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
+                                          crossAxisAlignment: CrossAxisAlignment.center,
                                           children: [
                                             SizedBox(
                                               width: _heartSize,
