@@ -177,6 +177,7 @@ class PopupTitleBadge extends StatelessWidget {
                       offset: Offset(o, o),
                       child: const DecoratedBox(
                         decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(4)),
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
@@ -193,6 +194,7 @@ class PopupTitleBadge extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
                   decoration: BoxDecoration(
                     color: Colors.black,
+                    borderRadius: BorderRadius.circular(4),
                     border: Border.all(
                       color: _borderColor,
                       width: _borderWidth,

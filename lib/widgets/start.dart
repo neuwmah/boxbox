@@ -82,6 +82,9 @@ class _StartPopupState extends State<StartPopup>
                                   bottom: 4 - o,
                                   child: const DecoratedBox(
                                     decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(8),
+                                      ),
                                       gradient: LinearGradient(
                                         begin: Alignment.topCenter,
                                         end: Alignment.bottomCenter,
@@ -101,6 +104,7 @@ class _StartPopupState extends State<StartPopup>
                                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                                   decoration: BoxDecoration(
                                     color: Colors.black,
+                                    borderRadius: BorderRadius.circular(8),
                                     border: Border.all(
                                       color: _border,
                                       width: 1.6,

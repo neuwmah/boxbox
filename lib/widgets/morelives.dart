@@ -87,6 +87,9 @@ class _MoreLivesPopupState extends State<MoreLivesPopup>
                                   bottom: 4 - o,
                                   child: const DecoratedBox(
                                     decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(8),
+                                      ),
                                       gradient: LinearGradient(
                                         begin: Alignment.topCenter,
                                         end: Alignment.bottomCenter,
@@ -106,6 +109,7 @@ class _MoreLivesPopupState extends State<MoreLivesPopup>
                                   padding: const EdgeInsets.fromLTRB(0, 0, 0, 24),
                                   decoration: BoxDecoration(
                                     color: Colors.black,
+                                    borderRadius: BorderRadius.circular(8),
                                     border: Border.all(
                                       color: _border,
                                       width: 1.6,
@@ -379,7 +383,7 @@ class _MoreLivesPopupState extends State<MoreLivesPopup>
                                             ],
                                           ),
                                         ),
-                                        const SizedBox(width: 6),
+                                        const SizedBox(width: 4.5),
                                         const _StickerLabel(
                                           text: 'Life',
                                           depthColor: Color(0xFF4A0804),
