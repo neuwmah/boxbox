@@ -25,6 +25,10 @@ List<Block> levelAt(int level) {
   return levels[(level - 1) % levels.length];
 }
 
+String levelTitleAt(int level) {
+  return levelTitles[(level - 1) % levelTitles.length];
+}
+
 class FloorSkin {
   const FloorSkin({
     required this.asset,
@@ -87,6 +91,24 @@ BackgroundSkin backgroundAt(int level) {
   final index = (level - 1) ~/ 10;
   return backgrounds[index.clamp(0, backgrounds.length - 1)];
 }
+
+const levelTitles = <String>[
+  'Pizza',
+  'Meat',
+  'Sandwich',
+  'Burger',
+  'Popcorn',
+  'Popsicle Strawberry',
+  'Popsicle Chocolate',
+  'French Fries',
+  'Donut',
+  'Cake',
+  'Mushroom',
+  'Big Mushroom',
+  'Super Mushroom',
+  'Apple',
+  'Orange',
+];
 
 const levels = <List<Block>>[
   // Pizza

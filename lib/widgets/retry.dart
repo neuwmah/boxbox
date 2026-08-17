@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:boxbox/game/level.dart';
 import 'package:boxbox/widgets/background.dart';
 import 'package:boxbox/widgets/titlebar.dart';
 
@@ -125,38 +126,59 @@ class _RetryPopupState extends State<RetryPopup>
                                   child: Stack(
                                     children: [
                                       const Positioned.fill(
-                                        child: PopupBackground(),
+                                        child: PopupBackground(
+                                          offset: Offset(0, -28),
+                                        ),
                                       ),
                                       Padding(
                                         padding: const EdgeInsets.fromLTRB(
-                                          32,
+                                          24,
                                           20,
-                                          32,
+                                          24,
                                           20,
                                         ),
-                                        child: SizedBox(
-                                          width: _heartSize,
-                                          height: _heartSize,
-                                          child: Stack(
-                                            alignment: Alignment.center,
-                                            children: [
-                                              Image.asset(
-                                                'lib/assets/heart/icon1.png',
-                                                width: _heartSize,
-                                                height: _heartSize,
-                                                fit: BoxFit.contain,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            SizedBox(
+                                              width: _heartSize,
+                                              height: _heartSize,
+                                              child: Stack(
+                                                alignment: Alignment.center,
+                                                children: [
+                                                  Image.asset(
+                                                    'lib/assets/heart/icon1.png',
+                                                    width: _heartSize,
+                                                    height: _heartSize,
+                                                    fit: BoxFit.contain,
+                                                  ),
+                                                  const _StickerLabel(
+                                                    text: '1',
+                                                    depthColor:
+                                                        Color(0xFF5A1018),
+                                                    style: TextStyle(
+                                                      fontSize: 24,
+                                                      fontWeight:
+                                                          FontWeight.w900,
+                                                      height: 1,
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
-                                              const _StickerLabel(
-                                                text: '1',
-                                                depthColor: Color(0xFF5A1018),
-                                                style: TextStyle(
-                                                  fontSize: 24,
-                                                  fontWeight: FontWeight.w900,
-                                                  height: 1,
-                                                ),
+                                            ),
+                                            const SizedBox(height: 12),
+                                            _StickerLabel(
+                                              text: levelTitleAt(widget.level),
+                                              depthColor:
+                                                  const Color(0xFF212121),
+                                              textAlign: TextAlign.center,
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w600,
+                                                height: 1.4,
                                               ),
-                                            ],
-                                          ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ],
