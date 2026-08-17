@@ -26,7 +26,7 @@ List<Block> levelAt(int level) {
 }
 
 String levelTitleAt(int level) {
-  return levelTitles[(level - 1) % levelTitles.length];
+  return '"${levelTitles[(level - 1) % levelTitles.length]}"';
 }
 
 class FloorSkin {
