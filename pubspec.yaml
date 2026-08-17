@@ -27,7 +27,8 @@ flutter:
     - lib/assets/heart/icon1.png
     - lib/assets/heart/broken1.png
     - lib/assets/play/icon.png
-    - lib/assets/play/balls.png
+    - lib/assets/count/balls1.png
+    - lib/assets/count/balls2.png
     - lib/assets/ad/icon.png
     - lib/assets/floor/grass.png
     - lib/assets/floor/wood/8.png

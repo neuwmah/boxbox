@@ -569,7 +569,10 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
               right: 0,
               child: IgnorePointer(
                 child: Center(
-                  child: _BallsBadge(value: _ballsLeft),
+                  child: _BallsBadge(
+                    value: _ballsLeft,
+                    asset: ballsBadgeAt(widget.level),
+                  ),
                 ),
               ),
             ),
@@ -616,9 +619,10 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
 }
 
 class _BallsBadge extends StatelessWidget {
-  const _BallsBadge({required this.value});
+  const _BallsBadge({required this.value, required this.asset});
 
   final int value;
+  final String asset;
 
   @override
   Widget build(BuildContext context) {
@@ -629,7 +633,7 @@ class _BallsBadge extends StatelessWidget {
         alignment: Alignment.center,
         children: [
           Image.asset(
-            'lib/assets/play/balls.png',
+            asset,
             fit: BoxFit.contain,
           ),
           Padding(

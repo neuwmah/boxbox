@@ -55,6 +55,16 @@ FloorSkin floorAt(int level) {
   return floors[index.clamp(0, floors.length - 1)];
 }
 
+const ballsBadges = <String>[
+  'lib/assets/count/balls1.png',
+  'lib/assets/count/balls2.png',
+];
+
+String ballsBadgeAt(int level) {
+  final index = (level - 1) ~/ 10;
+  return ballsBadges[index.clamp(0, ballsBadges.length - 1)];
+}
+
 const levels = <List<Block>>[
   // Pizza
   [
