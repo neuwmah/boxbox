@@ -102,7 +102,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   Size _viewSize = Size.zero;
   int _ballsLeft = _maxBalls;
   late int _coins;
-  ui.Image? _grassImage;
+  final Map<String, ui.Image> _floorImages = {};
   double _clearTimer = 0;
   double _outOfBallsTimer = 0;
   bool _exiting = false;
@@ -128,20 +128,27 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
       vsync: this,
       duration: const Duration(seconds: 5),
     )..repeat();
-    _loadGrassTexture();
+    _loadFloorTextures();
   }
 
-  Future<void> _loadGrassTexture() async {
-    final data = await rootBundle.load('lib/assets/floor/grass.png');
-    final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
-    final frame = await codec.getNextFrame();
-    if (!mounted) return;
-    setState(() => _grassImage = frame.image);
+  FloorSkin get _floor => floorAt(widget.level);
+
+  Future<void> _loadFloorTextures() async {
+    for (final floor in floors) {
+      final data = await rootBundle.load(floor.asset);
+      final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
+      final frame = await codec.getNextFrame();
+      if (!mounted) return;
+      _floorImages[floor.asset] = frame.image;
+    }
+    if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
-    _grassImage?.dispose();
+    for (final image in _floorImages.values) {
+      image.dispose();
+    }
     _hueAnim.dispose();
     _menuAnim.dispose();
     _ticker.dispose();
@@ -518,7 +525,9 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
                         platformFar: _platformFar,
                         platformThickness: _platformThickness,
                         ballRadius: _ballRadius,
-                        grassImage: _grassImage,
+                        floorImage: _floorImages[_floor.asset],
+                        floorTopColor: Color(_floor.topColor),
+                        floorBottomColor: Color(_floor.bottomColor),
                       ),
                       child: const SizedBox.expand(),
                     );
@@ -826,7 +835,9 @@ class _ScenePainter extends CustomPainter {
     required this.platformFar,
     required this.platformThickness,
     required this.ballRadius,
-    required this.grassImage,
+    required this.floorImage,
+    required this.floorTopColor,
+    required this.floorBottomColor,
   });
 
   final List<
@@ -845,7 +856,9 @@ class _ScenePainter extends CustomPainter {
   final double platformFar;
   final double platformThickness;
   final double ballRadius;
-  final ui.Image? grassImage;
+  final ui.Image? floorImage;
+  final Color floorTopColor;
+  final Color floorBottomColor;
 
   static const _camY = 3.4;
   static const _camZ = 0.0;
@@ -1061,15 +1074,15 @@ class _ScenePainter extends CustomPainter {
     final hx = platformHalfW;
     final hz = (platformFar - platformNear) / 2;
     final hy = platformThickness / 2;
-    const topColor = Color(0xFF8DE364);
-    const bottomColor = Color(0xFF6B4A2E);
-    const sideFallback = [
-      Color(0xFF7BCF55),
-      Color(0xFF5A8F3A),
-      Color(0xFF6B4A2E),
-      Color(0xFF8DE364),
-      Color(0xFF6B4A2E),
-      Color(0xFF5A8F3A),
+    final topColor = floorTopColor;
+    final bottomColor = floorBottomColor;
+    final sideFallback = [
+      Color.lerp(topColor, bottomColor, 0.25)!,
+      Color.lerp(topColor, Colors.black, 0.22)!,
+      bottomColor,
+      topColor,
+      bottomColor,
+      Color.lerp(topColor, Colors.black, 0.22)!,
     ];
 
     for (var i = 0; i < platformXs.length; i++) {
@@ -1149,7 +1162,7 @@ class _ScenePainter extends CustomPainter {
         ..color = const Color(0xFF111111);
 
       final cubeSize = platformThickness;
-      final image = grassImage;
+      final image = floorImage;
 
       for (final item in items) {
         final index = item.index;

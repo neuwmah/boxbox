@@ -25,6 +25,36 @@ List<Block> levelAt(int level) {
   return levels[(level - 1) % levels.length];
 }
 
+class FloorSkin {
+  const FloorSkin({
+    required this.asset,
+    required this.topColor,
+    required this.bottomColor,
+  });
+
+  final String asset;
+  final int topColor;
+  final int bottomColor;
+}
+
+const floors = <FloorSkin>[
+  FloorSkin(
+    asset: 'lib/assets/floor/wood/7.png',
+    topColor: 0xFF101010,
+    bottomColor: 0xFF000000,
+  ),
+  FloorSkin(
+    asset: 'lib/assets/floor/grass.png',
+    topColor: 0xFF8DE364,
+    bottomColor: 0xFF000000,
+  ),
+];
+
+FloorSkin floorAt(int level) {
+  final index = (level - 1) ~/ 10;
+  return floors[index.clamp(0, floors.length - 1)];
+}
+
 const levels = <List<Block>>[
   // Popcorn
   [
