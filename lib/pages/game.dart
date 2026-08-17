@@ -485,7 +485,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
                 BlendMode.srcATop,
               ),
               child: ImageFiltered(
-                imageFilter: ui.ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+                imageFilter: ui.ImageFilter.blur(sigmaX: 3, sigmaY: 3),
                 child: const Image(
                   image: AssetImage('lib/assets/background/kitchen.png'),
                   fit: BoxFit.cover,
