@@ -14,6 +14,70 @@ struct _MyApplication {
 
 G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
 
+static gboolean is_pointer_event(GdkEventType type) {
+  switch (type) {
+    case GDK_MOTION_NOTIFY:
+    case GDK_BUTTON_PRESS:
+    case GDK_BUTTON_RELEASE:
+    case GDK_SCROLL:
+    case GDK_ENTER_NOTIFY:
+    case GDK_LEAVE_NOTIFY:
+    case GDK_TOUCH_BEGIN:
+    case GDK_TOUCH_UPDATE:
+    case GDK_TOUCH_END:
+    case GDK_TOUCH_CANCEL:
+      return TRUE;
+    default:
+      return FALSE;
+  }
+}
+
+static void attach_pointer_device_if_missing(GdkEvent* event) {
+  if (event == nullptr || !is_pointer_event(gdk_event_get_event_type(event))) {
+    return;
+  }
+  if (gdk_event_get_source_device(event) != nullptr &&
+      gdk_event_get_device(event) != nullptr) {
+    return;
+  }
+
+  GdkDisplay* display = gdk_display_get_default();
+  if (display == nullptr) {
+    return;
+  }
+  GdkSeat* seat = gdk_display_get_default_seat(display);
+  if (seat == nullptr) {
+    return;
+  }
+  GdkDevice* pointer = gdk_seat_get_pointer(seat);
+  if (pointer == nullptr) {
+    return;
+  }
+
+  if (gdk_event_get_device(event) == nullptr) {
+    gdk_event_set_device(event, pointer);
+  }
+  if (gdk_event_get_source_device(event) == nullptr) {
+    gdk_event_set_source_device(event, pointer);
+  }
+}
+
+static void patched_event_handler(GdkEvent* event, gpointer data) {
+  (void)data;
+  attach_pointer_device_if_missing(event);
+  gtk_main_do_event(event);
+}
+
+static void gdk_critical_handler(const gchar* log_domain,
+                                 GLogLevelFlags log_level,
+                                 const gchar* message,
+                                 gpointer user_data) {
+  if (message != nullptr && g_strstr_len(message, -1, "GDK_IS_DEVICE") != nullptr) {
+    return;
+  }
+  g_log_default_handler(log_domain, log_level, message, user_data);
+}
+
 // Implements GApplication::activate.
 static void my_application_activate(GApplication* application) {
   MyApplication* self = MY_APPLICATION(application);
@@ -83,11 +147,13 @@ static gboolean my_application_local_command_line(GApplication* application, gch
 
 // Implements GApplication::startup.
 static void my_application_startup(GApplication* application) {
-  //MyApplication* self = MY_APPLICATION(object);
-
-  // Perform any actions required at application startup.
-
   G_APPLICATION_CLASS(my_application_parent_class)->startup(application);
+
+  g_log_set_handler(
+      "Gdk",
+      static_cast<GLogLevelFlags>(G_LOG_LEVEL_CRITICAL | G_LOG_FLAG_FATAL),
+      gdk_critical_handler, nullptr);
+  gdk_event_handler_set(patched_event_handler, nullptr, nullptr);
 }
 
 // Implements GApplication::shutdown.
