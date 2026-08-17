@@ -42,9 +42,7 @@ class AppNavbar extends StatelessWidget {
 
           return Stack(
             children: [
-              AnimatedPositioned(
-                duration: const Duration(milliseconds: 280),
-                curve: Curves.easeInOut,
+              Positioned(
                 left: selectedIndex * itemWidth,
                 top: 0,
                 bottom: 0,
