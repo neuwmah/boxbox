@@ -685,32 +685,13 @@ class _ClearBanner extends StatelessWidget {
     letterSpacing: -1.2,
   );
 
-  static const _outline = [
-    Offset(-3, 0),
-    Offset(3, 0),
-    Offset(0, -3),
-    Offset(0, 3),
-    Offset(-2.5, -2.5),
-    Offset(2.5, -2.5),
-    Offset(-2.5, 2.5),
-    Offset(2.5, 2.5),
-    Offset(-3, -1.5),
-    Offset(3, -1.5),
-    Offset(-3, 1.5),
-    Offset(3, 1.5),
-    Offset(-1.5, -3),
-    Offset(1.5, -3),
-    Offset(-1.5, 3),
-    Offset(1.5, 3),
-  ];
-
   static const _depth = [
+    Offset(1, 1),
     Offset(2, 2),
-    Offset(3, 3),
+    Offset(0, 1),
+    Offset(1, 0),
     Offset(1, 2),
     Offset(2, 1),
-    Offset(2, 3),
-    Offset(3, 2),
   ];
 
   @override
@@ -743,14 +724,6 @@ class _ClearBanner extends StatelessWidget {
           clipBehavior: Clip.none,
           children: [
             for (final offset in _depth)
-              Transform.translate(
-                offset: offset,
-                child: Text(
-                  'GG!',
-                  style: _style.copyWith(color: const Color(0xFF101010)),
-                ),
-              ),
-            for (final offset in _outline)
               Transform.translate(
                 offset: offset,
                 child: Text(
