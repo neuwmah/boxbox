@@ -39,8 +39,8 @@ class FloorSkin {
 
 const floors = <FloorSkin>[
   FloorSkin(
-    asset: 'lib/assets/floor/wood/6.png',
-    topColor: 0xFF552c15,
+    asset: 'lib/assets/floor/wood/8.png',
+    topColor: 0xFFfdcc5f,
     bottomColor: 0xFF000000,
   ),
   FloorSkin(
