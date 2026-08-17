@@ -78,6 +78,7 @@ class _MainShellState extends State<MainShell> {
   Timer? _heartTimer;
   int _playGen = 0;
   int _debugLevelOffset = 0;
+  bool _loadingPrecached = false;
 
   @override
   void initState() {
@@ -98,6 +99,14 @@ class _MainShellState extends State<MainShell> {
     }
     _heartTimer?.cancel();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_loadingPrecached) return;
+    _loadingPrecached = true;
+    precacheImage(const AssetImage(loadingAsset), context);
   }
 
   bool _onDebugKey(KeyEvent event) {
@@ -335,6 +344,16 @@ class _MainShellState extends State<MainShell> {
 
     return Stack(
       children: [
+        const Offstage(
+          child: SizedBox(
+            width: 1,
+            height: 1,
+            child: Image(
+              image: AssetImage(loadingAsset),
+              gaplessPlayback: true,
+            ),
+          ),
+        ),
         Scaffold(
           backgroundColor: Colors.black,
           body: Stack(

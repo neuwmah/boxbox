@@ -23,6 +23,7 @@ flutter:
     - lib/assets/background/giphy.webp
     - lib/assets/background/kitchen.png
     - lib/assets/background/forest.png
+    - lib/assets/background/loading.png
     - lib/assets/coin/icon1.png
     - lib/assets/coin/pile.png
     - lib/assets/heart/icon1.png

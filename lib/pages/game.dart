@@ -13,6 +13,26 @@ import 'package:boxbox/widgets/insettings.dart';
 import 'package:boxbox/widgets/return.dart';
 import 'package:vector_math/vector_math.dart' hide Colors, Sphere, Matrix4;
 
+class LoadingCover extends StatelessWidget {
+  const LoadingCover({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const ColoredBox(
+      color: Colors.black,
+      child: Image(
+        image: AssetImage(loadingAsset),
+        fit: BoxFit.cover,
+        alignment: Alignment.center,
+        width: double.infinity,
+        height: double.infinity,
+        filterQuality: FilterQuality.medium,
+        gaplessPlayback: true,
+      ),
+    );
+  }
+}
+
 class GamePage extends StatefulWidget {
   const GamePage({
     super.key,
@@ -65,6 +85,8 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   static const _clearDelay = 3.0;
   static const _clearBannerDuration = 3.0;
   static const _outOfBallsDelay = 3.0;
+  static const _loadingMinDuration = Duration(seconds: 1);
+  static const _loadingFadeDuration = Duration(milliseconds: 250);
   static const _ballMass = 3.2;
   static const _cubeGap = _cubeHalf * 2;
   static const _startX = -(levelSize - 1) * _cubeGap / 2;
@@ -84,6 +106,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
 
   late final Ticker _ticker;
   late final AnimationController _menuAnim;
+  late final AnimationController _loadingFade;
   late cannon.World _world;
   late cannon.Material _cubeSoftMaterial;
   late cannon.Material _cubeMidMaterial;
@@ -101,6 +124,8 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   int _ballsLeft = _maxBalls;
   late int _coins;
   final Map<String, ui.Image> _floorImages = {};
+  bool _loadingStarted = false;
+  bool _assetsReady = false;
   double _clearTimer = 0;
   double _outOfBallsTimer = 0;
   bool _exiting = false;
@@ -116,28 +141,82 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     super.initState();
     _coins = widget.coins;
     _initWorld();
-    _buildLevel();
-    _ticker = createTicker(_onTick)..start();
+    _ticker = createTicker(_onTick);
     _menuAnim = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 280),
     );
-    _loadFloorTextures();
+    _loadingFade = AnimationController(
+      vsync: this,
+      duration: _loadingFadeDuration,
+      value: 1,
+    )..addStatusListener((status) {
+        if (status == AnimationStatus.dismissed && mounted) {
+          setState(() {});
+        }
+      });
   }
 
   FloorSkin get _floor => floorAt(widget.level);
 
   BackgroundSkin get _background => backgroundAt(widget.level);
 
-  Future<void> _loadFloorTextures() async {
-    for (final floor in floors) {
-      final data = await rootBundle.load(floor.asset);
-      final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
-      final frame = await codec.getNextFrame();
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_loadingStarted) return;
+    _loadingStarted = true;
+    _loadLevelAssets();
+  }
+
+  Future<void> _loadLevelAssets() async {
+    await Future.wait([
+      _buildLevel(),
+      _decodeFloor(_floor.asset),
+      precacheImage(AssetImage(_background.asset), context),
+      precacheImage(AssetImage(ballsBadgeAt(widget.level)), context),
+      Future<void>.delayed(_loadingMinDuration),
+    ]);
+    if (!mounted) return;
+
+    _ticker.start();
+    setState(() {});
+    await _waitPaintedFrames(3);
+    if (!mounted) return;
+
+    setState(() => _assetsReady = true);
+    await _waitPaintedFrames(2);
+    if (!mounted) return;
+
+    _loadingFade.reverse();
+    _loadRemainingFloors();
+  }
+
+  Future<void> _waitPaintedFrames(int count) async {
+    for (var i = 0; i < count; i++) {
       if (!mounted) return;
-      _floorImages[floor.asset] = frame.image;
+      setState(() {});
+      await SchedulerBinding.instance.endOfFrame;
     }
-    if (mounted) setState(() {});
+  }
+
+  Future<void> _decodeFloor(String asset) async {
+    if (_floorImages.containsKey(asset)) return;
+    final data = await rootBundle.load(asset);
+    final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
+    final frame = await codec.getNextFrame();
+    if (!mounted) {
+      frame.image.dispose();
+      return;
+    }
+    _floorImages[asset] = frame.image;
+  }
+
+  Future<void> _loadRemainingFloors() async {
+    for (final floor in floors) {
+      if (!mounted) return;
+      await _decodeFloor(floor.asset);
+    }
   }
 
   @override
@@ -145,6 +224,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     for (final image in _floorImages.values) {
       image.dispose();
     }
+    _loadingFade.dispose();
     _menuAnim.dispose();
     _ticker.dispose();
     super.dispose();
@@ -211,7 +291,10 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     _balls.clear();
   }
 
-  void _buildLevel() {
+  Future<void> _buildLevel() async {
+    await Future<void>.delayed(Duration.zero);
+    if (!mounted) return;
+
     _clearWorldBodies();
 
     final ground = cannon.Body(
@@ -242,6 +325,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     _world.addBody(platform);
 
     const gap = _cubeGap;
+    var placed = 0;
     for (final block in levelAt(widget.level)) {
       if (block.x < 0 ||
           block.x >= levelSize ||
@@ -287,6 +371,16 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
       if (layers.contains('1')) place(_layer1Z);
       if (layers.contains('2')) place(_layer2Z);
       if (layers.contains('3')) place(_layer3Z);
+
+      placed += 1;
+      if (placed % 16 == 0) {
+        await Future<void>.delayed(Duration.zero);
+        if (!mounted) return;
+      }
+    }
+
+    for (var i = 0; i < 12; i++) {
+      _world.step(1 / 120, 1 / 60, 5);
     }
   }
 
@@ -357,6 +451,11 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     if (_exiting || _continueOpen) return;
 
     _world.step(1 / 120, dt, 5);
+
+    if (!_assetsReady) {
+      setState(() {});
+      return;
+    }
 
     _balls.removeWhere((ball) {
       final out = ball.position.y < -8;
@@ -443,7 +542,8 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   }
 
   void _throwBall(Offset local) {
-    if (_viewSize == Size.zero ||
+    if (!_assetsReady ||
+        _viewSize == Size.zero ||
         !_menuAnim.isDismissed ||
         _exiting ||
         _continueOpen ||
@@ -475,9 +575,10 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: _assetsReady ? Colors.transparent : Colors.black,
       body: Stack(
         fit: StackFit.expand,
+        clipBehavior: Clip.none,
         children: [
           Transform.scale(
             scale: _background.scale,
@@ -504,8 +605,9 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
               return GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTapDown: (details) => _throwBall(details.localPosition),
-                child: CustomPaint(
-                  painter: _ScenePainter(
+                child: RepaintBoundary(
+                  child: CustomPaint(
+                    painter: _ScenePainter(
                     cubes: [
                       for (var i = 0; i < _cubes.length; i++)
                         (
@@ -538,13 +640,14 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
                     floorImage: _floorImages[_floor.asset],
                     floorTopColor: Color(_floor.topColor),
                     floorBottomColor: Color(_floor.bottomColor),
+                    ),
+                    child: const SizedBox.expand(),
                   ),
-                  child: const SizedBox.expand(),
                 ),
               );
             },
           ),
-          if (_ballsLeft > 0) ...[
+          if (_assetsReady && _ballsLeft > 0) ...[
             Positioned(
               top: 40,
               left: 38,
@@ -613,6 +716,15 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
             ReturnPopup(
               onClose: () => setState(() => _returnOpen = false),
               onQuit: () => _exitGame(null),
+            ),
+          if (!_loadingFade.isDismissed)
+            Positioned.fill(
+              child: RepaintBoundary(
+                child: FadeTransition(
+                  opacity: _loadingFade,
+                  child: const LoadingCover(),
+                ),
+              ),
             ),
         ],
       ),

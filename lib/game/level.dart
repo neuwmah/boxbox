@@ -69,6 +69,8 @@ String ballsBadgeAt(int level) {
   return ballsBadges[index.clamp(0, ballsBadges.length - 1)];
 }
 
+const loadingAsset = 'lib/assets/background/loading.png';
+
 class BackgroundSkin {
   const BackgroundSkin({required this.asset, required this.scale});
 
@@ -892,6 +894,7 @@ const levels = <List<Block>>[
     Block(4, 7, 3, 0xff4cc626, box),
     Block(6, 7, 3, 0xff4d913c, box),
   ],
+  [],
   // // Pikachu
   // [
   //   // Block(0, 0, 23, 0xFF000000, box),
