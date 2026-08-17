@@ -84,7 +84,6 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
 
   late final Ticker _ticker;
   late final AnimationController _menuAnim;
-  late final AnimationController _hueAnim;
   late cannon.World _world;
   late cannon.Material _cubeSoftMaterial;
   late cannon.Material _cubeMidMaterial;
@@ -123,10 +122,6 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
       vsync: this,
       duration: const Duration(milliseconds: 280),
     );
-    _hueAnim = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 5),
-    )..repeat();
     _loadFloorTextures();
   }
 
@@ -148,7 +143,6 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     for (final image in _floorImages.values) {
       image.dispose();
     }
-    _hueAnim.dispose();
     _menuAnim.dispose();
     _ticker.dispose();
     super.dispose();
@@ -508,47 +502,42 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
               return GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTapDown: (details) => _throwBall(details.localPosition),
-                child: AnimatedBuilder(
-                  animation: _hueAnim,
-                  builder: (context, child) {
-                    return CustomPaint(
-                      painter: _ScenePainter(
-                        cubes: [
-                          for (var i = 0; i < _cubes.length; i++)
-                            (
-                              pos: _Vec3(
-                                _cubes[i].position.x,
-                                _cubes[i].position.y,
-                                _cubes[i].position.z,
-                              ),
-                              rot: Quaternion.copy(_cubes[i].quaternion),
-                              color: _cubeColors[i],
-                              shape: _cubeShapes[i],
-                              half: _cubeHalves[i],
-                            ),
-                        ],
-                        balls: [
-                          for (final ball in _balls)
-                            _Vec3(
-                              ball.position.x,
-                              ball.position.y,
-                              ball.position.z,
-                            ),
-                        ],
-                        platformXs: const [_platformX],
-                        platformTops: const [_platformTop],
-                        platformHalfW: _platformHalfW,
-                        platformNear: _platformNear,
-                        platformFar: _platformFar,
-                        platformThickness: _platformThickness,
-                        ballRadius: _ballRadius,
-                        floorImage: _floorImages[_floor.asset],
-                        floorTopColor: Color(_floor.topColor),
-                        floorBottomColor: Color(_floor.bottomColor),
-                      ),
-                      child: const SizedBox.expand(),
-                    );
-                  },
+                child: CustomPaint(
+                  painter: _ScenePainter(
+                    cubes: [
+                      for (var i = 0; i < _cubes.length; i++)
+                        (
+                          pos: _Vec3(
+                            _cubes[i].position.x,
+                            _cubes[i].position.y,
+                            _cubes[i].position.z,
+                          ),
+                          rot: Quaternion.copy(_cubes[i].quaternion),
+                          color: _cubeColors[i],
+                          shape: _cubeShapes[i],
+                          half: _cubeHalves[i],
+                        ),
+                    ],
+                    balls: [
+                      for (final ball in _balls)
+                        _Vec3(
+                          ball.position.x,
+                          ball.position.y,
+                          ball.position.z,
+                        ),
+                    ],
+                    platformXs: const [_platformX],
+                    platformTops: const [_platformTop],
+                    platformHalfW: _platformHalfW,
+                    platformNear: _platformNear,
+                    platformFar: _platformFar,
+                    platformThickness: _platformThickness,
+                    ballRadius: _ballRadius,
+                    floorImage: _floorImages[_floor.asset],
+                    floorTopColor: Color(_floor.topColor),
+                    floorBottomColor: Color(_floor.bottomColor),
+                  ),
+                  child: const SizedBox.expand(),
                 ),
               );
             },
@@ -580,7 +569,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
               right: 0,
               child: IgnorePointer(
                 child: Center(
-                  child: _BallsBadge(value: _ballsLeft, hue: _hueAnim),
+                  child: _BallsBadge(value: _ballsLeft),
                 ),
               ),
             ),
@@ -627,13 +616,9 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
 }
 
 class _BallsBadge extends StatelessWidget {
-  const _BallsBadge({
-    required this.value,
-    required this.hue,
-  });
+  const _BallsBadge({required this.value});
 
   final int value;
-  final Animation<double> hue;
 
   @override
   Widget build(BuildContext context) {
@@ -643,18 +628,9 @@ class _BallsBadge extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          AnimatedBuilder(
-            animation: hue,
-            builder: (context, child) {
-              return ColorFiltered(
-                colorFilter: ColorFilter.matrix(_hueRotateMatrix(hue.value)),
-                child: child,
-              );
-            },
-            child: Image.asset(
-              'lib/assets/play/balls.png',
-              fit: BoxFit.contain,
-            ),
+          Image.asset(
+            'lib/assets/play/balls.png',
+            fit: BoxFit.contain,
           ),
           Padding(
             padding: const EdgeInsets.only(top: 16),
@@ -688,37 +664,6 @@ class _BallsBadge extends StatelessWidget {
       ),
     );
   }
-}
-
-List<double> _hueRotateMatrix(double turns) {
-  final rad = turns * 2 * math.pi;
-  final c = math.cos(rad);
-  final s = math.sin(rad);
-  const lumR = 0.213;
-  const lumG = 0.715;
-  const lumB = 0.072;
-  return <double>[
-    lumR + c * (1 - lumR) + s * (-lumR),
-    lumG + c * (-lumG) + s * (-lumG),
-    lumB + c * (-lumB) + s * (1 - lumB),
-    0,
-    0,
-    lumR + c * (-lumR) + s * 0.143,
-    lumG + c * (1 - lumG) + s * 0.140,
-    lumB + c * (-lumB) + s * (-0.283),
-    0,
-    0,
-    lumR + c * (-lumR) + s * (-(1 - lumR)),
-    lumG + c * (-lumG) + s * lumG,
-    lumB + c * (1 - lumB) + s * lumB,
-    0,
-    0,
-    0,
-    0,
-    0,
-    1,
-    0,
-  ];
 }
 
 class _ClearBanner extends StatelessWidget {
