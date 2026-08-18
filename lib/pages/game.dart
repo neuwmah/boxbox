@@ -574,6 +574,8 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final isTablet = MediaQuery.sizeOf(context).shortestSide >= 600;
+
     return Scaffold(
       backgroundColor: _assetsReady ? Colors.transparent : Colors.black,
       body: Stack(
@@ -650,21 +652,26 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
           if (_assetsReady && _ballsLeft > 0) ...[
             Positioned(
               top: 40,
-              left: 38,
+              left: isTablet ? 0 : 38,
+              right: isTablet ? 0 : null,
               height: 48,
               child: Align(
-                alignment: Alignment.centerLeft,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    if (_menuOpen) {
-                      _setMenuOpen(false);
-                      return;
-                    }
-                    if (_exiting || _continueOpen || _returnOpen) return;
-                    setState(() => _returnOpen = true);
-                  },
-                  child: const Icon(Icons.arrow_back, color: Colors.white),
+                alignment:
+                    isTablet ? Alignment.center : Alignment.centerLeft,
+                child: Transform.translate(
+                  offset: Offset(isTablet ? -100 : 0, 0),
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      if (_menuOpen) {
+                        _setMenuOpen(false);
+                        return;
+                      }
+                      if (_exiting || _continueOpen || _returnOpen) return;
+                      setState(() => _returnOpen = true);
+                    },
+                    child: const Icon(Icons.arrow_back, color: Colors.white),
+                  ),
                 ),
               ),
             ),

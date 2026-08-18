@@ -59,7 +59,9 @@ class _ReturnPopupState extends State<ReturnPopup>
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
                 child: PopupAppearScale(
                   t: t,
-                  child: Material(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 270),
+                    child: Material(
                     color: Colors.transparent,
                     child: Stack(
                       clipBehavior: Clip.none,
@@ -220,9 +222,10 @@ class _ReturnPopupState extends State<ReturnPopup>
                       ],
                     ),
                   ),
+                    ),
+                  ),
                 ),
               ),
-            ),
           ],
         );
       },

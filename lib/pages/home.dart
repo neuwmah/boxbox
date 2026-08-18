@@ -70,7 +70,7 @@ class HomePage extends StatelessWidget {
         if (onAdsTap != null)
           Positioned(
             top: 120,
-            right: 32,
+            right: MediaQuery.sizeOf(context).shortestSide >= 600 ? 130 : 32,
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: onAdsTap,

@@ -35,6 +35,7 @@ class InSettingsMenu extends StatelessWidget {
       builder: (context, _) {
         final t = Curves.easeInOut.transform(animation.value);
         final open = animation.value > 0.001;
+        final isTablet = MediaQuery.sizeOf(context).shortestSide >= 600;
 
         return Stack(
           fit: StackFit.expand,
@@ -51,55 +52,62 @@ class InSettingsMenu extends StatelessWidget {
               ),
             Positioned(
               top: 40,
-              right: 32,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(
-                    width: buttonSize,
-                    height: 48,
-                    child: Center(
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: onToggleMenu,
-                        child: const Icon(
-                          Icons.settings,
-                          color: Colors.white,
-                          size: iconSize,
+              left: isTablet ? 0 : null,
+              right: isTablet ? 0 : 32,
+              child: Align(
+                alignment: isTablet ? Alignment.topCenter : Alignment.topRight,
+                child: Transform.translate(
+                  offset: Offset(isTablet ? 100 : 0, 0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: buttonSize,
+                        height: 48,
+                        child: Center(
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: onToggleMenu,
+                            child: const Icon(
+                              Icons.settings,
+                              color: Colors.white,
+                              size: iconSize,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                      if (open) ...[
+                        SizedBox(height: gap),
+                        _AnimatedMenuItem(
+                          progress: _stagger(t, 0),
+                          child: _MenuIconButton(
+                            icon: Icons.music_note_rounded,
+                            enabled: music,
+                            onTap: onMusic,
+                          ),
+                        ),
+                        SizedBox(height: gap),
+                        _AnimatedMenuItem(
+                          progress: _stagger(t, 1),
+                          child: _MenuIconButton(
+                            icon: Icons.volume_up_rounded,
+                            enabled: sound,
+                            onTap: onSound,
+                          ),
+                        ),
+                        SizedBox(height: gap),
+                        _AnimatedMenuItem(
+                          progress: _stagger(t, 2),
+                          child: _MenuIconButton(
+                            icon: Icons.vibration_rounded,
+                            enabled: vibration,
+                            onTap: onVibration,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
-                  if (open) ...[
-                    SizedBox(height: gap),
-                    _AnimatedMenuItem(
-                      progress: _stagger(t, 0),
-                      child: _MenuIconButton(
-                        icon: Icons.music_note_rounded,
-                        enabled: music,
-                        onTap: onMusic,
-                      ),
-                    ),
-                    SizedBox(height: gap),
-                    _AnimatedMenuItem(
-                      progress: _stagger(t, 1),
-                      child: _MenuIconButton(
-                        icon: Icons.volume_up_rounded,
-                        enabled: sound,
-                        onTap: onSound,
-                      ),
-                    ),
-                    SizedBox(height: gap),
-                    _AnimatedMenuItem(
-                      progress: _stagger(t, 2),
-                      child: _MenuIconButton(
-                        icon: Icons.vibration_rounded,
-                        enabled: vibration,
-                        onTap: onVibration,
-                      ),
-                    ),
-                  ],
-                ],
+                ),
               ),
             ),
           ],

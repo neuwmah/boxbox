@@ -28,33 +28,38 @@ class StatusCounters extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final coinsCounter = ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: 0, maxWidth: 100),
+      child: _StatusCounter(
+        iconAsset: 'lib/assets/coin/icon1.png',
+        value: _formatDots(coins),
+        onTap: onCoinsTap,
+        iconKey: coinIconKey,
+        showPlus: showCoinPlus,
+      ),
+    );
+    final heartsCounter = ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: 0, maxWidth: 100),
+      child: _StatusCounter(
+        iconAsset: 'lib/assets/heart/icon1.png',
+        value: heartTimer,
+        iconLabel: '$hearts',
+        onTap: onHeartsTap,
+        showPlus: showHeartPlus,
+      ),
+    );
+
     return Row(
+      mainAxisAlignment: showHearts
+          ? MainAxisAlignment.center
+          : MainAxisAlignment.start,
+      mainAxisSize: showHearts ? MainAxisSize.max : MainAxisSize.min,
       children: [
-        Expanded(
-          child: _StatusCounter(
-            iconAsset: 'lib/assets/coin/icon1.png',
-            value: _formatDots(coins),
-            onTap: onCoinsTap,
-            iconKey: coinIconKey,
-            showPlus: showCoinPlus,
-          ),
-        ),
-        SizedBox(width: gap),
-        Expanded(
-          child: Visibility(
-            visible: showHearts,
-            maintainSize: true,
-            maintainAnimation: true,
-            maintainState: true,
-            child: _StatusCounter(
-              iconAsset: 'lib/assets/heart/icon1.png',
-              value: heartTimer,
-              iconLabel: '$hearts',
-              onTap: onHeartsTap,
-              showPlus: showHeartPlus,
-            ),
-          ),
-        ),
+        if (showHearts) Flexible(child: coinsCounter) else coinsCounter,
+        if (showHearts) ...[
+          SizedBox(width: gap),
+          Flexible(child: heartsCounter),
+        ],
       ],
     );
   }

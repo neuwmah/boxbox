@@ -97,23 +97,29 @@ class _ShopProductTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.circular(0),
-        border: Border.all(color: _border, width: 1.6),
-      ),
-      child: Row(
-        children: [
-          _ShiningPile(shine: shine, pile: pile),
-          const SizedBox(width: 8),
-          Expanded(
-            child: _AmountLabel(value: _formatDots(product.amount)),
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 280),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(9, 8, 8, 8),
+          decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(0),
+            border: Border.all(color: _border, width: 1.6),
           ),
-          const SizedBox(width: 8),
-          _BuyButton(label: 'BRL ${product.price}'),
-        ],
+          child: Row(
+            children: [
+              _ShiningPile(shine: shine, pile: pile),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _AmountLabel(value: _formatDots(product.amount)),
+              ),
+              const SizedBox(width: 8),
+              _BuyButton(label: 'BRL ${product.price}'),
+            ],
+          ),
+        ),
       ),
     );
   }

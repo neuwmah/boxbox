@@ -339,8 +339,34 @@ class _MainShellState extends State<MainShell> {
   Widget build(BuildContext context) {
     final showStatus = _selectedIndex == 0 || _selectedIndex == 1;
     final onHome = _selectedIndex == 1;
+    final isTablet = MediaQuery.sizeOf(context).shortestSide >= 600;
     final blocking =
         _pendingReward != null || _homePopup != _HomePopup.none;
+    final status = StatusCounters(
+      coins: _displayedCoins,
+      hearts: _hearts,
+      heartTimer: _heartTimerLabel,
+      showHearts: onHome,
+      showCoinPlus: onHome,
+      showHeartPlus: onHome && _hearts < _maxHearts,
+      gap: onHome ? 32 : 72,
+      coinIconKey: onHome ? _coinIconKey : null,
+      onCoinsTap: onHome
+          ? () {
+              if (blocking) return;
+              setState(() => _selectedIndex = 0);
+            }
+          : null,
+      onHeartsTap: onHome
+          ? () {
+              if (blocking) return;
+              if (_hearts >= _maxHearts) return;
+              setState(
+                () => _homePopup = _HomePopup.moreLives,
+              );
+            }
+          : null,
+    );
 
     return Stack(
       children: [
@@ -384,31 +410,21 @@ class _MainShellState extends State<MainShell> {
                   top: onHome ? 48 : 48,
                   left: onHome ? 32 : 12,
                   right: onHome ? 32 : 12,
-                  child: StatusCounters(
-                    coins: _displayedCoins,
-                    hearts: _hearts,
-                    heartTimer: _heartTimerLabel,
-                    showHearts: onHome,
-                    showCoinPlus: onHome,
-                    showHeartPlus: onHome && _hearts < _maxHearts,
-                    gap: onHome ? 32 : 72,
-                    coinIconKey: onHome ? _coinIconKey : null,
-                    onCoinsTap: onHome
-                        ? () {
-                            if (blocking) return;
-                            setState(() => _selectedIndex = 0);
-                          }
-                        : null,
-                    onHeartsTap: onHome
-                        ? () {
-                            if (blocking) return;
-                            if (_hearts >= _maxHearts) return;
-                            setState(
-                              () => _homePopup = _HomePopup.moreLives,
-                            );
-                          }
-                        : null,
-                  ),
+                  child: onHome || !isTablet
+                      ? status
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            status,
+                            const SizedBox(width: 130),
+                            const IgnorePointer(
+                              child: Opacity(
+                                opacity: 0,
+                                child: StickerTitle(title: 'Shop'),
+                              ),
+                            ),
+                          ],
+                        ),
                 ),
             ],
           ),

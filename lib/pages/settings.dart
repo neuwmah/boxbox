@@ -69,20 +69,26 @@ class _SettingsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(48, 12, 48, 12),
-      decoration: BoxDecoration(
-        color: Colors.black,
-        border: Border.all(color: _border, width: 1.6),
-      ),
-      child: Row(
-        children: [
-          for (var i = 0; i < children.length; i++) ...[
-            if (i > 0) const SizedBox(width: 12),
-            Expanded(child: children[i]),
-          ],
-        ],
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 270),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.black,
+            border: Border.all(color: _border, width: 1.6),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              for (var i = 0; i < children.length; i++) ...[
+                if (i > 0) const SizedBox(width: 12),
+                children[i],
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -110,12 +116,12 @@ class _ToggleControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(
-          width: double.infinity,
-          child: FittedBox(
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 52),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
               label,
@@ -124,23 +130,23 @@ class _ToggleControl extends StatelessWidget {
               maxLines: 1,
             ),
           ),
-        ),
-        const SizedBox(height: 8),
-        AspectRatio(
-          aspectRatio: 1,
-          child: GestureDetector(
-            onTap: onTap,
-            child: _GlossyTile(
-              enabled: enabled,
-              child: Icon(
-                icon,
-                color: enabled ? Colors.white : const Color(0xFF6A6A6A),
-                size: 24,
+          const SizedBox(height: 8),
+          AspectRatio(
+            aspectRatio: 1,
+            child: GestureDetector(
+              onTap: onTap,
+              child: _GlossyTile(
+                enabled: enabled,
+                child: Icon(
+                  icon,
+                  color: enabled ? Colors.white : const Color(0xFF6A6A6A),
+                  size: 24,
+                ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
