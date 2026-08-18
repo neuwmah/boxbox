@@ -105,7 +105,7 @@ class _ShopProductTile extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(9, 8, 8, 8),
           decoration: BoxDecoration(
             color: Colors.black,
-            borderRadius: BorderRadius.circular(0),
+            borderRadius: BorderRadius.circular(8),
             border: Border.all(color: _border, width: 1.6),
           ),
           child: Row(
