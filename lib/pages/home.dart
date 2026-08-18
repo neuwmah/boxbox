@@ -15,8 +15,8 @@ class HomePage extends StatelessWidget {
   final VoidCallback? onLevelTap;
   final VoidCallback? onAdsTap;
 
-  static const _scale = 1.1;
-  static const _bgOpacity = 0.08;
+  static const _scale = 1.0;
+  static const _bgOpacity = 0.035;
   static const _adsIconSize = 72.0;
   static const _grayscale = ColorFilter.matrix(<double>[
     0.2126, 0.7152, 0.0722, 0, 0,
@@ -37,7 +37,7 @@ class HomePage extends StatelessWidget {
             child: ColorFiltered(
               colorFilter: _grayscale,
               child: Image.asset(
-                'lib/assets/background/giphy.webp',
+                'lib/assets/background/giphy.gif',
                 fit: BoxFit.cover,
                 width: double.infinity,
                 height: double.infinity,
