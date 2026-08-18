@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
 class AppTitleBar extends StatelessWidget {
-  const AppTitleBar({
-    super.key,
-    required this.title,
-  });
+  const AppTitleBar({super.key, required this.title});
 
   final String title;
 
@@ -16,10 +13,7 @@ class AppTitleBar extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFF000000),
-            Color(0xFF000000),
-          ],
+          colors: [Color(0xFF000000), Color(0xFF000000)],
         ),
       ),
       child: DragToMoveArea(
@@ -28,9 +22,7 @@ class AppTitleBar extends StatelessWidget {
           child: SizedBox(
             height: 56,
             width: double.infinity,
-            child: Center(
-              child: StickerTitle(title: title),
-            ),
+            child: Center(child: StickerTitle(title: title)),
           ),
         ),
       ),
@@ -39,11 +31,7 @@ class AppTitleBar extends StatelessWidget {
 }
 
 class StickerTitle extends StatelessWidget {
-  const StickerTitle({
-    super.key,
-    required this.title,
-    this.fontSize = 20,
-  });
+  const StickerTitle({super.key, required this.title, this.fontSize = 20});
 
   final String title;
   final double fontSize;
@@ -71,15 +59,9 @@ class StickerTitle extends StatelessWidget {
         ])
           Transform.translate(
             offset: offset,
-            child: Text(
-              title,
-              style: base.copyWith(color: depthColor),
-            ),
+            child: Text(title, style: base.copyWith(color: depthColor)),
           ),
-        Text(
-          title,
-          style: base.copyWith(color: Colors.white),
-        ),
+        Text(title, style: base.copyWith(color: Colors.white)),
       ],
     );
   }
@@ -89,6 +71,9 @@ class PopupAppear {
   PopupAppear._();
 
   static const duration = Duration(milliseconds: 300);
+  static const dimAlpha = 0.55;
+  static const opacityTween = _PopupOpacityTween();
+  static const scaleTween = _PopupScaleTween();
 
   static double dim(double t) =>
       Curves.easeOut.transform((t / 0.36).clamp(0.0, 1.0));
@@ -111,24 +96,83 @@ class PopupAppear {
   }
 }
 
-class PopupAppearScale extends StatelessWidget {
-  const PopupAppearScale({
+class _PopupOpacityTween extends Animatable<double> {
+  const _PopupOpacityTween();
+
+  @override
+  double transform(double t) => PopupAppear.opacity(t);
+}
+
+class _PopupScaleTween extends Animatable<double> {
+  const _PopupScaleTween();
+
+  @override
+  double transform(double t) => PopupAppear.scale(t);
+}
+
+class PopupDim extends StatelessWidget {
+  const PopupDim({super.key, required this.animation});
+
+  final Animation<double> animation;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: AnimatedBuilder(
+        animation: animation,
+        builder: (context, _) {
+          return ColoredBox(
+            color: Color.fromRGBO(
+              0,
+              0,
+              0,
+              PopupAppear.dimAlpha * PopupAppear.dim(animation.value),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class PopupAppearFade extends StatelessWidget {
+  const PopupAppearFade({
     super.key,
-    required this.t,
+    required this.animation,
     required this.child,
   });
 
-  final double t;
+  final Animation<double> animation;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return Opacity(
-      opacity: PopupAppear.opacity(t),
-      child: Transform.scale(
-        scale: PopupAppear.scale(t),
+    return FadeTransition(
+      opacity: animation.drive(PopupAppear.opacityTween),
+      child: child,
+    );
+  }
+}
+
+class PopupAppearScale extends StatelessWidget {
+  const PopupAppearScale({
+    super.key,
+    required this.animation,
+    required this.child,
+  });
+
+  final Animation<double> animation;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: animation.drive(PopupAppear.opacityTween),
+      child: ScaleTransition(
+        scale: animation.drive(PopupAppear.scaleTween),
         alignment: Alignment.center,
-        child: child,
+        filterQuality: FilterQuality.low,
+        child: RepaintBoundary(child: child),
       ),
     );
   }
@@ -155,8 +199,7 @@ class PopupShade {
     );
   }
 
-  static Color muted(Color color) =>
-      Color.lerp(Colors.black, color, _fillMix)!;
+  static Color muted(Color color) => Color.lerp(Colors.black, color, _fillMix)!;
 
   static Color borderTint(Color color) =>
       Color.lerp(Colors.black, color, _borderMix)!;
@@ -165,10 +208,7 @@ class PopupShade {
     return LinearGradient(
       begin: Alignment.topRight,
       end: Alignment.bottomLeft,
-      colors: [
-        muted(color),
-        Colors.black,
-      ],
+      colors: [muted(color), Colors.black],
     );
   }
 
@@ -322,10 +362,7 @@ class PopupCloseButton extends StatelessWidget {
         child: const Center(
           child: CustomPaint(
             size: Size(8, 8),
-            painter: _CloseIconPainter(
-              color: Colors.white,
-              strokeWidth: 2.4,
-            ),
+            painter: _CloseIconPainter(color: Colors.white, strokeWidth: 2.4),
           ),
         ),
       ),
@@ -334,28 +371,25 @@ class PopupCloseButton extends StatelessWidget {
 }
 
 class _CloseIconPainter extends CustomPainter {
-  const _CloseIconPainter({
-    required this.color,
-    required this.strokeWidth,
-  });
+  const _CloseIconPainter({required this.color, required this.strokeWidth});
 
   final Color color;
   final double strokeWidth;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
+    final paint =
+        Paint()
+          ..color = color
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round
+          ..style = PaintingStyle.stroke;
     canvas.drawLine(Offset.zero, Offset(size.width, size.height), paint);
     canvas.drawLine(Offset(size.width, 0), Offset(0, size.height), paint);
   }
 
   @override
   bool shouldRepaint(covariant _CloseIconPainter oldDelegate) {
-    return oldDelegate.color != color ||
-        oldDelegate.strokeWidth != strokeWidth;
+    return oldDelegate.color != color || oldDelegate.strokeWidth != strokeWidth;
   }
 }

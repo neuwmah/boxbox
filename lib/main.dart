@@ -216,8 +216,7 @@ class _MainShellState extends State<MainShell> {
   void _onLevelTap() {
     if (_homePopup != _HomePopup.none || _pendingReward != null) return;
     setState(() {
-      _homePopup =
-          _hearts > 0 ? _HomePopup.start : _HomePopup.moreLives;
+      _homePopup = _hearts > 0 ? _HomePopup.start : _HomePopup.moreLives;
     });
   }
 
@@ -255,11 +254,12 @@ class _MainShellState extends State<MainShell> {
 
     final reward = await Navigator.of(context).push<int>(
       PageRouteBuilder(
-        pageBuilder: (_, __, ___) => GamePage(
-          coins: _coins,
-          level: _level,
-          onSpendCoins: _spendCoins,
-        ),
+        pageBuilder:
+            (_, __, ___) => GamePage(
+              coins: _coins,
+              level: _level,
+              onSpendCoins: _spendCoins,
+            ),
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
       ),
@@ -340,8 +340,7 @@ class _MainShellState extends State<MainShell> {
     final showStatus = _selectedIndex == 0 || _selectedIndex == 1;
     final onHome = _selectedIndex == 1;
     final isTablet = MediaQuery.sizeOf(context).shortestSide >= 600;
-    final blocking =
-        _pendingReward != null || _homePopup != _HomePopup.none;
+    final blocking = _pendingReward != null || _homePopup != _HomePopup.none;
     final status = StatusCounters(
       coins: _displayedCoins,
       hearts: _hearts,
@@ -351,21 +350,21 @@ class _MainShellState extends State<MainShell> {
       showHeartPlus: onHome && _hearts < _maxHearts,
       gap: onHome ? 32 : 72,
       coinIconKey: onHome ? _coinIconKey : null,
-      onCoinsTap: onHome
-          ? () {
-              if (blocking) return;
-              setState(() => _selectedIndex = 0);
-            }
-          : null,
-      onHeartsTap: onHome
-          ? () {
-              if (blocking) return;
-              if (_hearts >= _maxHearts) return;
-              setState(
-                () => _homePopup = _HomePopup.moreLives,
-              );
-            }
-          : null,
+      onCoinsTap:
+          onHome
+              ? () {
+                if (blocking) return;
+                setState(() => _selectedIndex = 0);
+              }
+              : null,
+      onHeartsTap:
+          onHome
+              ? () {
+                if (blocking) return;
+                if (_hearts >= _maxHearts) return;
+                setState(() => _homePopup = _HomePopup.moreLives);
+              }
+              : null,
     );
 
     return Stack(
@@ -380,60 +379,61 @@ class _MainShellState extends State<MainShell> {
             ),
           ),
         ),
-        Scaffold(
-          backgroundColor: Colors.black,
-          body: Stack(
-            children: [
-              IndexedStack(
-                index: _selectedIndex,
-                children: [
-                  const Column(
-                    children: [
-                      AppTitleBar(title: 'Shop'),
-                      Expanded(child: ShopPage()),
-                    ],
-                  ),
-                  HomePage(
-                    onLevelTap: _onLevelTap,
-                    onAdsTap: _onAdsTap,
-                  ),
-                  const Column(
-                    children: [
-                      AppTitleBar(title: 'Settings'),
-                      Expanded(child: SettingsPage()),
-                    ],
-                  ),
-                ],
-              ),
-              if (showStatus)
-                Positioned(
-                  top: onHome ? 48 : 48,
-                  left: onHome ? 32 : 12,
-                  right: onHome ? 32 : 12,
-                  child: onHome || !isTablet
-                      ? status
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            status,
-                            const SizedBox(width: 130),
-                            const IgnorePointer(
-                              child: Opacity(
-                                opacity: 0,
-                                child: StickerTitle(title: 'Shop'),
-                              ),
-                            ),
-                          ],
-                        ),
+        TickerMode(
+          enabled: !blocking,
+          child: Scaffold(
+            backgroundColor: Colors.black,
+            body: Stack(
+              children: [
+                IndexedStack(
+                  index: _selectedIndex,
+                  children: [
+                    const Column(
+                      children: [
+                        AppTitleBar(title: 'Shop'),
+                        Expanded(child: ShopPage()),
+                      ],
+                    ),
+                    HomePage(onLevelTap: _onLevelTap, onAdsTap: _onAdsTap),
+                    const Column(
+                      children: [
+                        AppTitleBar(title: 'Settings'),
+                        Expanded(child: SettingsPage()),
+                      ],
+                    ),
+                  ],
                 ),
-            ],
-          ),
-          bottomNavigationBar: AppNavbar(
-            selectedIndex: _selectedIndex,
-            onDestinationSelected: (index) {
-              if (blocking) return;
-              setState(() => _selectedIndex = index);
-            },
+                if (showStatus)
+                  Positioned(
+                    top: onHome ? 48 : 48,
+                    left: onHome ? 32 : 12,
+                    right: onHome ? 32 : 12,
+                    child:
+                        onHome || !isTablet
+                            ? status
+                            : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                status,
+                                const SizedBox(width: 130),
+                                const IgnorePointer(
+                                  child: Opacity(
+                                    opacity: 0,
+                                    child: StickerTitle(title: 'Shop'),
+                                  ),
+                                ),
+                              ],
+                            ),
+                  ),
+              ],
+            ),
+            bottomNavigationBar: AppNavbar(
+              selectedIndex: _selectedIndex,
+              onDestinationSelected: (index) {
+                if (blocking) return;
+                setState(() => _selectedIndex = index);
+              },
+            ),
           ),
         ),
         if (_homePopup == _HomePopup.start)

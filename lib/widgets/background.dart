@@ -76,11 +76,7 @@ class _RectBackgroundState extends State<RectBackground>
 }
 
 class PopupBackground extends StatefulWidget {
-  const PopupBackground({
-    super.key,
-    this.offset = Offset.zero,
-    this.tint,
-  });
+  const PopupBackground({super.key, this.offset = Offset.zero, this.tint});
 
   final Offset offset;
   final Color? tint;
@@ -99,8 +95,10 @@ class _PopupBackgroundState extends State<PopupBackground>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: _duration)
-      ..repeat();
+    _controller = AnimationController(vsync: this, duration: _duration);
+    Future<void>.delayed(const Duration(milliseconds: 320), () {
+      if (mounted) _controller.repeat();
+    });
   }
 
   @override
@@ -115,8 +113,7 @@ class _PopupBackgroundState extends State<PopupBackground>
       builder: (context, constraints) {
         final w = constraints.maxWidth;
         final h = constraints.maxHeight;
-        final size =
-            math.sqrt(w * w + h * h) + widget.offset.distance * 2;
+        final size = math.sqrt(w * w + h * h) + widget.offset.distance * 2;
 
         return AnimatedBuilder(
           animation: _controller,
@@ -127,13 +124,14 @@ class _PopupBackgroundState extends State<PopupBackground>
             child: SizedBox(
               width: size,
               height: size,
-              child: 
-                Image.asset(
+              child: RepaintBoundary(
+                child: Image.asset(
                   _asset,
                   fit: BoxFit.cover,
-                  filterQuality: FilterQuality.medium,
+                  filterQuality: FilterQuality.low,
                   gaplessPlayback: true,
                 ),
+              ),
             ),
           ),
           builder: (context, child) {
@@ -141,6 +139,7 @@ class _PopupBackgroundState extends State<PopupBackground>
               offset: widget.offset,
               child: Transform.rotate(
                 angle: _controller.value * 2 * math.pi,
+                filterQuality: FilterQuality.low,
                 child: child,
               ),
             );
@@ -153,10 +152,7 @@ class _PopupBackgroundState extends State<PopupBackground>
   Widget _tinted(Widget child) {
     final tint = widget.tint;
     if (tint == null) return child;
-    return ColorFiltered(
-      colorFilter: _lumaTint(tint),
-      child: child,
-    );
+    return ColorFiltered(colorFilter: _lumaTint(tint), child: child);
   }
 
   static ColorFilter _lumaTint(Color tint, [double amount = 0.050]) {
@@ -166,10 +162,26 @@ class _PopupBackgroundState extends State<PopupBackground>
     final tg = tint.g * s;
     final tb = tint.b * s;
     return ColorFilter.matrix([
-      tr, tr, tr, 0, 0,
-      tg, tg, tg, 0, 0,
-      tb, tb, tb, 0, 0,
-      0, 0, 0, 1, 0,
+      tr,
+      tr,
+      tr,
+      0,
+      0,
+      tg,
+      tg,
+      tg,
+      0,
+      0,
+      tb,
+      tb,
+      tb,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
     ]);
   }
 }

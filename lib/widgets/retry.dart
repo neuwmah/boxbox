@@ -44,32 +44,23 @@ class _RetryPopupState extends State<RetryPopup>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) {
-        final t = _controller.value;
-        final dim = PopupAppear.dim(t);
-
-        return Stack(
-          fit: StackFit.expand,
-          children: [
-            Positioned.fill(
-              child: ColoredBox(
-                color: Colors.black.withValues(alpha: 0.55 * dim),
-              ),
-            ),
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
-                child: PopupAppearScale(
-                  t: t,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 240),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
+    return RepaintBoundary(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          PopupDim(animation: _controller),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+              child: PopupAppearScale(
+                animation: _controller,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 240),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
                         Padding(
                           padding: const EdgeInsets.only(top: 16),
                           child: Stack(
@@ -82,166 +73,197 @@ class _RetryPopupState extends State<RetryPopup>
                                 ),
                               ),
                               Padding(
-                                padding:
-                                    const EdgeInsets.only(right: 4, bottom: 4),
+                                padding: const EdgeInsets.only(
+                                  right: 4,
+                                  bottom: 4,
+                                ),
                                 child: Container(
                                   width: double.infinity,
-                                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                                  padding: const EdgeInsets.fromLTRB(
+                                    16,
+                                    0,
+                                    16,
+                                    24,
+                                  ),
                                   decoration: PopupShade.panel(color: _shade),
                                   child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              PopupTitleBadge(
-                                title: 'Level ${widget.level}',
-                                shadeColor: _shade,
-                                endColor: _shadeEnd,
-                              ),
-                              Center(
-                                child: Container(
-                                  constraints: const BoxConstraints(minWidth: 150),
-                                  clipBehavior: Clip.antiAlias,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  foregroundDecoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                      color: PopupShade.borderTint(_shade),
-                                      width: 1.6,
-                                    ),
-                                  ),
-                                  child: Stack(
-                                    alignment: Alignment.center,
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Positioned.fill(
-                                        child: PopupBackground(
-                                          offset: Offset(0, -28),
-                                          tint: _shade,
+                                      PopupTitleBadge(
+                                        title: 'Level ${widget.level}',
+                                        shadeColor: _shade,
+                                        endColor: _shadeEnd,
+                                      ),
+                                      Center(
+                                        child: Container(
+                                          constraints: const BoxConstraints(
+                                            minWidth: 150,
+                                          ),
+                                          clipBehavior: Clip.antiAlias,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                          ),
+                                          foregroundDecoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                            border: Border.all(
+                                              color: PopupShade.borderTint(
+                                                _shade,
+                                              ),
+                                              width: 1.6,
+                                            ),
+                                          ),
+                                          child: Stack(
+                                            alignment: Alignment.center,
+                                            children: [
+                                              const Positioned.fill(
+                                                child: PopupBackground(
+                                                  offset: Offset(0, -28),
+                                                  tint: _shade,
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.fromLTRB(
+                                                      24,
+                                                      20,
+                                                      24,
+                                                      20,
+                                                    ),
+                                                child: Column(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.center,
+                                                  children: [
+                                                    SizedBox(
+                                                      width: _heartSize,
+                                                      height: _heartSize,
+                                                      child: Stack(
+                                                        alignment:
+                                                            Alignment.center,
+                                                        children: [
+                                                          Image.asset(
+                                                            'lib/assets/heart/icon1.png',
+                                                            width: _heartSize,
+                                                            height: _heartSize,
+                                                            fit: BoxFit.contain,
+                                                          ),
+                                                          const _StickerLabel(
+                                                            text: '1',
+                                                            depthColor: Color(
+                                                              0xFF5A1018,
+                                                            ),
+                                                            style: TextStyle(
+                                                              fontSize: 24,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w900,
+                                                              height: 1,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    const SizedBox(height: 12),
+                                                    _StickerLabel(
+                                                      text: levelTitleAt(
+                                                        widget.level,
+                                                      ),
+                                                      depthColor: const Color(
+                                                        0xFF212121,
+                                                      ),
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                      style: const TextStyle(
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        height: 1.4,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
-                                      Padding(
-                                        padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          crossAxisAlignment: CrossAxisAlignment.center,
-                                          children: [
-                                            SizedBox(
-                                              width: _heartSize,
-                                              height: _heartSize,
-                                              child: Stack(
-                                                alignment: Alignment.center,
-                                                children: [
-                                                  Image.asset(
-                                                    'lib/assets/heart/icon1.png',
-                                                    width: _heartSize,
-                                                    height: _heartSize,
-                                                    fit: BoxFit.contain,
-                                                  ),
-                                                  const _StickerLabel(
-                                                    text: '1',
-                                                    depthColor:
-                                                        Color(0xFF5A1018),
-                                                    style: TextStyle(
-                                                      fontSize: 24,
-                                                      fontWeight:
-                                                          FontWeight.w900,
-                                                      height: 1,
-                                                    ),
-                                                  ),
+                                      const SizedBox(height: 24),
+                                      Center(
+                                        child: GestureDetector(
+                                          behavior: HitTestBehavior.opaque,
+                                          onTap: widget.onRetry,
+                                          child: Container(
+                                            height: 48,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 24,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(40),
+                                              gradient: const LinearGradient(
+                                                begin: Alignment.topCenter,
+                                                end: Alignment.bottomCenter,
+                                                colors: [
+                                                  Color(0xFFB6F34A),
+                                                  Color(0xFF6FBF1E),
+                                                  Color(0xFF4E9A12),
                                                 ],
+                                                stops: [0.0, 0.55, 1.0],
+                                              ),
+                                              border: Border.all(
+                                                color: const Color(0xFF2F6B0C),
+                                                width: 4,
+                                              ),
+                                              boxShadow: const [
+                                                BoxShadow(
+                                                  color: Color(0x66000000),
+                                                  blurRadius: 2,
+                                                  offset: Offset(0, 1),
+                                                ),
+                                              ],
+                                            ),
+                                            child: const _StickerLabel(
+                                              text: 'Try Again',
+                                              depthColor: Color(0xFF24580A),
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w900,
+                                                height: 1,
+                                                letterSpacing: -.2,
                                               ),
                                             ),
-                                            const SizedBox(height: 12),
-                                            _StickerLabel(
-                                              text: levelTitleAt(widget.level),
-                                              depthColor:
-                                                  const Color(0xFF212121),
-                                              textAlign: TextAlign.center,
-                                              style: const TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w600,
-                                                height: 1.4,
-                                              ),
-                                            ),
-                                          ],
+                                          ),
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 24),
-                              Center(
-                                child: GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: widget.onRetry,
-                                  child: Container(
-                                    height: 48,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 24,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(40),
-                                      gradient: const LinearGradient(
-                                        begin: Alignment.topCenter,
-                                        end: Alignment.bottomCenter,
-                                        colors: [
-                                          Color(0xFFB6F34A),
-                                          Color(0xFF6FBF1E),
-                                          Color(0xFF4E9A12),
-                                        ],
-                                        stops: [0.0, 0.55, 1.0],
-                                      ),
-                                      border: Border.all(
-                                        color: const Color(0xFF2F6B0C),
-                                        width: 4,
-                                      ),
-                                      boxShadow: const [
-                                        BoxShadow(
-                                          color: Color(0x66000000),
-                                          blurRadius: 2,
-                                          offset: Offset(0, 1),
-                                        ),
-                                      ],
-                                    ),
-                                    child: const _StickerLabel(
-                                      text: 'Try Again',
-                                      depthColor: Color(0xFF24580A),
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w900,
-                                        height: 1,
-                                        letterSpacing: -.2,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                      Positioned(
-                        top: 24,
-                        right: 12,
-                        child: PopupCloseButton(
-                          onTap: widget.onClose,
-                          borderColor: PopupShade.borderTint(_shade),
+                        Positioned(
+                          top: 24,
+                          right: 12,
+                          child: PopupCloseButton(
+                            onTap: widget.onClose,
+                            borderColor: PopupShade.borderTint(_shade),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ],
-        );
-      },
+          ),
+        ],
+      ),
     );
   }
 }
@@ -319,10 +341,7 @@ class _StickerLabel extends StatelessWidget {
                 return LinearGradient(
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
-                  colors: [
-                    innerBorderColor!,
-                    Colors.white,
-                  ],
+                  colors: [innerBorderColor!, Colors.white],
                   stops: const [0.0, 0.28],
                 ).createShader(bounds);
               },

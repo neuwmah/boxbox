@@ -448,7 +448,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     if (dt <= 0) return;
     dt = dt.clamp(0.0, 1 / 30);
 
-    if (_exiting || _continueOpen) return;
+    if (_exiting || _continueOpen || _returnOpen) return;
 
     _world.step(1 / 120, dt, 5);
 

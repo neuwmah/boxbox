@@ -43,28 +43,19 @@ class _NoAdsPopupState extends State<NoAdsPopup>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) {
-        final t = _controller.value;
-        final dim = PopupAppear.dim(t);
-
-        return Stack(
-          fit: StackFit.expand,
-          children: [
-            Positioned.fill(
-              child: ColoredBox(
-                color: Colors.black.withValues(alpha: 0.55 * dim),
-              ),
-            ),
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
-                child: PopupAppearScale(
-                  t: t,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 270),
-                    child: Material(
+    return RepaintBoundary(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          PopupDim(animation: _controller),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+              child: PopupAppearScale(
+                animation: _controller,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 270),
+                  child: Material(
                     color: Colors.transparent,
                     child: Stack(
                       clipBehavior: Clip.none,
@@ -87,7 +78,12 @@ class _NoAdsPopupState extends State<NoAdsPopup>
                                 ),
                                 child: Container(
                                   width: double.infinity,
-                                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                                  padding: const EdgeInsets.fromLTRB(
+                                    24,
+                                    0,
+                                    24,
+                                    24,
+                                  ),
                                   decoration: PopupShade.panel(color: _shade),
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
@@ -101,14 +97,18 @@ class _NoAdsPopupState extends State<NoAdsPopup>
                                         child: Container(
                                           clipBehavior: Clip.antiAlias,
                                           decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
                                           ),
                                           foregroundDecoration: BoxDecoration(
-                                            borderRadius:
-                                              BorderRadius.circular(8),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
                                             border: Border.all(
-                                              color: PopupShade.borderTint(_shade),
+                                              color: PopupShade.borderTint(
+                                                _shade,
+                                              ),
                                               width: 1.6,
                                             ),
                                           ),
@@ -122,7 +122,12 @@ class _NoAdsPopupState extends State<NoAdsPopup>
                                               ),
                                               Padding(
                                                 padding:
-                                                    const EdgeInsets.fromLTRB(16, 24, 16, 20),
+                                                    const EdgeInsets.fromLTRB(
+                                                      16,
+                                                      24,
+                                                      16,
+                                                      20,
+                                                    ),
                                                 child: Column(
                                                   mainAxisSize:
                                                       MainAxisSize.min,
@@ -137,10 +142,12 @@ class _NoAdsPopupState extends State<NoAdsPopup>
                                                     const _StickerLabel(
                                                       text:
                                                           'All pop-up ads will be permanently removed!',
-                                                      depthColor:
-                                                          Color(0xFF212121),
-                                                      offsets: _StickerLabel
-                                                          .offsets2,
+                                                      depthColor: Color(
+                                                        0xFF212121,
+                                                      ),
+                                                      offsets:
+                                                          _StickerLabel
+                                                              .offsets2,
                                                       textAlign:
                                                           TextAlign.center,
                                                       style: TextStyle(
@@ -164,8 +171,7 @@ class _NoAdsPopupState extends State<NoAdsPopup>
                                           onTap: widget.onPurchase,
                                           child: Container(
                                             height: 48,
-                                            padding:
-                                                const EdgeInsets.symmetric(
+                                            padding: const EdgeInsets.symmetric(
                                               horizontal: 24,
                                             ),
                                             decoration: BoxDecoration(
@@ -182,8 +188,7 @@ class _NoAdsPopupState extends State<NoAdsPopup>
                                                 stops: [0.0, 0.55, 1.0],
                                               ),
                                               border: Border.all(
-                                                color:
-                                                    const Color(0xFF2F6B0C),
+                                                color: const Color(0xFF2F6B0C),
                                                 width: 4,
                                               ),
                                               boxShadow: const [
@@ -196,8 +201,9 @@ class _NoAdsPopupState extends State<NoAdsPopup>
                                             ),
                                             child: _StickerLabel(
                                               text: widget.priceLabel,
-                                              depthColor:
-                                                  const Color(0xFF24580A),
+                                              depthColor: const Color(
+                                                0xFF24580A,
+                                              ),
                                               style: const TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w900,
@@ -226,13 +232,12 @@ class _NoAdsPopupState extends State<NoAdsPopup>
                       ],
                     ),
                   ),
-                    ),
-                  ),
                 ),
               ),
-          ],
-        );
-      },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

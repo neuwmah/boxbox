@@ -51,28 +51,19 @@ class _MoreLivesPopupState extends State<MoreLivesPopup>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) {
-        final t = _controller.value;
-        final dim = PopupAppear.dim(t);
-
-        return Stack(
-          fit: StackFit.expand,
-          children: [
-            Positioned.fill(
-              child: ColoredBox(
-                color: Colors.black.withValues(alpha: 0.55 * dim),
-              ),
-            ),
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
-                child: PopupAppearScale(
-                  t: t,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 270),
-                    child: Material(
+    return RepaintBoundary(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          PopupDim(animation: _controller),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+              child: PopupAppearScale(
+                animation: _controller,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 270),
+                  child: Material(
                     color: Colors.transparent,
                     child: Stack(
                       clipBehavior: Clip.none,
@@ -89,333 +80,386 @@ class _MoreLivesPopupState extends State<MoreLivesPopup>
                                 ),
                               ),
                               Padding(
-                                padding:
-                                    const EdgeInsets.only(right: 4, bottom: 4),
+                                padding: const EdgeInsets.only(
+                                  right: 4,
+                                  bottom: 4,
+                                ),
                                 child: Container(
                                   width: double.infinity,
-                                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 24),
+                                  padding: const EdgeInsets.fromLTRB(
+                                    0,
+                                    0,
+                                    0,
+                                    24,
+                                  ),
                                   decoration: PopupShade.panel(color: _shade),
                                   child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const PopupTitleBadge(
-                                title: 'More Lives!',
-                                shadeColor: _shade,
-                                endColor: _shadeEnd,
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 16),
-                                child: Center(
-                                  child: Container(
-                                    clipBehavior: Clip.antiAlias,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    foregroundDecoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color: PopupShade.borderTint(_shade),
-                                        width: 1.6,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const PopupTitleBadge(
+                                        title: 'More Lives!',
+                                        shadeColor: _shade,
+                                        endColor: _shadeEnd,
                                       ),
-                                    ),
-                                    child: Stack(
-                                      children: [
-                                        const Positioned.fill(
-                                          child: PopupBackground(
-                                            offset: Offset(0, -36),
-                                            tint: _shade,
-                                          ),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
                                         ),
-                                        Padding(
-                                          padding: const EdgeInsets.fromLTRB(
-                                            32,
-                                            20,
-                                            32,
-                                            20,
-                                          ),
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              SizedBox(
-                                                width: _heartSize,
-                                                height: _heartSize,
-                                                child: Stack(
-                                                  alignment: Alignment.center,
-                                                  children: [
-                                                    Image.asset(
-                                                      'lib/assets/heart/icon1.png',
-                                                      width: _heartSize,
-                                                      height: _heartSize,
-                                                      fit: BoxFit.contain,
-                                                    ),
-                                                    _StickerLabel(
-                                                      text: '${widget.hearts}',
-                                                      depthColor:
-                                                          const Color(0xFF5A1018),
-                                                      style: const TextStyle(
-                                                        fontSize: 24,
-                                                        fontWeight:
-                                                            FontWeight.w900,
-                                                        height: 1,
-                                                      ),
-                                                    ),
-                                                  ],
+                                        child: Center(
+                                          child: Container(
+                                            clipBehavior: Clip.antiAlias,
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            foregroundDecoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              border: Border.all(
+                                                color: PopupShade.borderTint(
+                                                  _shade,
                                                 ),
+                                                width: 1.6,
                                               ),
-                                              const SizedBox(height: 12),
-                                              const _StickerLabel(
-                                                text: 'Time to next life!',
-                                                depthColor: Color(0xFF212121),
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w600,
-                                                  height: 1.4,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 10),
-                                              Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                  horizontal: 12,
-                                                  vertical: 6,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.black,
-                                                  borderRadius:
-                                                      BorderRadius.circular(20),
-                                                  border: Border.all(
-                                                    color: const Color(0xFF101010),
-                                                    width: 1.6,
+                                            ),
+                                            child: Stack(
+                                              children: [
+                                                const Positioned.fill(
+                                                  child: PopupBackground(
+                                                    offset: Offset(0, -36),
+                                                    tint: _shade,
                                                   ),
                                                 ),
-                                                child: Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    const Icon(
-                                                      Icons
-                                                          .access_time_rounded,
-                                                      size: 16,
-                                                      color: Colors.white,
-                                                    ),
-                                                    const SizedBox(width: 6),
-                                                    Text(
-                                                      widget.heartTimer,
-                                                      style: const TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.w700,
-                                                        height: 1,
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.fromLTRB(
+                                                        32,
+                                                        20,
+                                                        32,
+                                                        20,
                                                       ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 24),
-                              Center(
-                                child: GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: widget.onRefill,
-                                  child: Container(
-                                    height: 48,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 24,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(40),
-                                      gradient: const LinearGradient(
-                                        begin: Alignment.topCenter,
-                                        end: Alignment.bottomCenter,
-                                        colors: [
-                                          Color(0xFFB6F34A),
-                                          Color(0xFF6FBF1E),
-                                          Color(0xFF4E9A12),
-                                        ],
-                                        stops: [0.0, 0.55, 1.0],
-                                      ),
-                                      border: Border.all(
-                                        color: const Color(0xFF2F6B0C),
-                                        width: 4,
-                                      ),
-                                      boxShadow: const [
-                                        BoxShadow(
-                                          color: Color(0x66000000),
-                                          blurRadius: 2,
-                                          offset: Offset(0, 1),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const _StickerLabel(
-                                          text: 'Refill',
-                                          depthColor: Color(0xFF24580A),
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w900,
-                                            height: 1,
-                                            letterSpacing: -.2,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 4.5),
-                                        SizedBox(
-                                          width: _coinSize,
-                                          height: _coinSize,
-                                          child: Stack(
-                                            fit: StackFit.expand,
-                                            children: [
-                                              Image.asset(
-                                                'lib/assets/coin/icon1.png',
-                                                width: _coinSize,
-                                                height: _coinSize,
-                                                fit: BoxFit.contain,
-                                              ),
-                                              const DecoratedBox(
-                                                decoration: BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  border:
-                                                      Border.fromBorderSide(
-                                                    BorderSide(
-                                                      color: Color(0xFF905D00),
-                                                      width: 1,
-                                                    ),
+                                                  child: Column(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      SizedBox(
+                                                        width: _heartSize,
+                                                        height: _heartSize,
+                                                        child: Stack(
+                                                          alignment:
+                                                              Alignment.center,
+                                                          children: [
+                                                            Image.asset(
+                                                              'lib/assets/heart/icon1.png',
+                                                              width: _heartSize,
+                                                              height:
+                                                                  _heartSize,
+                                                              fit:
+                                                                  BoxFit
+                                                                      .contain,
+                                                            ),
+                                                            _StickerLabel(
+                                                              text:
+                                                                  '${widget.hearts}',
+                                                              depthColor:
+                                                                  const Color(
+                                                                    0xFF5A1018,
+                                                                  ),
+                                                              style: const TextStyle(
+                                                                fontSize: 24,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w900,
+                                                                height: 1,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      const SizedBox(
+                                                        height: 12,
+                                                      ),
+                                                      const _StickerLabel(
+                                                        text:
+                                                            'Time to next life!',
+                                                        depthColor: Color(
+                                                          0xFF212121,
+                                                        ),
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                        style: TextStyle(
+                                                          fontSize: 14,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                          height: 1.4,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(
+                                                        height: 10,
+                                                      ),
+                                                      Container(
+                                                        padding:
+                                                            const EdgeInsets.symmetric(
+                                                              horizontal: 12,
+                                                              vertical: 6,
+                                                            ),
+                                                        decoration: BoxDecoration(
+                                                          color: Colors.black,
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                20,
+                                                              ),
+                                                          border: Border.all(
+                                                            color: const Color(
+                                                              0xFF101010,
+                                                            ),
+                                                            width: 1.6,
+                                                          ),
+                                                        ),
+                                                        child: Row(
+                                                          mainAxisSize:
+                                                              MainAxisSize.min,
+                                                          children: [
+                                                            const Icon(
+                                                              Icons
+                                                                  .access_time_rounded,
+                                                              size: 16,
+                                                              color:
+                                                                  Colors.white,
+                                                            ),
+                                                            const SizedBox(
+                                                              width: 6,
+                                                            ),
+                                                            Text(
+                                                              widget.heartTimer,
+                                                              style: const TextStyle(
+                                                                color:
+                                                                    Colors
+                                                                        .white,
+                                                                fontSize: 14,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w700,
+                                                                height: 1,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ],
                                                   ),
                                                 ),
-                                              ),
-                                            ],
+                                              ],
+                                            ),
                                           ),
                                         ),
-                                        const SizedBox(width: 3),
-                                        _StickerLabel(
-                                          text: '${widget.refillPrice}',
-                                          depthColor: const Color(0xFF24580A),
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w900,
-                                            height: 1,
-                                            letterSpacing: -.2,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Center(
-                                child: GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: widget.onWatchAd,
-                                  child: Container(
-                                    height: 48,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 24,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(40),
-                                      gradient: const LinearGradient(
-                                        begin: Alignment.topCenter,
-                                        end: Alignment.bottomCenter,
-                                        colors: [
-                                          Color(0xFFC42A1E),
-                                          Color(0xFFA11309),
-                                          Color(0xFF7E0E07),
-                                        ],
-                                        stops: [0.0, 0.55, 1.0],
                                       ),
-                                      border: Border.all(
-                                        color: const Color(0xFF6B0C06),
-                                        width: 4,
-                                      ),
-                                      boxShadow: const [
-                                        BoxShadow(
-                                          color: Color(0x66000000),
-                                          blurRadius: 2,
-                                          offset: Offset(0, 1),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        SizedBox(
-                                          width: _statusHeartSize,
-                                          height: _statusHeartSize,
-                                          child: Stack(
-                                            alignment: Alignment.center,
-                                            children: [
-                                              Image.asset(
-                                                'lib/assets/heart/icon1.png',
-                                                width: _statusHeartSize,
-                                                height: _statusHeartSize,
-                                                fit: BoxFit.contain,
+                                      const SizedBox(height: 24),
+                                      Center(
+                                        child: GestureDetector(
+                                          behavior: HitTestBehavior.opaque,
+                                          onTap: widget.onRefill,
+                                          child: Container(
+                                            height: 48,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 24,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(40),
+                                              gradient: const LinearGradient(
+                                                begin: Alignment.topCenter,
+                                                end: Alignment.bottomCenter,
+                                                colors: [
+                                                  Color(0xFFB6F34A),
+                                                  Color(0xFF6FBF1E),
+                                                  Color(0xFF4E9A12),
+                                                ],
+                                                stops: [0.0, 0.55, 1.0],
                                               ),
-                                              const _StickerLabel(
-                                                text: '+1',
-                                                depthColor: Color(0xFF5A1018),
-                                                offsets: _StickerLabel.offsets1,
-                                                style: TextStyle(
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w700,
-                                                  height: 1,
+                                              border: Border.all(
+                                                color: const Color(0xFF2F6B0C),
+                                                width: 4,
+                                              ),
+                                              boxShadow: const [
+                                                BoxShadow(
+                                                  color: Color(0x66000000),
+                                                  blurRadius: 2,
+                                                  offset: Offset(0, 1),
                                                 ),
+                                              ],
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                const _StickerLabel(
+                                                  text: 'Refill',
+                                                  depthColor: Color(0xFF24580A),
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w900,
+                                                    height: 1,
+                                                    letterSpacing: -.2,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 4.5),
+                                                SizedBox(
+                                                  width: _coinSize,
+                                                  height: _coinSize,
+                                                  child: Stack(
+                                                    fit: StackFit.expand,
+                                                    children: [
+                                                      Image.asset(
+                                                        'lib/assets/coin/icon1.png',
+                                                        width: _coinSize,
+                                                        height: _coinSize,
+                                                        fit: BoxFit.contain,
+                                                      ),
+                                                      const DecoratedBox(
+                                                        decoration: BoxDecoration(
+                                                          shape:
+                                                              BoxShape.circle,
+                                                          border:
+                                                              Border.fromBorderSide(
+                                                                BorderSide(
+                                                                  color: Color(
+                                                                    0xFF905D00,
+                                                                  ),
+                                                                  width: 1,
+                                                                ),
+                                                              ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 3),
+                                                _StickerLabel(
+                                                  text: '${widget.refillPrice}',
+                                                  depthColor: const Color(
+                                                    0xFF24580A,
+                                                  ),
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w900,
+                                                    height: 1,
+                                                    letterSpacing: -.2,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Center(
+                                        child: GestureDetector(
+                                          behavior: HitTestBehavior.opaque,
+                                          onTap: widget.onWatchAd,
+                                          child: Container(
+                                            height: 48,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 24,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(40),
+                                              gradient: const LinearGradient(
+                                                begin: Alignment.topCenter,
+                                                end: Alignment.bottomCenter,
+                                                colors: [
+                                                  Color(0xFFC42A1E),
+                                                  Color(0xFFA11309),
+                                                  Color(0xFF7E0E07),
+                                                ],
+                                                stops: [0.0, 0.55, 1.0],
                                               ),
-                                            ],
+                                              border: Border.all(
+                                                color: const Color(0xFF6B0C06),
+                                                width: 4,
+                                              ),
+                                              boxShadow: const [
+                                                BoxShadow(
+                                                  color: Color(0x66000000),
+                                                  blurRadius: 2,
+                                                  offset: Offset(0, 1),
+                                                ),
+                                              ],
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                SizedBox(
+                                                  width: _statusHeartSize,
+                                                  height: _statusHeartSize,
+                                                  child: Stack(
+                                                    alignment: Alignment.center,
+                                                    children: [
+                                                      Image.asset(
+                                                        'lib/assets/heart/icon1.png',
+                                                        width: _statusHeartSize,
+                                                        height:
+                                                            _statusHeartSize,
+                                                        fit: BoxFit.contain,
+                                                      ),
+                                                      const _StickerLabel(
+                                                        text: '+1',
+                                                        depthColor: Color(
+                                                          0xFF5A1018,
+                                                        ),
+                                                        offsets:
+                                                            _StickerLabel
+                                                                .offsets1,
+                                                        style: TextStyle(
+                                                          fontSize: 12,
+                                                          fontWeight:
+                                                              FontWeight.w700,
+                                                          height: 1,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 4.5),
+                                                const _StickerLabel(
+                                                  text: 'Life',
+                                                  depthColor: Color(0xFF4A0804),
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w900,
+                                                    height: 1,
+                                                    letterSpacing: -.2,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
-                                        const SizedBox(width: 4.5),
-                                        const _StickerLabel(
-                                          text: 'Life',
-                                          depthColor: Color(0xFF4A0804),
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w900,
-                                            height: 1,
-                                            letterSpacing: -.2,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                      Positioned(
-                        top: 24,
-                        right: 12,
-                        child: PopupCloseButton(
-                          onTap: widget.onClose,
-                          borderColor: PopupShade.borderTint(_shade),
+                        Positioned(
+                          top: 24,
+                          right: 12,
+                          child: PopupCloseButton(
+                            onTap: widget.onClose,
+                            borderColor: PopupShade.borderTint(_shade),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ],
-        );
-      },
+          ),
+        ],
+      ),
     );
   }
 }
@@ -437,11 +481,7 @@ class _StickerLabel extends StatelessWidget {
   final TextAlign? textAlign;
   final Color? innerBorderColor;
 
-  static const offsets1 = [
-    Offset(1, 1),
-    Offset(0, 1),
-    Offset(1, 0),
-  ];
+  static const offsets1 = [Offset(1, 1), Offset(0, 1), Offset(1, 0)];
 
   static const offsets2 = [
     Offset(1, 1),
@@ -499,10 +539,7 @@ class _StickerLabel extends StatelessWidget {
                 return LinearGradient(
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
-                  colors: [
-                    innerBorderColor!,
-                    Colors.white,
-                  ],
+                  colors: [innerBorderColor!, Colors.white],
                   stops: const [0.0, 0.28],
                 ).createShader(bounds);
               },

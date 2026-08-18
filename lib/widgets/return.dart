@@ -3,11 +3,7 @@ import 'package:boxbox/widgets/background.dart';
 import 'package:boxbox/widgets/titlebar.dart';
 
 class ReturnPopup extends StatefulWidget {
-  const ReturnPopup({
-    super.key,
-    required this.onClose,
-    required this.onQuit,
-  });
+  const ReturnPopup({super.key, required this.onClose, required this.onQuit});
 
   final VoidCallback onClose;
   final VoidCallback onQuit;
@@ -41,28 +37,19 @@ class _ReturnPopupState extends State<ReturnPopup>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) {
-        final t = _controller.value;
-        final dim = PopupAppear.dim(t);
-
-        return Stack(
-          fit: StackFit.expand,
-          children: [
-            Positioned.fill(
-              child: ColoredBox(
-                color: Colors.black.withValues(alpha: 0.55 * dim),
-              ),
-            ),
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
-                child: PopupAppearScale(
-                  t: t,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 270),
-                    child: Material(
+    return RepaintBoundary(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          PopupDim(animation: _controller),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+              child: PopupAppearScale(
+                animation: _controller,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 270),
+                  child: Material(
                     color: Colors.transparent,
                     child: Stack(
                       clipBehavior: Clip.none,
@@ -79,11 +66,18 @@ class _ReturnPopupState extends State<ReturnPopup>
                                 ),
                               ),
                               Padding(
-                                padding:
-                                    const EdgeInsets.only(right: 4, bottom: 4),
+                                padding: const EdgeInsets.only(
+                                  right: 4,
+                                  bottom: 4,
+                                ),
                                 child: Container(
                                   width: double.infinity,
-                                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                                  padding: const EdgeInsets.fromLTRB(
+                                    24,
+                                    0,
+                                    24,
+                                    24,
+                                  ),
                                   decoration: PopupShade.panel(color: _shade),
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
@@ -97,12 +91,14 @@ class _ReturnPopupState extends State<ReturnPopup>
                                         child: Container(
                                           clipBehavior: Clip.antiAlias,
                                           decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
                                           ),
                                           foregroundDecoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
                                             border: Border.all(
                                               color: PopupShade.borderTint(
                                                 _shade,
@@ -119,7 +115,13 @@ class _ReturnPopupState extends State<ReturnPopup>
                                                 ),
                                               ),
                                               Padding(
-                                                padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
+                                                padding:
+                                                    const EdgeInsets.fromLTRB(
+                                                      24,
+                                                      20,
+                                                      24,
+                                                      20,
+                                                    ),
                                                 child: Column(
                                                   mainAxisSize:
                                                       MainAxisSize.min,
@@ -134,8 +136,9 @@ class _ReturnPopupState extends State<ReturnPopup>
                                                     const _StickerLabel(
                                                       text:
                                                           'If you give up now, you will lose a life!',
-                                                      depthColor:
-                                                          Color(0xFF212121),
+                                                      depthColor: Color(
+                                                        0xFF212121,
+                                                      ),
                                                       textAlign:
                                                           TextAlign.center,
                                                       style: TextStyle(
@@ -218,13 +221,12 @@ class _ReturnPopupState extends State<ReturnPopup>
                       ],
                     ),
                   ),
-                    ),
-                  ),
                 ),
               ),
-          ],
-        );
-      },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -302,10 +304,7 @@ class _StickerLabel extends StatelessWidget {
                 return LinearGradient(
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
-                  colors: [
-                    innerBorderColor!,
-                    Colors.white,
-                  ],
+                  colors: [innerBorderColor!, Colors.white],
                   stops: const [0.0, 0.28],
                 ).createShader(bounds);
               },
