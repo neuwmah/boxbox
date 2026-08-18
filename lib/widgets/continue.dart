@@ -25,7 +25,8 @@ class ContinuePopup extends StatefulWidget {
 
 class _ContinuePopupState extends State<ContinuePopup>
     with SingleTickerProviderStateMixin {
-  static const _border = Color(0xFF101010);
+  static const _shade = Color(0xFF333333);
+  static const _shadeEnd = Color(0xFF050505);
   static const _coinSize = 32.0;
 
   late final AnimationController _controller;
@@ -93,28 +94,12 @@ class _ContinuePopupState extends State<ContinuePopup>
                           child: Stack(
                             clipBehavior: Clip.none,
                             children: [
-                              for (final o in [4.0, 3.0, 2.0, 1.0])
-                                Positioned(
-                                  left: o,
-                                  top: o,
-                                  right: 4 - o,
-                                  bottom: 4 - o,
-                                  child: const DecoratedBox(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.all(
-                                        Radius.circular(8),
-                                      ),
-                                      gradient: LinearGradient(
-                                        begin: Alignment.topCenter,
-                                        end: Alignment.bottomCenter,
-                                        colors: [
-                                          Color(0xFF101010),
-                                          Color(0xFF050505),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
+                              const Positioned.fill(
+                                child: PopupBodyShade(
+                                  color: _shade,
+                                  endColor: _shadeEnd,
                                 ),
+                              ),
                               Padding(
                                 padding:
                                     const EdgeInsets.only(right: 4, bottom: 4),
@@ -126,29 +111,34 @@ class _ContinuePopupState extends State<ContinuePopup>
                                     16,
                                     24,
                                   ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.black,
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                      color: _border,
-                                      width: 1.6,
-                                    ),
-                                  ),
+                                  decoration: PopupShade.panel(color: _shade),
                                   child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const PopupTitleBadge(title: 'Continue?'),
+                              const PopupTitleBadge(
+                                title: 'Continue?',
+                                shadeColor: _shade,
+                                endColor: _shadeEnd,
+                              ),
                               Center(
                                 child: Container(
                                   clipBehavior: Clip.antiAlias,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(8),
                                   ),
+                                  foregroundDecoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: PopupShade.borderTint(_shade),
+                                      width: 1.6,
+                                    ),
+                                  ),
                                   child: Stack(
                                     children: [
                                       const Positioned.fill(
                                         child: PopupBackground(
                                           offset: Offset(0, -12),
+                                          tint: _shade,
                                         ),
                                       ),
                                       Padding(
@@ -288,7 +278,10 @@ class _ContinuePopupState extends State<ContinuePopup>
                         Positioned(
                           top: 24,
                           right: 12,
-                          child: PopupCloseButton(onTap: widget.onClose),
+                          child: PopupCloseButton(
+                            onTap: widget.onClose,
+                            borderColor: PopupShade.borderTint(_shade),
+                          ),
                         ),
                       ],
                     ),

@@ -134,21 +134,111 @@ class PopupAppearScale extends StatelessWidget {
   }
 }
 
+class PopupShade {
+  PopupShade._();
+
+  static const start = Color(0xFF101010);
+  static const end = Color(0xFF050505);
+  static const depth = 4.0;
+  static const steps = [4.0, 3.0, 2.0, 1.0];
+  static const _fillMix = 0.025;
+  static const _borderMix = 0.25;
+
+  static LinearGradient gradient([
+    Color startColor = start,
+    Color endColor = end,
+  ]) {
+    return LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [startColor, endColor],
+    );
+  }
+
+  static Color muted(Color color) =>
+      Color.lerp(Colors.black, color, _fillMix)!;
+
+  static Color borderTint(Color color) =>
+      Color.lerp(Colors.black, color, _borderMix)!;
+
+  static LinearGradient fillGradient(Color color) {
+    return LinearGradient(
+      begin: Alignment.topRight,
+      end: Alignment.bottomLeft,
+      colors: [
+        muted(color),
+        Colors.black,
+      ],
+    );
+  }
+
+  static BoxDecoration panel({
+    Color? color,
+    double radius = 8,
+    double borderWidth = 1.6,
+  }) {
+    final tinted = color != null && color != start;
+    return BoxDecoration(
+      color: tinted ? null : Colors.black,
+      gradient: tinted ? fillGradient(color!) : null,
+      borderRadius: BorderRadius.circular(radius),
+      border: Border.all(
+        color: tinted ? borderTint(color!) : start,
+        width: borderWidth,
+      ),
+    );
+  }
+}
+
+class PopupBodyShade extends StatelessWidget {
+  const PopupBodyShade({
+    super.key,
+    this.color = PopupShade.start,
+    this.endColor = PopupShade.end,
+  });
+
+  final Color color;
+  final Color endColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        for (final o in PopupShade.steps)
+          Positioned(
+            left: o,
+            top: o,
+            right: PopupShade.depth - o,
+            bottom: PopupShade.depth - o,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                gradient: PopupShade.gradient(color, endColor),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
 class PopupTitleBadge extends StatelessWidget {
   const PopupTitleBadge({
     super.key,
     required this.title,
     this.fontSize = 20,
+    this.shadeColor = PopupShade.start,
+    this.endColor = PopupShade.end,
   });
 
   final String title;
   final double fontSize;
+  final Color shadeColor;
+  final Color endColor;
 
   static const _padding = 10.0;
   static const _borderWidth = 1.0;
-  static const _borderColor = Color(0xFF101010);
   static const _gapBelow = 24.0;
-  static const _shadeSteps = [4.0, 3.0, 2.0, 1.0];
 
   static double boxHeight([double fontSize = 24]) =>
       _padding * 2 + fontSize + _borderWidth * 2;
@@ -171,34 +261,26 @@ class PopupTitleBadge extends StatelessWidget {
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                for (final o in _shadeSteps)
+                for (final o in PopupShade.steps)
                   Positioned.fill(
                     child: Transform.translate(
                       offset: Offset(o, o),
-                      child: const DecoratedBox(
+                      child: DecoratedBox(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(4)),
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Color(0xFF101010),
-                              Color(0xFF050505),
-                            ],
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(4),
                           ),
+                          gradient: PopupShade.gradient(shadeColor, endColor),
                         ),
                       ),
                     ),
                   ),
                 Container(
                   padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(
-                      color: _borderColor,
-                      width: _borderWidth,
-                    ),
+                  decoration: PopupShade.panel(
+                    color: shadeColor,
+                    radius: 4,
+                    borderWidth: _borderWidth,
                   ),
                   child: StickerTitle(title: title, fontSize: fontSize),
                 ),
@@ -215,9 +297,11 @@ class PopupCloseButton extends StatelessWidget {
   const PopupCloseButton({
     super.key,
     required this.onTap,
+    this.borderColor = _border,
   });
 
   final VoidCallback onTap;
+  final Color borderColor;
 
   static const _size = 32.0;
   static const _border = Color(0xFF101010);
@@ -233,7 +317,7 @@ class PopupCloseButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.black,
           shape: BoxShape.circle,
-          border: Border.all(color: _border, width: 1.6),
+          border: Border.all(color: borderColor, width: 1.6),
         ),
         child: const Center(
           child: CustomPaint(

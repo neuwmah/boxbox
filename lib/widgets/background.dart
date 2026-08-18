@@ -79,9 +79,11 @@ class PopupBackground extends StatefulWidget {
   const PopupBackground({
     super.key,
     this.offset = Offset.zero,
+    this.tint,
   });
 
   final Offset offset;
+  final Color? tint;
 
   @override
   State<PopupBackground> createState() => _PopupBackgroundState();
@@ -125,12 +127,13 @@ class _PopupBackgroundState extends State<PopupBackground>
             child: SizedBox(
               width: size,
               height: size,
-              child: Image.asset(
-                _asset,
-                fit: BoxFit.cover,
-                filterQuality: FilterQuality.medium,
-                gaplessPlayback: true,
-              ),
+              child: 
+                Image.asset(
+                  _asset,
+                  fit: BoxFit.cover,
+                  filterQuality: FilterQuality.medium,
+                  gaplessPlayback: true,
+                ),
             ),
           ),
           builder: (context, child) {
@@ -145,5 +148,28 @@ class _PopupBackgroundState extends State<PopupBackground>
         );
       },
     );
+  }
+
+  Widget _tinted(Widget child) {
+    final tint = widget.tint;
+    if (tint == null) return child;
+    return ColorFiltered(
+      colorFilter: _lumaTint(tint),
+      child: child,
+    );
+  }
+
+  static ColorFilter _lumaTint(Color tint, [double amount = 0.050]) {
+    const source = 5 / 255;
+    final s = amount / source / 3;
+    final tr = tint.r * s;
+    final tg = tint.g * s;
+    final tb = tint.b * s;
+    return ColorFilter.matrix([
+      tr, tr, tr, 0, 0,
+      tg, tg, tg, 0, 0,
+      tb, tb, tb, 0, 0,
+      0, 0, 0, 1, 0,
+    ]);
   }
 }
