@@ -924,6 +924,11 @@ class _ScenePainter extends CustomPainter {
   static const _focal = 320.0;
   static const _horizon = 0.56;
   static const _coneSegments = 20;
+  static const _glassAlpha = 0.5;
+  static const _glassStrokeAlpha = 0.5;
+
+  static bool _isGlassCube(Color color) =>
+      color.r == 0 && color.g == 0 && color.b == 0;
 
   static double _lightLift(Color base) {
     return base.computeLuminance() < 0.05 ? 0.25 : 1.0;
@@ -931,7 +936,7 @@ class _ScenePainter extends CustomPainter {
 
   static List<Color> _shadeCube(Color base) {
     final lift = _lightLift(base);
-    return [
+    final shades = [
       Color.lerp(base, Colors.white, 0.08 * lift)!,
       Color.lerp(base, Colors.black, 0.22)!,
       Color.lerp(base, Colors.black, 0.34)!,
@@ -939,6 +944,8 @@ class _ScenePainter extends CustomPainter {
       Color.lerp(base, Colors.black, 0.14)!,
       Color.lerp(base, Colors.white, 0.06 * lift)!,
     ];
+    if (!_isGlassCube(base)) return shades;
+    return [for (final c in shades) c.withValues(alpha: _glassAlpha)];
   }
 
   Offset _project(_Vec3 p, Size size) {
@@ -1041,8 +1048,7 @@ class _ScenePainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.7
       ..strokeJoin = StrokeJoin.round
-      ..strokeCap = StrokeCap.round
-      ..color = const Color(0xFF050505);
+      ..strokeCap = StrokeCap.round;
     final gloss = Paint()..style = PaintingStyle.fill;
 
     for (final item in items) {
@@ -1054,6 +1060,7 @@ class _ScenePainter extends CustomPainter {
 
       final path = item.path!;
       final color = item.color;
+      final alpha = color?.a ?? 1.0;
       if (color != null) {
         final bounds = path.getBounds();
         final lift = _lightLift(color);
@@ -1061,9 +1068,10 @@ class _ScenePainter extends CustomPainter {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color.lerp(color, Colors.white, 0.42 * lift)!,
-            color,
-            Color.lerp(color, Colors.black, 0.14)!,
+            Color.lerp(color, Colors.white, 0.42 * lift)!
+                .withValues(alpha: alpha),
+            color.withValues(alpha: alpha),
+            Color.lerp(color, Colors.black, 0.14)!.withValues(alpha: alpha),
           ],
           stops: const [0.0, 0.52, 1.0],
         ).createShader(bounds);
@@ -1072,7 +1080,7 @@ class _ScenePainter extends CustomPainter {
 
         if (item.shiny && bounds.shortestSide > 4) {
           final r = bounds.shortestSide * 0.2;
-          gloss.color = Colors.white.withValues(alpha: 0.38 * lift);
+          gloss.color = Colors.white.withValues(alpha: 0.38 * lift * alpha);
           canvas.drawOval(
             Rect.fromCenter(
               center: Offset(
@@ -1088,6 +1096,9 @@ class _ScenePainter extends CustomPainter {
       }
 
       if (item.stroke) {
+        strokePaint.color = const Color(0xFF050505).withValues(
+          alpha: alpha < 1 ? _glassStrokeAlpha : 1.0,
+        );
         canvas.drawPath(path, strokePaint);
       }
     }
