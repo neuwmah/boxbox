@@ -52,6 +52,11 @@ const floors = <FloorSkin>[
     topColor: 0xFF8DE364,
     bottomColor: 0xFF000000,
   ),
+  FloorSkin(
+    asset: 'lib/assets/floor/grass.png',
+    topColor: 0xFF8DE364,
+    bottomColor: 0xFF000000,
+  ),
 ];
 
 FloorSkin floorAt(int level) {
@@ -61,6 +66,7 @@ FloorSkin floorAt(int level) {
 
 const ballsBadges = <String>[
   'lib/assets/count/balls1.png',
+  'lib/assets/count/balls2.png',
   'lib/assets/count/balls2.png',
 ];
 
@@ -85,7 +91,11 @@ const backgrounds = <BackgroundSkin>[
   ),
   BackgroundSkin(
     asset: 'lib/assets/background/forest.png',
-    scale: 1.085,
+    scale: 1.025,
+  ),
+  BackgroundSkin(
+    asset: 'lib/assets/background/ship.png',
+    scale: 1.025,
   ),
 ];
 
@@ -115,6 +125,7 @@ const levelTitles = <String>[
   'Watermelon',
   'Cherry',
   'Grape',
+  '',
 ];
 
 const levels = <List<Block>>[
@@ -1112,6 +1123,9 @@ const levels = <List<Block>>[
     Block(4, 7, 3, 0xff24523b, box),
     Block(6, 7, 3, 0xff1a7a3e, box),
     Block(7, 7, 3, 0xff1a7a3e, box),
+  ],
+  [
+    Block(0, 0, 3, 0xFF000000, box),
   ],
   // // Pikachu
   // [
