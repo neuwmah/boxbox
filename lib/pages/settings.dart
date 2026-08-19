@@ -1,5 +1,37 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:boxbox/widgets/background.dart';
+
+const _legalUrl = 'https://google.com.br';
+
+Future<void> _openLegalUrl() async {
+  final uri = Uri.parse(_legalUrl);
+
+  if (Platform.isLinux) {
+    if (await _tryProcess('cmd.exe', ['/c', 'start', '', uri.toString()])) {
+      return;
+    }
+    if (await _tryProcess('explorer.exe', [uri.toString()])) {
+      return;
+    }
+    if (await _tryProcess('xdg-open', [uri.toString()])) {
+      return;
+    }
+  }
+
+  await launchUrl(uri, mode: LaunchMode.externalApplication);
+}
+
+Future<bool> _tryProcess(String executable, List<String> arguments) async {
+  try {
+    final result = await Process.run(executable, arguments);
+    return result.exitCode == 0;
+  } catch (_) {
+    return false;
+  }
+}
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -45,12 +77,12 @@ class _SettingsPageState extends State<SettingsPage> {
             const SizedBox(height: 12),
             const Center(child: _PrimaryButton(label: 'Support')),
             const SizedBox(height: 12),
-            const Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _SecondaryButton(label: 'Terms'),
-                SizedBox(width: 12),
-                _SecondaryButton(label: 'Privacy'),
+                _SecondaryButton(label: 'Terms', onTap: _openLegalUrl),
+                const SizedBox(width: 12),
+                _SecondaryButton(label: 'Privacy', onTap: _openLegalUrl),
               ],
             ),
           ],
@@ -250,9 +282,10 @@ class _PrimaryButton extends StatelessWidget {
 }
 
 class _SecondaryButton extends StatelessWidget {
-  const _SecondaryButton({required this.label});
+  const _SecondaryButton({required this.label, required this.onTap});
 
   final String label;
+  final VoidCallback onTap;
 
   static const _base = TextStyle(
     fontSize: 16,
@@ -266,7 +299,7 @@ class _SecondaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {},
+      onTap: onTap,
       child: Container(
         constraints: const BoxConstraints(minWidth: 100),
         padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
