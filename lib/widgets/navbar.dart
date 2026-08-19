@@ -34,7 +34,7 @@ class AppNavbar extends StatelessWidget {
   static const _selectedExtra = 16.0;
   static const _padTop = 4.0;
   static const _padBottom = 4.0;
-  static const _iconSize = 30.0;
+  static const _iconSize = 32.0;
   static const _labelGap = 2.0;
   static const _labelBlock = 14 * 1.4 + 4;
   static const _barHeight =
@@ -127,7 +127,7 @@ class AppNavbar extends StatelessWidget {
                               ),
                               child: Padding(
                                 padding: const EdgeInsets.only(
-                                  top: _padTop + _selectedExtra / 1.55,
+                                  top: _padTop + _selectedExtra / 1.35,
                                   bottom: _padBottom + _selectedExtra / 2,
                                 ),
                                 child: _NavTabBody(
@@ -169,7 +169,7 @@ class _NavTabBody extends StatelessWidget {
 }
 
 class NavAssetIcon extends StatelessWidget {
-  const NavAssetIcon(this.asset, {super.key, this.size = 30});
+  const NavAssetIcon(this.asset, {super.key, this.size = 32});
 
   final String asset;
   final double size;
