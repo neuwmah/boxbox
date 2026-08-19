@@ -16,107 +16,210 @@ class AppNavbar extends StatelessWidget {
 
   static final destinations = [
     NavDestination(
-      icon: (color) => Icon(Icons.shopping_bag, color: color),
+      icon: (_) => const NavAssetIcon('lib/assets/play/shop.png'),
       label: 'Shop',
     ),
     NavDestination(
-      icon: (color) => CubeIcon(color: color),
+      icon: (_) => const NavAssetIcon('lib/assets/play/home.png'),
       label: 'Home',
     ),
     NavDestination(
-      icon: (color) => Icon(Icons.settings, color: color),
+      icon: (_) => const NavAssetIcon('lib/assets/play/settings.png'),
       label: 'Settings',
     ),
   ];
 
+  static const _maxWidth = 300.0;
+  static const _topRadius = Radius.circular(16);
+  static const _selectedExtra = 16.0;
+  static const _padTop = 4.0;
+  static const _padBottom = 4.0;
+  static const _iconSize = 30.0;
+  static const _labelGap = 2.0;
+  static const _labelBlock = 14 * 1.4 + 4;
+  static const _barHeight =
+      _padTop + _iconSize + _labelGap + _labelBlock + _padBottom;
+
   final int selectedIndex;
   final ValueChanged<int> onDestinationSelected;
+
+  BorderRadius _selectedRadius(bool wide) {
+    if (wide) {
+      return const BorderRadius.vertical(top: _topRadius);
+    }
+    switch (selectedIndex) {
+      case 0:
+        return const BorderRadius.only(topRight: _topRadius);
+      case 2:
+        return const BorderRadius.only(topLeft: _topRadius);
+      default:
+        return const BorderRadius.vertical(top: _topRadius);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
       color: Colors.black,
-      child: Align(
-        alignment: Alignment.center,
-        heightFactor: 1,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 300),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final itemWidth = constraints.maxWidth / destinations.length;
+      child: LayoutBuilder(
+        builder: (context, outer) {
+          final wide = outer.maxWidth > _maxWidth;
 
-              return Stack(
-                children: [
-                  Positioned(
-                    left: selectedIndex * itemWidth,
-                    top: 0,
-                    bottom: 0,
-                    width: itemWidth,
-                    child: const ColoredBox(color: Color(0xFF101010)),
-                  ),
-                  IntrinsicHeight(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+          return Align(
+            alignment: Alignment.center,
+            heightFactor: 1,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: _maxWidth),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final itemWidth =
+                      constraints.maxWidth / destinations.length;
+
+                  return SizedBox(
+                    height: _barHeight,
+                    child: Stack(
+                      clipBehavior: Clip.none,
                       children: [
-                        for (var i = 0; i < destinations.length; i++)
-                          Expanded(
-                            child: GestureDetector(
-                              behavior: HitTestBehavior.opaque,
-                              onTap: () => onDestinationSelected(i),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            for (var i = 0; i < destinations.length; i++)
+                              Expanded(
+                                child: i == selectedIndex
+                                    ? const SizedBox.expand()
+                                    : GestureDetector(
+                                        behavior: HitTestBehavior.opaque,
+                                        onTap: () => onDestinationSelected(i),
+                                        child: Center(
+                                          child: destinations[i].icon(
+                                            Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                              ),
+                          ],
+                        ),
+                        Positioned(
+                          left: selectedIndex * itemWidth,
+                          bottom: 0,
+                          width: itemWidth,
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () => onDestinationSelected(selectedIndex),
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Color(0xFF101010),
+                                    Color(0xFF050505),
+                                  ],
+                                ),
+                                borderRadius: _selectedRadius(wide),
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: Colors.black,
+                                    blurRadius: 4,
+                                    offset: Offset(0, 0),
+                                  ),
+                                ],
+                              ),
                               child: Padding(
                                 padding: const EdgeInsets.only(
-                                  top: 8,
-                                  bottom: 8,
+                                  top: _padTop + _selectedExtra / 1.55,
+                                  bottom: _padBottom + _selectedExtra / 2,
                                 ),
-                                child: i == selectedIndex
-                                    ? Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        spacing: 2,
-                                        children: [
-                                          destinations[i].icon(Colors.white),
-                                          Text(
-                                            destinations[i].label,
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ],
-                                      )
-                                    : Center(
-                                        child: destinations[i].icon(Colors.white),
-                                      ),
+                                child: _NavTabBody(
+                                  destination: destinations[selectedIndex],
+                                ),
                               ),
                             ),
                           ),
+                        ),
                       ],
                     ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
+                  );
+                },
+              ),
+            ),
+          );
+        },
       ),
     );
   }
 }
 
-class CubeIcon extends StatelessWidget {
-  const CubeIcon({super.key, this.size = 24, this.color = Colors.white});
+class _NavTabBody extends StatelessWidget {
+  const _NavTabBody({required this.destination});
 
-  final double size;
-  final Color color;
+  final NavDestination destination;
 
   @override
   Widget build(BuildContext context) {
-    return ColorFiltered(
-      colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
-      child: Image.asset(
-        'lib/assets/play/icon.png',
-        width: size,
-        height: size,
-        fit: BoxFit.contain,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      spacing: 2,
+      children: [
+        destination.icon(Colors.white),
+        _NavLabel(destination.label),
+      ],
+    );
+  }
+}
+
+class NavAssetIcon extends StatelessWidget {
+  const NavAssetIcon(this.asset, {super.key, this.size = 30});
+
+  final String asset;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      asset,
+      width: size,
+      height: size,
+      fit: BoxFit.contain,
+    );
+  }
+}
+
+class _NavLabel extends StatelessWidget {
+  const _NavLabel(this.text);
+
+  final String text;
+
+  static const _style = TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.w600,
+    height: 1.4,
+  );
+  static const _depthColor = Color(0xFF050505);
+  static const _offsets = [
+    Offset(1, 1),
+    Offset(2, 2),
+    Offset(0, 1),
+    Offset(1, 0),
+    Offset(1, 2),
+    Offset(2, 1),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(2),
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.center,
+        children: [
+          for (final offset in _offsets)
+            Transform.translate(
+              offset: offset,
+              child: Text(text, style: _style.copyWith(color: _depthColor)),
+            ),
+          Text(text, style: _style.copyWith(color: Colors.white)),
+        ],
       ),
     );
   }

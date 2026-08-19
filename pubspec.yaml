@@ -29,7 +29,9 @@ flutter:
     - lib/assets/coin/pile.png
     - lib/assets/heart/icon1.png
     - lib/assets/heart/broken1.png
-    - lib/assets/play/icon.png
+    - lib/assets/play/home.png
+    - lib/assets/play/settings.png
+    - lib/assets/play/shop.png
     - lib/assets/count/balls1.png
     - lib/assets/count/balls2.png
     - lib/assets/ad/icon.png
