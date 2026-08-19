@@ -127,7 +127,7 @@ class AppNavbar extends StatelessWidget {
                               ),
                               child: Padding(
                                 padding: const EdgeInsets.only(
-                                  top: _padTop + _selectedExtra / 1.35,
+                                  top: _padTop + _selectedExtra / 1.5,
                                   bottom: _padBottom + _selectedExtra / 2,
                                 ),
                                 child: _NavTabBody(
