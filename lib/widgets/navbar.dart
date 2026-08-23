@@ -107,39 +107,32 @@ class AppNavbar extends StatelessWidget {
                           left: selectedIndex * itemWidth,
                           bottom: 0,
                           width: itemWidth,
-                          child: GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onTap: () {
-                              Sfx.instance.playTouch();
-                              onDestinationSelected(selectedIndex);
-                            },
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: [
-                                    Color(0xFF101010),
-                                    Color(0xFF050505),
-                                  ],
-                                ),
-                                borderRadius: _selectedRadius(wide),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: Colors.black,
-                                    blurRadius: 4,
-                                    offset: Offset(0, 0),
-                                  ),
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Color(0xFF101010),
+                                  Color(0xFF050505),
                                 ],
                               ),
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                  top: _padTop + _selectedExtra / 1.5,
-                                  bottom: _padBottom + _selectedExtra / 2,
+                              borderRadius: _selectedRadius(wide),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black,
+                                  blurRadius: 4,
+                                  offset: Offset(0, 0),
                                 ),
-                                child: _NavTabBody(
-                                  destination: destinations[selectedIndex],
-                                ),
+                              ],
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                top: _padTop + _selectedExtra / 1.5,
+                                bottom: _padBottom + _selectedExtra / 2,
+                              ),
+                              child: _NavTabBody(
+                                destination: destinations[selectedIndex],
                               ),
                             ),
                           ),
