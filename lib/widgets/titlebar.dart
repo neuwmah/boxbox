@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:boxbox/sound/sfx.dart';
 import 'package:window_manager/window_manager.dart';
 
 class AppTitleBar extends StatelessWidget {
@@ -350,7 +351,7 @@ class PopupCloseButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: onTap,
+      onTap: () => Sfx.instance.tap(onTap),
       child: Container(
         width: _size,
         height: _size,

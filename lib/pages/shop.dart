@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:boxbox/sound/sfx.dart';
 import 'package:boxbox/widgets/background.dart';
 
 const double kShopPileHeight = 40;
@@ -301,7 +302,9 @@ class _BuyButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      onTap: Sfx.instance.playTouch,
+      child: Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
         gradient: const LinearGradient(
@@ -376,6 +379,7 @@ class _BuyButton extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }

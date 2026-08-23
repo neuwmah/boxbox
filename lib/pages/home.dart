@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:boxbox/sound/sfx.dart';
 import 'package:boxbox/widgets/titlebar.dart';
 
 class HomePage extends StatelessWidget {
@@ -49,7 +50,7 @@ class HomePage extends StatelessWidget {
           child: Transform.translate(
             offset: const Offset(0, 40),
             child: GestureDetector(
-              onTap: onLevelTap,
+              onTap: () => Sfx.instance.tap(onLevelTap),
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 30,
@@ -74,7 +75,7 @@ class HomePage extends StatelessWidget {
             right: MediaQuery.sizeOf(context).shortestSide >= 600 ? 130 : 32,
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: onAdsTap,
+              onTap: () => Sfx.instance.tap(onAdsTap),
               child: const _ShiningAdsIcon(
                 size: _adsIconSize,
               ),

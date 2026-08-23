@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:boxbox/sound/sfx.dart';
 
 class InSettingsMenu extends StatelessWidget {
   const InSettingsMenu({
@@ -67,7 +68,7 @@ class InSettingsMenu extends StatelessWidget {
                         child: Center(
                           child: GestureDetector(
                             behavior: HitTestBehavior.opaque,
-                            onTap: onToggleMenu,
+                            onTap: () => Sfx.instance.tap(onToggleMenu),
                             child: const Icon(
                               Icons.settings,
                               color: Colors.white,
@@ -83,7 +84,7 @@ class InSettingsMenu extends StatelessWidget {
                           child: _MenuIconButton(
                             icon: Icons.music_note_rounded,
                             enabled: music,
-                            onTap: onMusic,
+                            onTap: () => Sfx.instance.tap(onMusic),
                           ),
                         ),
                         SizedBox(height: gap),
@@ -92,7 +93,7 @@ class InSettingsMenu extends StatelessWidget {
                           child: _MenuIconButton(
                             icon: Icons.volume_up_rounded,
                             enabled: sound,
-                            onTap: onSound,
+                            onTap: () => Sfx.instance.tap(onSound),
                           ),
                         ),
                         SizedBox(height: gap),
@@ -101,7 +102,7 @@ class InSettingsMenu extends StatelessWidget {
                           child: _MenuIconButton(
                             icon: Icons.vibration_rounded,
                             enabled: vibration,
-                            onTap: onVibration,
+                            onTap: () => Sfx.instance.tap(onVibration),
                           ),
                         ),
                       ],

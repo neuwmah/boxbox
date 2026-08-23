@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:boxbox/sound/sfx.dart';
 
 class NavDestination {
   const NavDestination({required this.icon, required this.label});
@@ -89,7 +90,10 @@ class AppNavbar extends StatelessWidget {
                                     ? const SizedBox.expand()
                                     : GestureDetector(
                                         behavior: HitTestBehavior.opaque,
-                                        onTap: () => onDestinationSelected(i),
+                                        onTap: () {
+                                          Sfx.instance.playTouch();
+                                          onDestinationSelected(i);
+                                        },
                                         child: Center(
                                           child: destinations[i].icon(
                                             Colors.white,
@@ -105,7 +109,10 @@ class AppNavbar extends StatelessWidget {
                           width: itemWidth,
                           child: GestureDetector(
                             behavior: HitTestBehavior.opaque,
-                            onTap: () => onDestinationSelected(selectedIndex),
+                            onTap: () {
+                              Sfx.instance.playTouch();
+                              onDestinationSelected(selectedIndex);
+                            },
                             child: DecoratedBox(
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(

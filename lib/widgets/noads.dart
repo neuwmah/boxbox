@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:boxbox/sound/sfx.dart';
 import 'package:boxbox/widgets/background.dart';
 import 'package:boxbox/widgets/titlebar.dart';
 
@@ -168,7 +169,7 @@ class _NoAdsPopupState extends State<NoAdsPopup>
                                       Center(
                                         child: GestureDetector(
                                           behavior: HitTestBehavior.opaque,
-                                          onTap: widget.onPurchase,
+                                          onTap: () => Sfx.instance.tap(widget.onPurchase),
                                           child: Container(
                                             height: 48,
                                             padding: const EdgeInsets.symmetric(

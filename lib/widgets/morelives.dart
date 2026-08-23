@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:boxbox/sound/sfx.dart';
 import 'package:boxbox/widgets/background.dart';
 import 'package:boxbox/widgets/titlebar.dart';
 
@@ -258,7 +259,7 @@ class _MoreLivesPopupState extends State<MoreLivesPopup>
                                       Center(
                                         child: GestureDetector(
                                           behavior: HitTestBehavior.opaque,
-                                          onTap: widget.onRefill,
+                                          onTap: () => Sfx.instance.tap(widget.onRefill),
                                           child: Container(
                                             height: 48,
                                             padding: const EdgeInsets.symmetric(
@@ -355,7 +356,7 @@ class _MoreLivesPopupState extends State<MoreLivesPopup>
                                       Center(
                                         child: GestureDetector(
                                           behavior: HitTestBehavior.opaque,
-                                          onTap: widget.onWatchAd,
+                                          onTap: () => Sfx.instance.tap(widget.onWatchAd),
                                           child: Container(
                                             height: 48,
                                             padding: const EdgeInsets.symmetric(

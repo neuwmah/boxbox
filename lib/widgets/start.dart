@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:boxbox/game/level.dart';
+import 'package:boxbox/sound/sfx.dart';
 import 'package:boxbox/widgets/background.dart';
 import 'package:boxbox/widgets/titlebar.dart';
 
@@ -196,7 +197,7 @@ class _StartPopupState extends State<StartPopup>
                                       Center(
                                         child: GestureDetector(
                                           behavior: HitTestBehavior.opaque,
-                                          onTap: widget.onStart,
+                                          onTap: () => Sfx.instance.tap(widget.onStart),
                                           child: Container(
                                             height: 48,
                                             padding: const EdgeInsets.symmetric(

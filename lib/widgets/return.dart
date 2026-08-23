@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:boxbox/sound/sfx.dart';
 import 'package:boxbox/widgets/background.dart';
 import 'package:boxbox/widgets/titlebar.dart';
 
@@ -159,7 +160,7 @@ class _ReturnPopupState extends State<ReturnPopup>
                                       Center(
                                         child: GestureDetector(
                                           behavior: HitTestBehavior.opaque,
-                                          onTap: widget.onQuit,
+                                          onTap: () => Sfx.instance.tap(widget.onQuit),
                                           child: Container(
                                             height: 48,
                                             padding: const EdgeInsets.symmetric(

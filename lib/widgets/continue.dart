@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:boxbox/sound/sfx.dart';
 import 'package:boxbox/widgets/background.dart';
 import 'package:boxbox/widgets/status.dart';
 import 'package:boxbox/widgets/titlebar.dart';
@@ -201,7 +202,7 @@ class _ContinuePopupState extends State<ContinuePopup>
                                       Center(
                                         child: GestureDetector(
                                           behavior: HitTestBehavior.opaque,
-                                          onTap: widget.onContinue,
+                                          onTap: () => Sfx.instance.tap(widget.onContinue),
                                           child: Container(
                                             height: 48,
                                             padding: const EdgeInsets.symmetric(

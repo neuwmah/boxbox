@@ -8,6 +8,8 @@ import 'package:window_manager/window_manager.dart';
 
 import 'package:cannon_physics/cannon_physics.dart' as cannon;
 import 'package:boxbox/game/level.dart';
+import 'package:boxbox/sound/sfx.dart';
+import 'package:boxbox/sound/soundtrack.dart';
 import 'package:boxbox/widgets/continue.dart';
 import 'package:boxbox/widgets/insettings.dart';
 import 'package:boxbox/widgets/return.dart';
@@ -132,8 +134,6 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   bool _continueOpen = false;
   bool _returnOpen = false;
   bool _menuOpen = false;
-  bool _music = true;
-  bool _sound = true;
   bool _vibration = true;
 
   @override
@@ -155,6 +155,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
           setState(() {});
         }
       });
+    Soundtrack.instance.setForeground(false);
   }
 
   FloorSkin get _floor => floorAt(widget.level);
@@ -227,6 +228,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     _loadingFade.dispose();
     _menuAnim.dispose();
     _ticker.dispose();
+    Soundtrack.instance.setForeground(true);
     super.dispose();
   }
 
@@ -663,6 +665,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: () {
+                      Sfx.instance.playTouch();
                       if (_menuOpen) {
                         _setMenuOpen(false);
                         return;
@@ -688,16 +691,24 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
                 ),
               ),
             ),
-            InSettingsMenu(
-              animation: _menuAnim,
-              music: _music,
-              sound: _sound,
-              vibration: _vibration,
-              onToggleMenu: () => _setMenuOpen(!_menuOpen),
-              onClose: () => _setMenuOpen(false),
-              onMusic: () => setState(() => _music = !_music),
-              onSound: () => setState(() => _sound = !_sound),
-              onVibration: () => setState(() => _vibration = !_vibration),
+            ListenableBuilder(
+              listenable: Listenable.merge([
+                Soundtrack.instance,
+                Sfx.instance,
+              ]),
+              builder: (context, _) {
+                return InSettingsMenu(
+                  animation: _menuAnim,
+                  music: Soundtrack.instance.enabled,
+                  sound: Sfx.instance.enabled,
+                  vibration: _vibration,
+                  onToggleMenu: () => _setMenuOpen(!_menuOpen),
+                  onClose: () => _setMenuOpen(false),
+                  onMusic: Soundtrack.instance.toggle,
+                  onSound: Sfx.instance.toggle,
+                  onVibration: () => setState(() => _vibration = !_vibration),
+                );
+              },
             ),
           ],
           if (_clearTimer > 0 && _clearTimer < _clearBannerDuration)

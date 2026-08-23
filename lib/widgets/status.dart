@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:boxbox/sound/sfx.dart';
 
 class StatusCounters extends StatelessWidget {
   const StatusCounters({
@@ -184,7 +185,7 @@ class _StatusCounter extends StatelessWidget {
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: onTap,
+      onTap: () => Sfx.instance.tap(onTap),
       child: content,
     );
   }

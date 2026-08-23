@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:boxbox/sound/sfx.dart';
+import 'package:boxbox/sound/soundtrack.dart';
 import 'package:boxbox/widgets/background.dart';
 
 const _legalUrl = 'https://google.com.br';
@@ -41,8 +43,6 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  bool _music = true;
-  bool _sound = true;
   bool _vibration = true;
 
   @override
@@ -54,17 +54,27 @@ class _SettingsPageState extends State<SettingsPage> {
           children: [
             _SettingsPanel(
               children: [
-                _ToggleControl(
-                  label: 'Music',
-                  icon: Icons.music_note_rounded,
-                  enabled: _music,
-                  onTap: () => setState(() => _music = !_music),
+                ListenableBuilder(
+                  listenable: Soundtrack.instance,
+                  builder: (context, _) {
+                    return _ToggleControl(
+                      label: 'Music',
+                      icon: Icons.music_note_rounded,
+                      enabled: Soundtrack.instance.enabled,
+                      onTap: Soundtrack.instance.toggle,
+                    );
+                  },
                 ),
-                _ToggleControl(
-                  label: 'Sound',
-                  icon: Icons.volume_up_rounded,
-                  enabled: _sound,
-                  onTap: () => setState(() => _sound = !_sound),
+                ListenableBuilder(
+                  listenable: Sfx.instance,
+                  builder: (context, _) {
+                    return _ToggleControl(
+                      label: 'Sound',
+                      icon: Icons.volume_up_rounded,
+                      enabled: Sfx.instance.enabled,
+                      onTap: Sfx.instance.toggle,
+                    );
+                  },
                 ),
                 _ToggleControl(
                   label: 'Vibration',
@@ -166,7 +176,7 @@ class _ToggleControl extends StatelessWidget {
           AspectRatio(
             aspectRatio: 1,
             child: GestureDetector(
-              onTap: onTap,
+              onTap: () => Sfx.instance.tap(onTap),
               child: _GlossyTile(
                 enabled: enabled,
                 child: Icon(
@@ -200,7 +210,7 @@ class _PrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {},
+      onTap: Sfx.instance.playTouch,
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
@@ -299,7 +309,7 @@ class _SecondaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () => Sfx.instance.tap(onTap),
       child: Container(
         constraints: const BoxConstraints(minWidth: 100),
         padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),

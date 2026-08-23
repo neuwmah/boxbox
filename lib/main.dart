@@ -9,6 +9,8 @@ import 'package:boxbox/pages/game.dart';
 import 'package:boxbox/pages/home.dart';
 import 'package:boxbox/pages/settings.dart';
 import 'package:boxbox/pages/shop.dart';
+import 'package:boxbox/sound/sfx.dart';
+import 'package:boxbox/sound/soundtrack.dart';
 import 'package:boxbox/widgets/morelives.dart';
 import 'package:boxbox/widgets/noads.dart';
 import 'package:boxbox/widgets/reward.dart';
@@ -35,6 +37,8 @@ void main() async {
     await windowManager.focus();
   });
 
+  await Soundtrack.instance.start();
+  await Sfx.instance.preload();
   runApp(const MyApp());
 }
 
@@ -358,10 +362,9 @@ class _MainShellState extends State<MainShell> {
               }
               : null,
       onHeartsTap:
-          onHome
+          onHome && _hearts < _maxHearts
               ? () {
                 if (blocking) return;
-                if (_hearts >= _maxHearts) return;
                 setState(() => _homePopup = _HomePopup.moreLives);
               }
               : null,
