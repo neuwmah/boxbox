@@ -93,6 +93,8 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   static const _ballMass = 3.2;
   static const _hitSpeed2 = 6.25;
   static const _hitLookAhead = 0.04;
+  static const _fallLookAhead = 0.04;
+  static const _fallSpeed = 1.2;
   static const _cubeGap = _cubeHalf * 2;
   static const _startX = -(levelSize - 1) * _cubeGap / 2;
   static const _platformX = 0.0;
@@ -118,6 +120,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   late cannon.Material _cubeHardMaterial;
   late cannon.Material _ballMaterial;
   late cannon.Material _staticMaterial;
+  late cannon.Body _ground;
 
   final List<cannon.Body> _cubes = [];
   final List<Color> _cubeColors = [];
@@ -125,6 +128,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   final List<_Vec3> _cubeHalves = [];
   final List<cannon.Body> _balls = [];
   final Set<int> _hitPlayed = {};
+  final Set<int> _fallPlayed = {};
   late final void Function(dynamic) _onBeginContact;
   Duration _lastElapsed = Duration.zero;
   Size _viewSize = Size.zero;
@@ -299,7 +303,11 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     final a = event.bodyA;
     final b = event.bodyB;
     if (a == null || b == null) return;
+    _tryBallHitContact(a, b);
+    _tryCubeFallContact(a, b);
+  }
 
+  void _tryBallHitContact(cannon.Body a, cannon.Body b) {
     final aIsBall = _balls.contains(a);
     final bIsBall = _balls.contains(b);
     final aIsCube = _cubes.contains(a);
@@ -315,6 +323,19 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     if (dx * dx + dy * dy + dz * dz < _hitSpeed2) return;
 
     _playBallHit(ball.id);
+  }
+
+  void _tryCubeFallContact(cannon.Body a, cannon.Body b) {
+    if (!_assetsReady) return;
+    final cube = _cubeHittingGround(a, b);
+    if (cube == null || cube.velocity.y > -_fallSpeed) return;
+    _playCubeFall(cube.id);
+  }
+
+  cannon.Body? _cubeHittingGround(cannon.Body a, cannon.Body b) {
+    if (a == _ground && _cubes.contains(b)) return b;
+    if (b == _ground && _cubes.contains(a)) return a;
+    return null;
   }
 
   void _predictBallHits() {
@@ -383,6 +404,27 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     Sfx.instance.playHit();
   }
 
+  void _playCubeFall(int cubeId) {
+    if (!_fallPlayed.add(cubeId)) return;
+    Sfx.instance.playFall();
+  }
+
+  void _predictCubeFalls() {
+    if (!_assetsReady) return;
+    for (var i = 0; i < _cubes.length; i++) {
+      final cube = _cubes[i];
+      if (_fallPlayed.contains(cube.id)) continue;
+      final vy = cube.velocity.y;
+      if (vy > -_fallSpeed) continue;
+      final half = _cubeHalves[i];
+      final extent = math.max(half.x, math.max(half.y, half.z));
+      final dist = cube.position.y - extent - _groundY;
+      if (dist <= 0 || dist / -vy <= _fallLookAhead) {
+        _playCubeFall(cube.id);
+      }
+    }
+  }
+
   void _clearWorldBodies() {
     for (final body in [..._world.bodies]) {
       _world.removeBody(body);
@@ -393,6 +435,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     _cubeHalves.clear();
     _balls.clear();
     _hitPlayed.clear();
+    _fallPlayed.clear();
   }
 
   Future<void> _buildLevel() async {
@@ -401,15 +444,15 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
 
     _clearWorldBodies();
 
-    final ground = cannon.Body(
+    _ground = cannon.Body(
       mass: 0,
       material: _staticMaterial,
       shape: cannon.Plane(),
       position: Vector3(0, _groundY, 0),
       type: cannon.BodyTypes.static,
     );
-    ground.quaternion.setFromEuler(-math.pi / 2, 0, 0);
-    _world.addBody(ground);
+    _ground.quaternion.setFromEuler(-math.pi / 2, 0, 0);
+    _world.addBody(_ground);
 
     final platformHalfZ = (_platformFar - _platformNear) / 2;
     final platformZ = (_platformFar + _platformNear) / 2;
@@ -555,6 +598,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     if (_exiting || _continueOpen || _returnOpen) return;
 
     _predictBallHits();
+    _predictCubeFalls();
     _world.step(1 / 120, dt, 5);
 
     if (!_assetsReady) {
