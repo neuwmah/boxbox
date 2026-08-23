@@ -67,7 +67,7 @@ class Soundtrack extends ChangeNotifier {
   void setForeground(bool value) {
     if (_foreground == value) return;
     _foreground = value;
-    _apply();
+    _apply(restart: value);
   }
 
   Future<void> toggle() async {
@@ -80,12 +80,20 @@ class Soundtrack extends ChangeNotifier {
     _apply();
   }
 
-  void _apply() {
+  void _apply({bool restart = false}) {
     final handle = _handle;
     if (handle == null) return;
     try {
-      _soloud.setVolume(handle, _playing ? volume : 0);
-      _soloud.setPause(handle, !_playing);
+      if (_playing) {
+        if (restart) {
+          _soloud.seek(handle, Duration.zero);
+        }
+        _soloud.setVolume(handle, volume);
+        _soloud.setPause(handle, false);
+      } else {
+        _soloud.setVolume(handle, 0);
+        _soloud.setPause(handle, true);
+      }
     } catch (_) {}
   }
 }
