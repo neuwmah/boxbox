@@ -32,24 +32,18 @@ class Sfx extends ChangeNotifier {
     }
   }
 
-  Future<void> playTouch() async {
-    if (!enabled) return;
-    if (!_soloud.isInitialized) return;
-    try {
-      _touch ??= await _soloud.loadAsset(touchAsset, mode: LoadMode.memory);
-      await _soloud.play(_touch!, volume: volume);
-    } catch (_) {}
-  }
+  void playTouch() => _play(_touch, volume);
 
-  void playHit() {
+  void playHit() => _play(_hit, hitVolume);
+
+  void _play(AudioSource? source, double gain) {
     if (!enabled || !_soloud.isInitialized) return;
-    final hit = _hit;
-    if (hit == null) {
+    if (source == null) {
       preload();
       return;
     }
     try {
-      _soloud.play(hit, volume: hitVolume);
+      _soloud.play(source, volume: gain);
     } catch (_) {}
   }
 
