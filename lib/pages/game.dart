@@ -89,6 +89,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   static const _outOfBallsDelay = 3.0;
   static const _loadingMinDuration = Duration(milliseconds: 500);
   static const _loadingFadeDuration = Duration(milliseconds: 250);
+  static const _exitLoadingDuration = Duration(seconds: 1);
   static const _ballMass = 3.2;
   static const _cubeGap = _cubeHalf * 2;
   static const _startX = -(levelSize - 1) * _cubeGap / 2;
@@ -519,12 +520,15 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     });
   }
 
-  void _exitGame(int? reward) {
+  Future<void> _exitGame(int? reward) async {
     if (_exiting) return;
     _exiting = true;
     _continueOpen = false;
     _returnOpen = false;
     _ticker.stop();
+    _loadingFade.value = 1;
+    if (mounted) setState(() {});
+    await Future<void>.delayed(_exitLoadingDuration);
     if (!mounted) return;
     Navigator.of(context).pop(reward);
   }
