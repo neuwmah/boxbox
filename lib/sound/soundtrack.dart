@@ -6,14 +6,19 @@ class Soundtrack extends ChangeNotifier {
 
   static final instance = Soundtrack._();
 
-  static const asset = 'lib/assets/sound/background1.mp3';
+  static const homeAsset = 'lib/assets/sound/background1.mp3';
+  static const gameAsset = 'lib/assets/sound/background2.mp3';
   static const volume = 0.05;
 
   final SoLoud _soloud = SoLoud.instance;
-  SoundHandle? _handle;
+  AudioSource? _gameSource;
+  SoundHandle? _homeHandle;
+  SoundHandle? _gameHandle;
   bool enabled = true;
   bool _started = false;
   bool _foreground = true;
+  bool _gameActive = false;
+  int _gameGen = 0;
 
   Future<void> start() async {
     if (_started) return;
@@ -24,17 +29,26 @@ class Soundtrack extends ChangeNotifier {
       if (kDebugMode) {
         debugPrint('Soundtrack device: ${device?.name ?? 'default'}');
       }
-      final source = await _soloud.loadAsset(asset);
-      _handle = await _soloud.play(
+      final source = await _soloud.loadAsset(homeAsset);
+      _homeHandle = await _soloud.play(
         source,
-        volume: _playing ? volume : 0,
+        volume: _homePlaying ? volume : 0,
         looping: true,
-        paused: !_playing,
+        paused: !_homePlaying,
       );
     } catch (error, stack) {
       _started = false;
       debugPrint('Soundtrack start failed: $error');
       debugPrint('$stack');
+    }
+  }
+
+  Future<void> preloadGame() async {
+    if (!_started || _gameSource != null) return;
+    try {
+      _gameSource = await _soloud.loadAsset(gameAsset);
+    } catch (error) {
+      debugPrint('Soundtrack game preload failed: $error');
     }
   }
 
@@ -62,12 +76,55 @@ class Soundtrack extends ChangeNotifier {
     return true;
   }
 
-  bool get _playing => enabled && _foreground;
+  bool get _homePlaying => enabled && _foreground;
+  bool get _gamePlaying => enabled && _gameActive;
 
   void setForeground(bool value) {
     if (_foreground == value) return;
     _foreground = value;
-    _apply(restart: value);
+    _apply(restartHome: value);
+  }
+
+  Future<void> setGameActive(bool value) async {
+    if (_gameActive == value) return;
+    _gameActive = value;
+    if (!value) {
+      _gameGen++;
+      _stopGame();
+      return;
+    }
+    final gen = _gameGen;
+    await _playGame();
+    if (gen != _gameGen || !_gameActive) {
+      _stopGame();
+    }
+  }
+
+  Future<void> _playGame() async {
+    if (!_started) return;
+    try {
+      _gameSource ??= await _soloud.loadAsset(gameAsset);
+      final source = _gameSource;
+      if (source == null) return;
+      _stopGame();
+      _gameHandle = await _soloud.play(
+        source,
+        volume: _gamePlaying ? volume : 0,
+        looping: true,
+        paused: !_gamePlaying,
+      );
+    } catch (error) {
+      debugPrint('Soundtrack game play failed: $error');
+    }
+  }
+
+  void _stopGame() {
+    final handle = _gameHandle;
+    _gameHandle = null;
+    if (handle == null) return;
+    try {
+      _soloud.stop(handle);
+    } catch (_) {}
   }
 
   Future<void> toggle() async {
@@ -80,19 +137,32 @@ class Soundtrack extends ChangeNotifier {
     _apply();
   }
 
-  void _apply({bool restart = false}) {
-    final handle = _handle;
-    if (handle == null) return;
-    try {
-      if (_playing) {
-        if (restart) {
-          _soloud.seek(handle, Duration.zero);
+  void _apply({bool restartHome = false}) {
+    final home = _homeHandle;
+    if (home != null) {
+      try {
+        if (_homePlaying) {
+          if (restartHome) {
+            _soloud.seek(home, Duration.zero);
+          }
+          _soloud.setVolume(home, volume);
+          _soloud.setPause(home, false);
+        } else {
+          _soloud.setVolume(home, 0);
+          _soloud.setPause(home, true);
         }
-        _soloud.setVolume(handle, volume);
-        _soloud.setPause(handle, false);
+      } catch (_) {}
+    }
+
+    final game = _gameHandle;
+    if (game == null) return;
+    try {
+      if (_gamePlaying) {
+        _soloud.setVolume(game, volume);
+        _soloud.setPause(game, false);
       } else {
-        _soloud.setVolume(handle, 0);
-        _soloud.setPause(handle, true);
+        _soloud.setVolume(game, 0);
+        _soloud.setPause(game, true);
       }
     } catch (_) {}
   }

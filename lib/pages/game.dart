@@ -153,6 +153,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
       value: 1,
     )..addStatusListener((status) {
         if (status == AnimationStatus.dismissed && mounted) {
+          Soundtrack.instance.setGameActive(true);
           setState(() {});
         }
       });
@@ -178,6 +179,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
       precacheImage(AssetImage(_background.asset), context),
       precacheImage(AssetImage(ballsBadgeAt(widget.level)), context),
       Future<void>.delayed(_loadingMinDuration),
+      Soundtrack.instance.preloadGame(),
     ]);
     if (!mounted) return;
 
@@ -229,6 +231,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     _loadingFade.dispose();
     _menuAnim.dispose();
     _ticker.dispose();
+    Soundtrack.instance.setGameActive(false);
     Soundtrack.instance.setForeground(true);
     super.dispose();
   }
@@ -526,6 +529,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     _continueOpen = false;
     _returnOpen = false;
     _ticker.stop();
+    Soundtrack.instance.setGameActive(false);
     _loadingFade.value = 1;
     if (mounted) setState(() {});
     await Future<void>.delayed(_exitLoadingDuration);
