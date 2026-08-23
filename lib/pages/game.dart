@@ -91,6 +91,8 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   static const _loadingFadeDuration = Duration(milliseconds: 250);
   static const _exitLoadingDuration = Duration(seconds: 1);
   static const _ballMass = 3.2;
+  static const _hitSpeed2 = 6.25;
+  static const _hitLookAhead = 0.04;
   static const _cubeGap = _cubeHalf * 2;
   static const _startX = -(levelSize - 1) * _cubeGap / 2;
   static const _platformX = 0.0;
@@ -122,6 +124,8 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   final List<BlockShape> _cubeShapes = [];
   final List<_Vec3> _cubeHalves = [];
   final List<cannon.Body> _balls = [];
+  final Set<int> _hitPlayed = {};
+  late final void Function(dynamic) _onBeginContact;
   Duration _lastElapsed = Duration.zero;
   Size _viewSize = Size.zero;
   int _ballsLeft = _maxBalls;
@@ -141,6 +145,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _coins = widget.coins;
+    _onBeginContact = _handleBeginContact;
     _initWorld();
     _ticker = createTicker(_onTick);
     _menuAnim = AnimationController(
@@ -180,6 +185,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
       precacheImage(AssetImage(ballsBadgeAt(widget.level)), context),
       Future<void>.delayed(_loadingMinDuration),
       Soundtrack.instance.preloadGame(),
+      Sfx.instance.preload(),
     ]);
     if (!mounted) return;
 
@@ -231,6 +237,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     _loadingFade.dispose();
     _menuAnim.dispose();
     _ticker.dispose();
+    _world.removeEventListener('beginContact', _onBeginContact);
     Soundtrack.instance.setGameActive(false);
     Soundtrack.instance.setForeground(true);
     super.dispose();
@@ -284,6 +291,96 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     contact(_cubeMidMaterial, _staticMaterial, friction: 0.75, restitution: 0.02);
     contact(_cubeHardMaterial, _staticMaterial, friction: 0.9, restitution: 0.01);
     contact(_ballMaterial, _staticMaterial, friction: 0.35, restitution: 0.15);
+    _world.addEventListener('beginContact', _onBeginContact);
+  }
+
+  void _handleBeginContact(dynamic event) {
+    if (event is! cannon.ContactEvent) return;
+    final a = event.bodyA;
+    final b = event.bodyB;
+    if (a == null || b == null) return;
+
+    final aIsBall = _balls.contains(a);
+    final bIsBall = _balls.contains(b);
+    final aIsCube = _cubes.contains(a);
+    final bIsCube = _cubes.contains(b);
+    if (!(aIsBall && bIsCube) && !(bIsBall && aIsCube)) return;
+
+    final ball = aIsBall ? a : b;
+    if (_hitPlayed.contains(ball.id)) return;
+
+    final dx = a.velocity.x - b.velocity.x;
+    final dy = a.velocity.y - b.velocity.y;
+    final dz = a.velocity.z - b.velocity.z;
+    if (dx * dx + dy * dy + dz * dz < _hitSpeed2) return;
+
+    _playBallHit(ball.id);
+  }
+
+  void _predictBallHits() {
+    for (final ball in _balls) {
+      if (_hitPlayed.contains(ball.id)) continue;
+      final speed2 = ball.velocity.length2;
+      if (speed2 < _hitSpeed2) continue;
+
+      for (var i = 0; i < _cubes.length; i++) {
+        final cube = _cubes[i];
+        final half = _cubeHalves[i];
+        if (_ballWillHitCube(ball, cube, half, _hitLookAhead)) {
+          _playBallHit(ball.id);
+          break;
+        }
+      }
+    }
+  }
+
+  bool _ballWillHitCube(
+    cannon.Body ball,
+    cannon.Body cube,
+    _Vec3 half,
+    double tMax,
+  ) {
+    final hx = half.x + _ballRadius;
+    final hy = half.y + _ballRadius;
+    final hz = half.z + _ballRadius;
+    final ox = ball.position.x - cube.position.x;
+    final oy = ball.position.y - cube.position.y;
+    final oz = ball.position.z - cube.position.z;
+    final vx = ball.velocity.x - cube.velocity.x;
+    final vy = ball.velocity.y - cube.velocity.y;
+    final vz = ball.velocity.z - cube.velocity.z;
+
+    if (ox.abs() <= hx && oy.abs() <= hy && oz.abs() <= hz) {
+      return vx * vx + vy * vy + vz * vz >= _hitSpeed2;
+    }
+
+    var tEnter = 0.0;
+    var tExit = tMax;
+
+    bool slab(double origin, double vel, double extent) {
+      if (vel.abs() < 1e-8) return origin.abs() <= extent;
+      final inv = 1.0 / vel;
+      var t1 = (-extent - origin) * inv;
+      var t2 = (extent - origin) * inv;
+      if (t1 > t2) {
+        final swap = t1;
+        t1 = t2;
+        t2 = swap;
+      }
+      if (t1 > tEnter) tEnter = t1;
+      if (t2 < tExit) tExit = t2;
+      return tEnter <= tExit && tExit >= 0;
+    }
+
+    return slab(ox, vx, hx) &&
+        slab(oy, vy, hy) &&
+        slab(oz, vz, hz) &&
+        tEnter <= tMax;
+  }
+
+  void _playBallHit(int ballId) {
+    if (!_hitPlayed.add(ballId)) return;
+    Sfx.instance.playHit();
   }
 
   void _clearWorldBodies() {
@@ -295,6 +392,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     _cubeShapes.clear();
     _cubeHalves.clear();
     _balls.clear();
+    _hitPlayed.clear();
   }
 
   Future<void> _buildLevel() async {
@@ -456,6 +554,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
 
     if (_exiting || _continueOpen || _returnOpen) return;
 
+    _predictBallHits();
     _world.step(1 / 120, dt, 5);
 
     if (!_assetsReady) {
@@ -465,7 +564,10 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
 
     _balls.removeWhere((ball) {
       final out = ball.position.y < -8;
-      if (out) _world.removeBody(ball);
+      if (out) {
+        _hitPlayed.remove(ball.id);
+        _world.removeBody(ball);
+      }
       return out;
     });
 

@@ -25,7 +25,7 @@ class Soundtrack extends ChangeNotifier {
     _started = true;
     try {
       final device = _pickDevice(_soloud.listPlaybackDevices());
-      await _soloud.init(device: device);
+      await _soloud.init(device: device, bufferSize: 512);
       if (kDebugMode) {
         debugPrint('Soundtrack device: ${device?.name ?? 'default'}');
       }
