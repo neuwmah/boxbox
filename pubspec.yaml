@@ -12,6 +12,7 @@ dependencies:
   cannon_physics: ^0.0.3
   vector_math: ^2.2.0
   url_launcher: ^6.3.2
+  flutter_soloud: ^3.4.8
 dev_dependencies:
   flutter_test:
     sdk: flutter
