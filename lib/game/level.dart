@@ -53,8 +53,8 @@ const floors = <FloorSkin>[
     bottomColor: 0xFF000000,
   ),
   FloorSkin(
-    asset: 'lib/assets/floor/grass.png',
-    topColor: 0xFF8DE364,
+    asset: 'lib/assets/floor/farm.png',
+    topColor: 0xFFa5bb42,
     bottomColor: 0xFF000000,
   ),
 ];
@@ -67,7 +67,7 @@ FloorSkin floorAt(int level) {
 const ballsBadges = <String>[
   'lib/assets/count/balls1.png',
   'lib/assets/count/balls2.png',
-  'lib/assets/count/balls2.png',
+  'lib/assets/count/balls3.png',
 ];
 
 String ballsBadgeAt(int level) {
