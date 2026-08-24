@@ -129,6 +129,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   final List<cannon.Body> _balls = [];
   final Set<int> _hitPlayed = {};
   final Set<int> _fallPlayed = {};
+  bool _ggPlayed = false;
   late final void Function(dynamic) _onBeginContact;
   Duration _lastElapsed = Duration.zero;
   Size _viewSize = Size.zero;
@@ -436,6 +437,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     _balls.clear();
     _hitPlayed.clear();
     _fallPlayed.clear();
+    _ggPlayed = false;
   }
 
   Future<void> _buildLevel() async {
@@ -626,6 +628,10 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     if (anyOnPlatform) {
       _clearTimer = 0;
     } else {
+      if (!_ggPlayed) {
+        _ggPlayed = true;
+        Sfx.instance.playGg();
+      }
       _clearTimer += dt;
       if (_clearTimer >= _clearDelay) {
         _exitGame(100);
