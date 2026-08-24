@@ -1115,7 +1115,7 @@ class _ScenePainter extends CustomPainter {
   static const _focal = 320.0;
   static const _horizon = 0.56;
   static const _coneSegments = 20;
-  static const _glassAlpha = 0.75;
+  static const _glassAlpha = 0.5;
   static const _cubeEdgeAlpha = 0.35;
   static const _edgeWidth = 1.2;
   static const _edgeBlack = Color(0xFF000000);
