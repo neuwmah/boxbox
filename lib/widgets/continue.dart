@@ -39,6 +39,7 @@ class _ContinuePopupState extends State<ContinuePopup>
       vsync: this,
       duration: PopupAppear.duration,
     )..forward();
+    Sfx.instance.playFail();
   }
 
   @override
