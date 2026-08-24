@@ -146,6 +146,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   bool _menuOpen = false;
   bool _vibration = true;
   late final int _musicSession;
+  bool _restoreHomeOnDispose = true;
 
   @override
   void initState() {
@@ -244,7 +245,10 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     _menuAnim.dispose();
     _ticker.dispose();
     _world.removeEventListener('beginContact', _onBeginContact);
-    Soundtrack.instance.releaseGame(_musicSession);
+    Soundtrack.instance.releaseGame(
+      _musicSession,
+      restoreHome: _restoreHomeOnDispose,
+    );
     super.dispose();
   }
 
@@ -681,6 +685,8 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     _continueOpen = false;
     _returnOpen = false;
     _ticker.stop();
+    _restoreHomeOnDispose =
+        reward == null || reward <= 0 || reward == GamePage.defeatCode;
     Soundtrack.instance.releaseGame(_musicSession, restoreHome: false);
     _loadingFade.value = 1;
     if (mounted) setState(() {});

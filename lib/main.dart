@@ -324,6 +324,7 @@ class _MainShellState extends State<MainShell> {
       }
       _homePopup = _HomePopup.start;
     });
+    Soundtrack.instance.restoreHome();
   }
 
   bool _spendCoins(int amount) {

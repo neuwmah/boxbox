@@ -113,6 +113,12 @@ class Soundtrack extends ChangeNotifier {
     }
   }
 
+  void restoreHome() {
+    if (_gameActive) return;
+    _foreground = true;
+    _apply(restartHome: true);
+  }
+
   void setForeground(bool value) {
     if (_foreground == value) return;
     _foreground = value;

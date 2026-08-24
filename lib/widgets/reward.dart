@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:boxbox/sound/sfx.dart';
 
 class RewardOverlay extends StatefulWidget {
   const RewardOverlay({
@@ -40,6 +41,7 @@ class _RewardOverlayState extends State<RewardOverlay>
       vsync: this,
       duration: const Duration(milliseconds: 3000),
     )..addListener(_onTick);
+    Sfx.instance.playCoinFinish();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -51,6 +53,7 @@ class _RewardOverlayState extends State<RewardOverlay>
 
   @override
   void dispose() {
+    Sfx.instance.stopCoinRepeat();
     _controller
       ..removeListener(_onTick)
       ..dispose();
@@ -73,6 +76,9 @@ class _RewardOverlayState extends State<RewardOverlay>
     final t = _controller.value;
 
     if (t >= 0.78) {
+      if (!_counted) {
+        Sfx.instance.startCoinRepeat();
+      }
       final countT = ((t - 0.78) / 0.22).clamp(0.0, 1.0);
       final eased = Curves.easeOutCubic.transform(countT);
       final value = ui
@@ -88,6 +94,7 @@ class _RewardOverlayState extends State<RewardOverlay>
 
     if (_controller.isCompleted && !_finished) {
       _finished = true;
+      Sfx.instance.stopCoinRepeat();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         if (!_counted) {

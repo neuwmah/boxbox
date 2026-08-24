@@ -49,3 +49,5 @@ flutter:
     - lib/assets/sound/fail.mp3
     - lib/assets/sound/shot.mp3
     - lib/assets/sound/gg.mp3
+    - lib/assets/sound/coin_finish.mp3
+    - lib/assets/sound/coin_repeat.mp3
