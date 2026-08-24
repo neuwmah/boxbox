@@ -144,6 +144,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   bool _returnOpen = false;
   bool _menuOpen = false;
   bool _vibration = true;
+  late final int _musicSession;
 
   @override
   void initState() {
@@ -162,11 +163,11 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
       value: 1,
     )..addStatusListener((status) {
         if (status == AnimationStatus.dismissed && mounted) {
-          Soundtrack.instance.setGameActive(true);
+          Soundtrack.instance.playGame(_musicSession);
           setState(() {});
         }
       });
-    Soundtrack.instance.setForeground(false);
+    _musicSession = Soundtrack.instance.claimGame();
   }
 
   FloorSkin get _floor => floorAt(widget.level);
@@ -242,8 +243,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     _menuAnim.dispose();
     _ticker.dispose();
     _world.removeEventListener('beginContact', _onBeginContact);
-    Soundtrack.instance.setGameActive(false);
-    Soundtrack.instance.setForeground(true);
+    Soundtrack.instance.releaseGame(_musicSession);
     super.dispose();
   }
 
@@ -675,7 +675,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     _continueOpen = false;
     _returnOpen = false;
     _ticker.stop();
-    Soundtrack.instance.setGameActive(false);
+    Soundtrack.instance.releaseGame(_musicSession, restoreHome: false);
     _loadingFade.value = 1;
     if (mounted) setState(() {});
     await Future<void>.delayed(_exitLoadingDuration);

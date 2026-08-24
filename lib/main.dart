@@ -161,13 +161,8 @@ class _MainShellState extends State<MainShell> {
       _homePopup = _HomePopup.none;
       _pendingReward = null;
     });
-    if (Navigator.of(context).canPop()) {
-      _playGen++;
-      Navigator.of(context).pop();
-      await Future<void>.delayed(Duration.zero);
-    }
-    if (!mounted) return;
-    await _playLevel(debug: true);
+    final replace = Navigator.of(context).canPop();
+    await _playLevel(debug: true, replace: replace);
   }
 
   String get _heartTimerLabel {
@@ -244,7 +239,7 @@ class _MainShellState extends State<MainShell> {
     setState(() => _homePopup = _HomePopup.none);
   }
 
-  Future<void> _playLevel({bool debug = false}) async {
+  Future<void> _playLevel({bool debug = false, bool replace = false}) async {
     if (!debug && !_consumeHeart()) {
       setState(() => _homePopup = _HomePopup.moreLives);
       return;
@@ -256,18 +251,19 @@ class _MainShellState extends State<MainShell> {
       _selectedIndex = 1;
     });
 
-    final reward = await Navigator.of(context).push<int>(
-      PageRouteBuilder(
-        pageBuilder:
-            (_, __, ___) => GamePage(
-              coins: _coins,
-              level: _level,
-              onSpendCoins: _spendCoins,
-            ),
-        transitionDuration: Duration.zero,
-        reverseTransitionDuration: Duration.zero,
-      ),
+    final route = PageRouteBuilder<int>(
+      pageBuilder:
+          (_, __, ___) => GamePage(
+            coins: _coins,
+            level: _level,
+            onSpendCoins: _spendCoins,
+          ),
+      transitionDuration: Duration.zero,
+      reverseTransitionDuration: Duration.zero,
     );
+    final reward = replace
+        ? await Navigator.of(context).pushReplacement<int, int>(route)
+        : await Navigator.of(context).push<int>(route);
     if (!mounted || gen != _playGen) return;
     if (reward == GamePage.defeatCode) {
       _onDefeat();

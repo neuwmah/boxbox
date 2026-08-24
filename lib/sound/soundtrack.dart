@@ -19,6 +19,7 @@ class Soundtrack extends ChangeNotifier {
   bool _foreground = true;
   bool _gameActive = false;
   int _gameGen = 0;
+  int _gameSession = 0;
 
   Future<void> start() async {
     if (_started) return;
@@ -78,6 +79,39 @@ class Soundtrack extends ChangeNotifier {
 
   bool get _homePlaying => enabled && _foreground;
   bool get _gamePlaying => enabled && _gameActive;
+
+  int claimGame() {
+    final session = ++_gameSession;
+    _foreground = false;
+    _gameActive = false;
+    _gameGen++;
+    _stopGame();
+    _apply();
+    return session;
+  }
+
+  Future<void> playGame(int session) async {
+    if (session != _gameSession) return;
+    _gameActive = true;
+    final gen = _gameGen;
+    await _playGame();
+    if (gen != _gameGen || session != _gameSession || !_gameActive) {
+      _stopGame();
+    }
+  }
+
+  void releaseGame(int session, {bool restoreHome = true}) {
+    if (session != _gameSession) return;
+    _gameActive = false;
+    _gameGen++;
+    _stopGame();
+    if (restoreHome) {
+      _foreground = true;
+      _apply(restartHome: true);
+    } else {
+      _apply();
+    }
+  }
 
   void setForeground(bool value) {
     if (_foreground == value) return;
