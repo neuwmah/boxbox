@@ -10,16 +10,19 @@ class Sfx extends ChangeNotifier {
   static const hitAsset = 'lib/assets/sound/hit.mp3';
   static const fallAsset = 'lib/assets/sound/fall.mp3';
   static const failAsset = 'lib/assets/sound/fail.mp3';
+  static const shotAsset = 'lib/assets/sound/shot.mp3';
   static const volume = 0.7;
   static const hitVolume = 0.85;
   static const fallVolume = 0.85;
   static const failVolume = 0.85;
+  static const shotVolume = 0.85;
 
   final SoLoud _soloud = SoLoud.instance;
   AudioSource? _touch;
   AudioSource? _hit;
   AudioSource? _fall;
   AudioSource? _fail;
+  AudioSource? _shot;
   bool enabled = true;
 
   Future<void> preload() async {
@@ -41,6 +44,10 @@ class Sfx extends ChangeNotifier {
         failAsset,
         mode: LoadMode.memory,
       );
+      _shot ??= await _soloud.loadAsset(
+        shotAsset,
+        mode: LoadMode.memory,
+      );
     } catch (error) {
       debugPrint('Sfx preload failed: $error');
     }
@@ -53,6 +60,8 @@ class Sfx extends ChangeNotifier {
   void playFall() => _play(_fall, fallVolume);
 
   void playFail() => _play(_fail, failVolume);
+
+  void playShot() => _play(_shot, shotVolume);
 
   void _play(AudioSource? source, double gain) {
     if (!enabled || !_soloud.isInitialized) return;

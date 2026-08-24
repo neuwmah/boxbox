@@ -47,3 +47,4 @@ flutter:
     - lib/assets/sound/hit.mp3
     - lib/assets/sound/fall.mp3
     - lib/assets/sound/fail.mp3
+    - lib/assets/sound/shot.mp3

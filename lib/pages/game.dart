@@ -717,6 +717,8 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     final flat = math.sqrt(dx * dx + dz * dz);
     if (flat < 0.05) return;
 
+    Sfx.instance.playShot();
+
     final t = math.max(0.16, flat / _throwSpeed);
     final vx = dx / t;
     final vz = dz / t;
