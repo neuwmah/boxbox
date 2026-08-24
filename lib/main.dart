@@ -257,6 +257,7 @@ class _MainShellState extends State<MainShell> {
             coins: _coins,
             level: _level,
             onSpendCoins: _spendCoins,
+            onPrepareReward: _onReward,
           ),
       transitionDuration: Duration.zero,
       reverseTransitionDuration: Duration.zero,
@@ -297,6 +298,7 @@ class _MainShellState extends State<MainShell> {
 
   void _onReward(int amount) {
     if (amount <= 0) return;
+    if (_pendingReward == amount) return;
     setState(() {
       if (_pendingReward != null) {
         _coins += _pendingReward!;

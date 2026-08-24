@@ -28,6 +28,7 @@ class _RewardOverlayState extends State<RewardOverlay>
     with SingleTickerProviderStateMixin {
   static const _asset = 'lib/assets/coin/icon1.png';
   static const _showcaseSize = 72.0;
+  static const _readyT = 0.18;
 
   late final AnimationController _controller;
   Offset? _targetCenter;
@@ -40,6 +41,7 @@ class _RewardOverlayState extends State<RewardOverlay>
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 3000),
+      value: _readyT,
     )..addListener(_onTick);
     Sfx.instance.playCoinFinish();
 
@@ -115,9 +117,8 @@ class _RewardOverlayState extends State<RewardOverlay>
         final target = _targetCenter ?? const Offset(56, 48);
 
         final t = _controller.value;
-        final appear =
-            Curves.easeOut.transform((t / 0.18).clamp(0.0, 1.0));
-        final dim = Curves.easeOut.transform((t / 0.12).clamp(0.0, 1.0));
+        const appear = 1.0;
+        const dim = 1.0;
         final flyT = Curves.easeInOutCubic.transform(
           ((t - 0.48) / 0.30).clamp(0.0, 1.0),
         );
@@ -126,10 +127,7 @@ class _RewardOverlayState extends State<RewardOverlay>
         final pos = _bezier(center, target, flyT);
         final coinSize = ui.lerpDouble(_showcaseSize, 32, flyT)!;
         final spin = t * math.pi * 6.2 + flyT * math.pi * 2.4;
-        final labelOpacity =
-            (Curves.easeOut.transform((t / 0.18).clamp(0.0, 1.0)) *
-                    (1 - flyT))
-                .clamp(0.0, 1.0);
+        final labelOpacity = ((1 - flyT) * fadeOut).clamp(0.0, 1.0);
         final impactT = ((t - 0.76) / 0.18).clamp(0.0, 1.0);
         final labelTop = center.dy + _showcaseSize / 2 + 16;
 
