@@ -782,7 +782,13 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
               return GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTapDown: (details) => _throwBall(details.localPosition),
-                child: RepaintBoundary(
+                child: ImageFiltered(
+                  imageFilter: ui.ImageFilter.blur(
+                    sigmaX: 0.55,
+                    sigmaY: 0.55,
+                    tileMode: TileMode.decal,
+                  ),
+                  child: RepaintBoundary(
                   child: CustomPaint(
                     painter: _ScenePainter(
                     cubes: [
@@ -819,6 +825,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
                     floorBottomColor: Color(_floor.bottomColor),
                     ),
                     child: const SizedBox.expand(),
+                  ),
                   ),
                 ),
               );
@@ -1108,8 +1115,15 @@ class _ScenePainter extends CustomPainter {
   static const _focal = 320.0;
   static const _horizon = 0.56;
   static const _coneSegments = 20;
-  static const _glassAlpha = 0.5;
-  static const _glassStrokeAlpha = 0.5;
+  static const _glassAlpha = 0.75;
+  static const _cubeEdgeAlpha = 0.35;
+  static const _edgeWidth = 1.2;
+  static const _edgeBlack = Color(0xFF000000);
+  static const _edgeColorMix = 0.0;
+
+  static Color _edgeColor(Color color) =>
+      Color.lerp(_edgeBlack, color, _edgeColorMix)!
+          .withValues(alpha: _cubeEdgeAlpha);
 
   static bool _isGlassCube(Color color) =>
       color.r == 0 && color.g == 0 && color.b == 0;
@@ -1129,7 +1143,8 @@ class _ScenePainter extends CustomPainter {
       Color.lerp(base, Colors.white, 0.06 * lift)!,
     ];
     if (!_isGlassCube(base)) return shades;
-    return [for (final c in shades) c.withValues(alpha: _glassAlpha)];
+    final glass = Color.lerp(base, Colors.white, 0.1)!.withValues(alpha: _glassAlpha);
+    return List.filled(6, glass);
   }
 
   Offset _project(_Vec3 p, Size size) {
@@ -1209,7 +1224,7 @@ class _ScenePainter extends CustomPainter {
           half: cube.half,
           rot: cube.rot,
           colors: colors,
-          shinyTop: true,
+          shinyTop: !_isGlassCube(cube.color),
         );
       }
     }
@@ -1227,12 +1242,21 @@ class _ScenePainter extends CustomPainter {
 
     items.sort((a, b) => b.depth.compareTo(a.depth));
 
-    final fill = Paint()..style = PaintingStyle.fill;
-    final strokePaint = Paint()
+    final fill = Paint()
+      ..style = PaintingStyle.fill
+      ..isAntiAlias = true;
+    final seam = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.7
+      ..strokeWidth = _edgeWidth
       ..strokeJoin = StrokeJoin.round
-      ..strokeCap = StrokeCap.round;
+      ..strokeCap = StrokeCap.round
+      ..isAntiAlias = true;
+    final edge = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = _edgeWidth
+      ..strokeJoin = StrokeJoin.round
+      ..strokeCap = StrokeCap.round
+      ..isAntiAlias = true;
     final gloss = Paint()..style = PaintingStyle.fill;
 
     for (final item in items) {
@@ -1248,23 +1272,34 @@ class _ScenePainter extends CustomPainter {
       if (color != null) {
         final bounds = path.getBounds();
         final lift = _lightLift(color);
-        fill.shader = LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color.lerp(color, Colors.white, 0.42 * lift)!
-                .withValues(alpha: alpha),
-            color.withValues(alpha: alpha),
-            Color.lerp(color, Colors.black, 0.14)!.withValues(alpha: alpha),
-          ],
-          stops: const [0.0, 0.52, 1.0],
-        ).createShader(bounds);
+        fill.color = color.withValues(alpha: alpha);
+        fill.shader = alpha >= 1
+            ? LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color.lerp(color, Colors.white, 0.18 * lift)!
+                      .withValues(alpha: alpha),
+                  color.withValues(alpha: alpha),
+                  Color.lerp(color, Colors.black, 0.08)!
+                      .withValues(alpha: alpha),
+                ],
+                stops: const [0.0, 0.55, 1.0],
+              ).createShader(bounds)
+            : null;
         canvas.drawPath(path, fill);
         fill.shader = null;
 
+        if (alpha >= 1) {
+          seam.color = color;
+          canvas.drawPath(path, seam);
+        }
+        edge.color = _edgeColor(color);
+        canvas.drawPath(path, edge);
+
         if (item.shiny && bounds.shortestSide > 4) {
-          final r = bounds.shortestSide * 0.2;
-          gloss.color = Colors.white.withValues(alpha: 0.38 * lift * alpha);
+          final r = bounds.shortestSide * 0.18;
+          gloss.color = Colors.white.withValues(alpha: 0.2 * lift * alpha);
           canvas.drawOval(
             Rect.fromCenter(
               center: Offset(
@@ -1277,13 +1312,6 @@ class _ScenePainter extends CustomPainter {
             gloss,
           );
         }
-      }
-
-      if (item.stroke) {
-        strokePaint.color = const Color(0xFF050505).withValues(
-          alpha: alpha < 1 ? _glassStrokeAlpha : 1.0,
-        );
-        canvas.drawPath(path, strokePaint);
       }
     }
   }
@@ -1415,11 +1443,15 @@ class _ScenePainter extends CustomPainter {
 
       items.sort((a, b) => b.depth.compareTo(a.depth));
 
-      final fill = Paint()..style = PaintingStyle.fill;
+      final fill = Paint()
+        ..style = PaintingStyle.fill
+        ..isAntiAlias = true;
       final stroke = Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 1
-        ..color = const Color(0xFF111111);
+        ..strokeWidth = _edgeWidth
+        ..strokeJoin = StrokeJoin.round
+        ..strokeCap = StrokeCap.round
+        ..isAntiAlias = true;
 
       final cubeSize = platformThickness;
       final image = floorImage;
@@ -1467,6 +1499,12 @@ class _ScenePainter extends CustomPainter {
           };
           canvas.drawPath(item.path, fill);
         }
+        final faceColor = switch (index) {
+          3 => topColor,
+          2 => bottomColor,
+          _ => sideFallback[index],
+        };
+        stroke.color = _edgeColor(faceColor);
         canvas.drawPath(item.path, stroke);
       }
     }
@@ -1586,7 +1624,7 @@ class _ScenePainter extends CustomPainter {
         color: colors[index],
         ball: null,
         shiny: shinyTop && index == 3,
-        stroke: true,
+        stroke: false,
       ));
     }
   }
@@ -1673,18 +1711,9 @@ class _ScenePainter extends CustomPainter {
         color: colors[2],
         ball: null,
         shiny: false,
-        stroke: true,
+        stroke: false,
       ));
     }
-
-    out.add((
-      depth: depth - 0.001,
-      path: body,
-      color: null,
-      ball: null,
-      shiny: false,
-      stroke: true,
-    ));
   }
 
   static List<Offset> _convexHull(List<Offset> points) {
