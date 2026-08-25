@@ -26,7 +26,7 @@ flutter:
     - lib/assets/background/game/1.png
     - lib/assets/background/game/2.png
     - lib/assets/background/game/3.png
-    - lib/assets/background/game/4.jpg
+    - lib/assets/background/game/4.png
     - lib/assets/background/loading.png
     - lib/assets/coin/icon1.png
     - lib/assets/coin/pile.png

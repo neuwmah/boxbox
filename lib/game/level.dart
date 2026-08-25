@@ -106,8 +106,8 @@ const backgrounds = <BackgroundSkin>[
     scale: 1.025,
   ),
   BackgroundSkin(
-    asset: 'lib/assets/background/game/4.jpg',
-    scale: 1.000,
+    asset: 'lib/assets/background/game/4.png',
+    scale: 1.025,
   ),
 ];
 
