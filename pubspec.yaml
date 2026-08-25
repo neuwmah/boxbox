@@ -23,10 +23,10 @@ flutter:
     - lib/assets/background/sample.png
     - lib/assets/background/highlight.png
     - lib/assets/background/giphy.gif
-    - lib/assets/background/kitchen.png
-    - lib/assets/background/forest.png
-    - lib/assets/background/ship.png
-    - lib/assets/background/super.jpg
+    - lib/assets/background/game/1.png
+    - lib/assets/background/game/2.png
+    - lib/assets/background/game/3.png
+    - lib/assets/background/game/4.jpg
     - lib/assets/background/loading.png
     - lib/assets/coin/icon1.png
     - lib/assets/coin/pile.png

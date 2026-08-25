@@ -94,19 +94,19 @@ class BackgroundSkin {
 
 const backgrounds = <BackgroundSkin>[
   BackgroundSkin(
-    asset: 'lib/assets/background/kitchen.png',
+    asset: 'lib/assets/background/game/1.png',
     scale: 1.025,
   ),
   BackgroundSkin(
-    asset: 'lib/assets/background/forest.png',
+    asset: 'lib/assets/background/game/2.png',
     scale: 1.025,
   ),
   BackgroundSkin(
-    asset: 'lib/assets/background/ship.png',
+    asset: 'lib/assets/background/game/3.png',
     scale: 1.025,
   ),
   BackgroundSkin(
-    asset: 'lib/assets/background/super.jpg',
+    asset: 'lib/assets/background/game/4.jpg',
     scale: 1.000,
   ),
 ];
