@@ -21,12 +21,14 @@ double massForColor(Color color) {
   return 1.0 + 2.0 * (1.0 - color.computeLuminance());
 }
 
+int clampLevel(int level) => level.clamp(1, levels.length);
+
 List<Block> levelAt(int level) {
-  return levels[(level - 1) % levels.length];
+  return levels[clampLevel(level) - 1];
 }
 
 String levelTitleAt(int level) {
-  return '"${levelTitles[(level - 1) % levelTitles.length]}"';
+  return '"${levelTitles[clampLevel(level) - 1]}"';
 }
 
 class FloorSkin {
@@ -65,7 +67,7 @@ const floors = <FloorSkin>[
 ];
 
 FloorSkin floorAt(int level) {
-  final index = (level - 1) ~/ 10;
+  final index = (clampLevel(level) - 1) ~/ 10;
   return floors[index.clamp(0, floors.length - 1)];
 }
 
@@ -77,7 +79,7 @@ const ballsBadges = <String>[
 ];
 
 String ballsBadgeAt(int level) {
-  final index = (level - 1) ~/ 10;
+  final index = (clampLevel(level) - 1) ~/ 10;
   return ballsBadges[index.clamp(0, ballsBadges.length - 1)];
 }
 
@@ -110,7 +112,7 @@ const backgrounds = <BackgroundSkin>[
 ];
 
 BackgroundSkin backgroundAt(int level) {
-  final index = (level - 1) ~/ 10;
+  final index = (clampLevel(level) - 1) ~/ 10;
   return backgrounds[index.clamp(0, backgrounds.length - 1)];
 }
 

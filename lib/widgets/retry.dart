@@ -90,7 +90,7 @@ class _RetryPopupState extends State<RetryPopup>
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       PopupTitleBadge(
-                                        title: 'Level ${widget.level}',
+                                        title: 'Level ${clampLevel(widget.level)}',
                                         shadeColor: _shade,
                                         endColor: _shadeEnd,
                                       ),

@@ -65,7 +65,6 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   static const _maxHearts = 5;
-  static const _maxLevel = 500;
   static const _heartRegen = Duration(minutes: 20);
   static const _refillPrice = 900;
   static const _noAdsPriceLabel = 'BRL 59.90';
@@ -247,6 +246,7 @@ class _MainShellState extends State<MainShell> {
 
     final gen = ++_playGen;
     setState(() {
+      _level = clampLevel(_level);
       _homePopup = _HomePopup.none;
       _selectedIndex = 1;
     });
@@ -321,9 +321,7 @@ class _MainShellState extends State<MainShell> {
       _coins += amount;
       _displayedCoins = _coins;
       _pendingReward = null;
-      if (_level < _maxLevel) {
-        _level += 1;
-      }
+      _level = clampLevel(_level + 1);
       _homePopup = _HomePopup.start;
     });
     Soundtrack.instance.restoreHome();

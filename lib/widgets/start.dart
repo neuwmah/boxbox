@@ -91,7 +91,7 @@ class _StartPopupState extends State<StartPopup>
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       PopupTitleBadge(
-                                        title: 'Level ${widget.level}',
+                                        title: 'Level ${clampLevel(widget.level)}',
                                         shadeColor: _shade,
                                         endColor: _shadeEnd,
                                       ),
