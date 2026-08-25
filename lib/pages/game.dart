@@ -75,6 +75,13 @@ class _Vec3 {
       );
 }
 
+class _HitSpark {
+  _HitSpark(this.pos);
+
+  final _Vec3 pos;
+  double age = 0;
+}
+
 class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   static const _gravity = 16.0;
   static const _ballRadius = 0.18;
@@ -95,6 +102,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   static const _ballMass = 3.2;
   static const _hitSpeed2 = 6.25;
   static const _hitLookAhead = 0.04;
+  static const _hitSparkDuration = 0.28;
   static const _fallLookAhead = 0.04;
   static const _fallSpeed = 1.2;
   static const _cubeGap = _cubeHalf * 2;
@@ -129,7 +137,9 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   final List<BlockShape> _cubeShapes = [];
   final List<_Vec3> _cubeHalves = [];
   final List<cannon.Body> _balls = [];
+  final List<_HitSpark> _hitSparks = [];
   final Set<int> _hitPlayed = {};
+  final Set<int> _sparkPlayed = {};
   final Set<int> _fallPlayed = {};
   bool _ggPlayed = false;
   late final void Function(dynamic) _onBeginContact;
@@ -322,7 +332,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     if (!(aIsBall && bIsCube) && !(bIsBall && aIsCube)) return;
 
     final ball = aIsBall ? a : b;
-    if (_hitPlayed.contains(ball.id)) return;
+    final cube = aIsBall ? b : a;
 
     final dx = a.velocity.x - b.velocity.x;
     final dy = a.velocity.y - b.velocity.y;
@@ -330,6 +340,30 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     if (dx * dx + dy * dy + dz * dz < _hitSpeed2) return;
 
     _playBallHit(ball.id);
+    if (!_sparkPlayed.add(ball.id)) return;
+    _hitSparks.add(_HitSpark(_ballCubeContact(ball, cube)));
+  }
+
+  _Vec3 _ballCubeContact(cannon.Body ball, cannon.Body cube) {
+    final i = _cubes.indexOf(cube);
+    final half = i >= 0
+        ? _cubeHalves[i]
+        : const _Vec3(_cubeHalf, _cubeHalf, _cubeHalf);
+    final ox = ball.position.x - cube.position.x;
+    final oy = ball.position.y - cube.position.y;
+    final oz = ball.position.z - cube.position.z;
+    final local = Quaternion.copy(cube.quaternion).conjugated().vmult(
+          Vector3(ox, oy, oz),
+        );
+    final cx = local.x.clamp(-half.x, half.x);
+    final cy = local.y.clamp(-half.y, half.y);
+    final cz = local.z.clamp(-half.z, half.z);
+    final world = cube.quaternion.vmult(Vector3(cx, cy, cz));
+    return _Vec3(
+      cube.position.x + world.x,
+      cube.position.y + world.y,
+      cube.position.z + world.z,
+    );
   }
 
   void _tryCubeFallContact(cannon.Body a, cannon.Body b) {
@@ -441,7 +475,9 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     _cubeShapes.clear();
     _cubeHalves.clear();
     _balls.clear();
+    _hitSparks.clear();
     _hitPlayed.clear();
+    _sparkPlayed.clear();
     _fallPlayed.clear();
     _ggPlayed = false;
   }
@@ -609,6 +645,11 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     _predictCubeFalls();
     _world.step(1 / 120, dt, 5);
 
+    for (final spark in _hitSparks) {
+      spark.age += dt;
+    }
+    _hitSparks.removeWhere((spark) => spark.age >= _hitSparkDuration);
+
     if (!_assetsReady) {
       setState(() {});
       return;
@@ -618,6 +659,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
       final out = ball.position.y < -8;
       if (out) {
         _hitPlayed.remove(ball.id);
+        _sparkPlayed.remove(ball.id);
         _world.removeBody(ball);
       }
       return out;
@@ -823,6 +865,13 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
                     floorImage: _floorImages[_floor.asset],
                     floorTopColor: Color(_floor.topColor),
                     floorBottomColor: Color(_floor.bottomColor),
+                    hitSparks: [
+                      for (final spark in _hitSparks)
+                        (
+                          pos: spark.pos,
+                          t: (spark.age / _hitSparkDuration).clamp(0.0, 1.0),
+                        ),
+                    ],
                     ),
                     child: const SizedBox.expand(),
                   ),
@@ -1088,6 +1137,7 @@ class _ScenePainter extends CustomPainter {
     required this.floorImage,
     required this.floorTopColor,
     required this.floorBottomColor,
+    required this.hitSparks,
   });
 
   final List<
@@ -1109,6 +1159,7 @@ class _ScenePainter extends CustomPainter {
   final ui.Image? floorImage;
   final Color floorTopColor;
   final Color floorBottomColor;
+  final List<({_Vec3 pos, double t})> hitSparks;
 
   static const _camY = 3.4;
   static const _camZ = 0.0;
@@ -1355,6 +1406,81 @@ class _ScenePainter extends CustomPainter {
     _paintDepthLayer(canvas, size, behindCubes, behindBalls);
     _paintPlatform(canvas, size);
     _paintDepthLayer(canvas, size, frontCubes, frontBalls);
+    _paintHitSparks(canvas, size);
+  }
+
+  void _paintHitSparks(Canvas canvas, Size size) {
+    if (hitSparks.isEmpty) return;
+    final ordered = [...hitSparks]
+      ..sort((a, b) => _camDist2(b.pos).compareTo(_camDist2(a.pos)));
+
+    for (final spark in ordered) {
+      final t = spark.t;
+      final p = _project(spark.pos, size);
+      final expand = Curves.easeOutCubic.transform(t);
+      final mark = ui.lerpDouble(0, 15, expand)!;
+      final half = mark / 2;
+      final stroke = ui.lerpDouble(1.5, 1.5, expand)!;
+      final fade = (1.0 -
+              Curves.easeInCubic.transform(
+                (t - 0.62).clamp(0.0, 1.0) / 0.38,
+              ))
+          .clamp(0.0, 1.0);
+      final holeT = Curves.easeInCubic.transform(t);
+      final holeR = mark * 1.5 * holeT;
+
+      final bounds = Rect.fromCenter(
+        center: p,
+        width: mark + stroke * 4,
+        height: mark + stroke * 4,
+      );
+      canvas.saveLayer(bounds, Paint());
+
+      void drawX(Color color, double width) {
+        final paint = Paint()
+          ..color = color
+          ..strokeWidth = width
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round
+          ..style = PaintingStyle.stroke
+          ..isAntiAlias = true;
+        canvas.drawLine(
+          p + Offset(-half, -half),
+          p + Offset(half, half),
+          paint,
+        );
+        canvas.drawLine(
+          p + Offset(half, -half),
+          p + Offset(-half, half),
+          paint,
+        );
+      }
+
+      drawX(
+        const Color(0xFF000000).withValues(alpha: 0.32 * fade),
+        stroke + 1.3,
+      );
+      drawX(Colors.white.withValues(alpha: fade), stroke);
+
+      if (holeR > 0.4) {
+        canvas.drawCircle(
+          p,
+          holeR,
+          Paint()
+            ..blendMode = BlendMode.dstOut
+            ..shader = RadialGradient(
+              colors: const [
+                Color(0xFFFFFFFF),
+                Color(0xCCFFFFFF),
+                Color(0x00FFFFFF),
+              ],
+              stops: const [0.0, 0.42, 1.0],
+            ).createShader(Rect.fromCircle(center: p, radius: holeR)),
+        );
+      }
+
+      canvas.restore();
+    }
   }
 
   void _paintPlatform(Canvas canvas, Size size) {
