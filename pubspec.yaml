@@ -26,6 +26,7 @@ flutter:
     - lib/assets/background/kitchen.png
     - lib/assets/background/forest.png
     - lib/assets/background/ship.png
+    - lib/assets/background/super.jpg
     - lib/assets/background/loading.png
     - lib/assets/coin/icon1.png
     - lib/assets/coin/pile.png
@@ -37,10 +38,12 @@ flutter:
     - lib/assets/count/balls1.png
     - lib/assets/count/balls2.png
     - lib/assets/count/balls3.png
+    - lib/assets/count/balls4.png
     - lib/assets/ad/icon.png
     - lib/assets/floor/grass.png
     - lib/assets/floor/farm.png
     - lib/assets/floor/wood/8.png
+    - lib/assets/floor/super.png
     - lib/assets/sound/background1.mp3
     - lib/assets/sound/background2.mp3
     - lib/assets/sound/touch.mp3
