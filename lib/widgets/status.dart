@@ -33,6 +33,7 @@ class StatusCounters extends StatelessWidget {
       constraints: const BoxConstraints(minWidth: 0, maxWidth: 100),
       child: _StatusCounter(
         iconAsset: 'lib/assets/coin/icon1.png',
+        accent: _StatusCounter.coinAccent,
         value: _formatDots(coins),
         onTap: onCoinsTap,
         iconKey: coinIconKey,
@@ -43,6 +44,7 @@ class StatusCounters extends StatelessWidget {
       constraints: const BoxConstraints(minWidth: 0, maxWidth: 100),
       child: _StatusCounter(
         iconAsset: 'lib/assets/heart/icon1.png',
+        accent: _StatusCounter.heartAccent,
         value: heartTimer,
         iconLabel: '$hearts',
         onTap: onHeartsTap,
@@ -79,6 +81,7 @@ String _formatDots(int value) {
 class _StatusCounter extends StatelessWidget {
   const _StatusCounter({
     required this.iconAsset,
+    required this.accent,
     required this.value,
     this.iconLabel,
     this.onTap,
@@ -87,15 +90,20 @@ class _StatusCounter extends StatelessWidget {
   });
 
   final String iconAsset;
+  final Color accent;
   final String value;
   final String? iconLabel;
   final VoidCallback? onTap;
   final GlobalKey? iconKey;
   final bool showPlus;
 
+  static const coinAccent = Color(0xFFF5C518);
+  static const heartAccent = Color(0xFFE53935);
   static const _barHeight = 24.0;
   static const _iconSize = 32.0;
   static const _plusSize = 16.0;
+  static const _topRim = 1.2;
+  static const _bottomRim = 0.6;
   static const _cream = Color(0xFF000000);
   static const _text = Color(0xFFFFFFFF);
   static const _plusGreen = Color(0xFF000000);
@@ -108,27 +116,36 @@ class _StatusCounter extends StatelessWidget {
         clipBehavior: Clip.none,
         children: [
           Positioned(
-            left: _iconSize * 0.42,
+            left: _iconSize * 0.42 - 2,
             right: 0,
             top: (_iconSize - _barHeight) / 2,
-            child: Container(
+            child: SizedBox(
               height: _barHeight,
-              alignment: Alignment.center,
-              padding: EdgeInsets.only(left: _iconSize * 0.55, right: 8),
-              decoration: BoxDecoration(
-                color: _cream,
-                borderRadius: BorderRadius.circular(_barHeight / 2),
-                border: Border.all(color: const Color(0xFF101010), width: 1.6),
-              ),
-              child: Text(
-                value,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: _text,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  height: 1
+              child: CustomPaint(
+                painter: _StatusBarPainter(
+                  accent: accent,
+                  fill: _cream,
+                  topRim: _topRim,
+                  bottomRim: _bottomRim,
+                ),
+                child: SizedBox.expand(
+                  child: Padding(
+                    padding: EdgeInsets.only(left: _iconSize * 0.55, right: 8),
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        value,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: _text,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          height: 1,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -165,10 +182,14 @@ class _StatusCounter extends StatelessWidget {
                             shape: BoxShape.circle,
                             border: Border.all(color: const Color(0xFF101010), width: 1.6),
                           ),
-                          child: const Icon(
-                            Icons.add,
-                            size: 12,
-                            color: Colors.white,
+                          child: const Center(
+                            child: SizedBox(
+                              width: 10,
+                              height: 10,
+                              child: CustomPaint(
+                                painter: _PlusMarkPainter(),
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -189,6 +210,104 @@ class _StatusCounter extends StatelessWidget {
       child: content,
     );
   }
+}
+
+class _StatusBarPainter extends CustomPainter {
+  const _StatusBarPainter({
+    required this.accent,
+    required this.fill,
+    required this.topRim,
+    required this.bottomRim,
+  });
+
+  final Color accent;
+  final Color fill;
+  final double topRim;
+  final double bottomRim;
+
+  static const _outline = Color(0xFF000000);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const outlineW = 1.6;
+    final rrect = RRect.fromRectAndRadius(
+      Offset.zero & size,
+      Radius.circular(size.height / 2),
+    );
+
+    canvas.drawRRect(rrect, Paint()..color = fill);
+
+    canvas.drawRRect(
+      rrect.deflate(outlineW / 2),
+      Paint()
+        ..color = _outline
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = outlineW,
+    );
+
+    canvas.save();
+    canvas.clipRRect(rrect);
+
+    final fadeColors = [
+      accent,
+      Color.lerp(accent, fill, 0.45)!,
+      fill,
+    ];
+    final bottomColors = [
+      Color.lerp(accent, fill, 0.42)!,
+      Color.lerp(accent, fill, 0.7)!,
+      fill,
+    ];
+    final topPaint = Paint()
+      ..shader = LinearGradient(
+        colors: fadeColors,
+        stops: const [0.0, 0.48, 0.84],
+      ).createShader(Offset.zero & size)
+      ..isAntiAlias = true;
+
+    final bottomLength = size.width * 0.60;
+    final bottomPaint = Paint()
+      ..shader = LinearGradient(
+        colors: bottomColors,
+        stops: const [0.0, 0.45, 1.0],
+      ).createShader(Rect.fromLTWH(0, 0, bottomLength, size.height))
+      ..isAntiAlias = true;
+
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, topRim), topPaint);
+    canvas.drawRect(
+      Rect.fromLTWH(0, size.height - bottomRim, bottomLength, bottomRim),
+      bottomPaint,
+    );
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant _StatusBarPainter oldDelegate) {
+    return oldDelegate.accent != accent ||
+        oldDelegate.fill != fill ||
+        oldDelegate.topRim != topRim ||
+        oldDelegate.bottomRim != bottomRim;
+  }
+}
+
+class _PlusMarkPainter extends CustomPainter {
+  const _PlusMarkPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final c = Offset(size.width / 2, size.height / 2);
+    final arm = size.shortestSide * 0.28;
+    final paint = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 1.5
+      ..strokeCap = StrokeCap.square
+      ..style = PaintingStyle.stroke;
+    canvas.drawLine(Offset(c.dx - arm, c.dy), Offset(c.dx + arm, c.dy), paint);
+    canvas.drawLine(Offset(c.dx, c.dy - arm), Offset(c.dx, c.dy + arm), paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _HeartValueLabel extends StatelessWidget {
