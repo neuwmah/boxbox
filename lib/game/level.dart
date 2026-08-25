@@ -59,7 +59,7 @@ const floors = <FloorSkin>[
   ),
   FloorSkin(
     asset: 'lib/assets/floor/super.png',
-    topColor: 0xFF010100,
+    topColor: 0xFF00C800,
     bottomColor: 0xFF000000,
   ),
 ];
