@@ -145,7 +145,7 @@ const levelTitles = <String>[
   'Sheep',
   'Monkey',
   'Butterfly',
-  'Lucid Boy',
+  'Mush Boy',
   'Pink Blob',
   'Ghost Face',
   'Teen Ape',
@@ -1640,7 +1640,7 @@ const levels = <List<Block>>[
     Block(2, 7, 3, 0xff0c0c0c, box),
     Block(7, 7, 3, 0xff0c0c0c, box),
   ],
-  // Lucid Boy
+  // Mush Boy
   [
     Block(1, 0, 3, 0xFF000000, box),
     Block(2, 0, 23, 0xFF000000, box),
