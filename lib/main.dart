@@ -446,61 +446,58 @@ class _MainShellState extends State<MainShell> {
             ),
           ),
         ),
-        TickerMode(
-          enabled: !blocking,
-          child: Scaffold(
-            backgroundColor: Colors.black,
-            body: Stack(
-              children: [
-                IndexedStack(
-                  index: _selectedIndex,
-                  children: [
-                    const Column(
-                      children: [
-                        AppTitleBar(title: 'Shop'),
-                        Expanded(child: ShopPage()),
-                      ],
-                    ),
-                    HomePage(onLevelTap: _onLevelTap, onAdsTap: _onAdsTap),
-                    const Column(
-                      children: [
-                        AppTitleBar(title: 'Settings'),
-                        Expanded(child: SettingsPage()),
-                      ],
-                    ),
-                  ],
-                ),
-                if (showStatus)
-                  Positioned(
-                    top: onHome ? 48 : 48,
-                    left: onHome ? 32 : 12,
-                    right: onHome ? 32 : 12,
-                    child:
-                        onHome || !isTablet
-                            ? status
-                            : Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                status,
-                                const SizedBox(width: 130),
-                                const IgnorePointer(
-                                  child: Opacity(
-                                    opacity: 0,
-                                    child: StickerTitle(title: 'Shop'),
-                                  ),
-                                ),
-                              ],
-                            ),
+        Scaffold(
+          backgroundColor: Colors.black,
+          body: Stack(
+            children: [
+              IndexedStack(
+                index: _selectedIndex,
+                children: [
+                  const Column(
+                    children: [
+                      AppTitleBar(title: 'Shop'),
+                      Expanded(child: ShopPage()),
+                    ],
                   ),
-              ],
-            ),
-            bottomNavigationBar: AppNavbar(
-              selectedIndex: _selectedIndex,
-              onDestinationSelected: (index) {
-                if (blocking) return;
-                setState(() => _selectedIndex = index);
-              },
-            ),
+                  HomePage(onLevelTap: _onLevelTap, onAdsTap: _onAdsTap),
+                  const Column(
+                    children: [
+                      AppTitleBar(title: 'Settings'),
+                      Expanded(child: SettingsPage()),
+                    ],
+                  ),
+                ],
+              ),
+              if (showStatus)
+                Positioned(
+                  top: onHome ? 48 : 48,
+                  left: onHome ? 32 : 12,
+                  right: onHome ? 32 : 12,
+                  child:
+                      onHome || !isTablet
+                          ? status
+                          : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              status,
+                              const SizedBox(width: 130),
+                              const IgnorePointer(
+                                child: Opacity(
+                                  opacity: 0,
+                                  child: StickerTitle(title: 'Shop'),
+                                ),
+                              ),
+                            ],
+                          ),
+                ),
+            ],
+          ),
+          bottomNavigationBar: AppNavbar(
+            selectedIndex: _selectedIndex,
+            onDestinationSelected: (index) {
+              if (blocking) return;
+              setState(() => _selectedIndex = index);
+            },
           ),
         ),
         if (_homePopup == _HomePopup.start)

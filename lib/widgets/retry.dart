@@ -21,8 +21,8 @@ class RetryPopup extends StatefulWidget {
 
 class _RetryPopupState extends State<RetryPopup>
     with SingleTickerProviderStateMixin {
-  static const _shade = Color(0xFF333333);
-  static const _shadeEnd = Color(0xFF050505);
+  static const _shade = Color(0xFF515151);
+  static const _shadeEnd = Color(0xFF212121);
   static const _heartSize = 72.0;
 
   late final AnimationController _controller;

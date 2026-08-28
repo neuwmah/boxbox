@@ -72,7 +72,7 @@ class PopupAppear {
   PopupAppear._();
 
   static const duration = Duration(milliseconds: 300);
-  static const dimAlpha = 0.55;
+  static const dimAlpha = 0.25;
   static const opacityTween = _PopupOpacityTween();
   static const scaleTween = _PopupScaleTween();
 
