@@ -1,9 +1,7 @@
 import 'dart:async';
+import 'dart:io';
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:window_manager/window_manager.dart';
+import 'package:boxbox/ads/ads.dart';
 import 'package:boxbox/game/level.dart';
 import 'package:boxbox/pages/game.dart';
 import 'package:boxbox/pages/home.dart';
@@ -12,33 +10,45 @@ import 'package:boxbox/pages/shop.dart';
 import 'package:boxbox/sound/sfx.dart';
 import 'package:boxbox/sound/soundtrack.dart';
 import 'package:boxbox/widgets/morelives.dart';
-import 'package:boxbox/widgets/noads.dart';
-import 'package:boxbox/widgets/reward.dart';
 import 'package:boxbox/widgets/navbar.dart';
+import 'package:boxbox/widgets/noads.dart';
 import 'package:boxbox/widgets/retry.dart';
+import 'package:boxbox/widgets/reward.dart';
 import 'package:boxbox/widgets/start.dart';
 import 'package:boxbox/widgets/status.dart';
 import 'package:boxbox/widgets/titlebar.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:window_manager/window_manager.dart';
+
+bool get _isDesktop {
+  if (kIsWeb) return false;
+  return Platform.isWindows || Platform.isLinux || Platform.isMacOS;
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await windowManager.ensureInitialized();
+  if (_isDesktop) {
+    await windowManager.ensureInitialized();
 
-  const windowOptions = WindowOptions(
-    size: Size(300, 600),
-    center: true,
-    backgroundColor: Colors.transparent,
-    skipTaskbar: false,
-    titleBarStyle: TitleBarStyle.hidden,
-  );
+    const windowOptions = WindowOptions(
+      size: Size(300, 600),
+      center: true,
+      backgroundColor: Colors.transparent,
+      skipTaskbar: false,
+      titleBarStyle: TitleBarStyle.hidden,
+    );
 
-  windowManager.waitUntilReadyToShow(windowOptions, () async {
-    await windowManager.show();
-    await windowManager.focus();
-  });
+    windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      await windowManager.focus();
+    });
+  }
 
   await Soundtrack.instance.start();
   await Sfx.instance.preload();
+  unawaited(Ads.instance.initialize());
   runApp(const MyApp());
 }
 
@@ -82,6 +92,8 @@ class _MainShellState extends State<MainShell> {
   int _playGen = 0;
   int _debugLevelOffset = 0;
   bool _loadingPrecached = false;
+  bool _adsRemoved = false;
+  bool _adBusy = false;
 
   @override
   void initState() {
@@ -224,10 +236,25 @@ class _MainShellState extends State<MainShell> {
   }
 
   void _onPurchaseNoAds() {
-    setState(() => _homePopup = _HomePopup.none);
+    setState(() {
+      _adsRemoved = true;
+      _homePopup = _HomePopup.none;
+    });
+    Ads.instance.setAdsRemoved(true);
   }
 
-  void _onDefeat() {
+  Future<void> _presentInterstitial() async {
+    if (_adsRemoved || _adBusy) return;
+    _adBusy = true;
+    Soundtrack.instance.setForeground(false);
+    await Ads.instance.showInterstitial();
+    Soundtrack.instance.restoreHome();
+    _adBusy = false;
+  }
+
+  Future<void> _onDefeat() async {
+    await _presentInterstitial();
+    if (!mounted) return;
     setState(() {
       _selectedIndex = 1;
       _homePopup = _hearts > 0 ? _HomePopup.retry : _HomePopup.moreLives;
@@ -267,7 +294,7 @@ class _MainShellState extends State<MainShell> {
         : await Navigator.of(context).push<int>(route);
     if (!mounted || gen != _playGen) return;
     if (reward == GamePage.defeatCode) {
-      _onDefeat();
+      await _onDefeat();
       return;
     }
     if (reward != null && reward > 0) {
@@ -284,7 +311,14 @@ class _MainShellState extends State<MainShell> {
     });
   }
 
-  void _onWatchAdForLife() {
+  Future<void> _onWatchAdForLife() async {
+    if (_adBusy) return;
+    _adBusy = true;
+    Soundtrack.instance.setForeground(false);
+    final earned = await Ads.instance.showRewarded();
+    Soundtrack.instance.restoreHome();
+    _adBusy = false;
+    if (!earned || !mounted) return;
     setState(() {
       _hearts = (_hearts + 1).clamp(0, _maxHearts);
       if (_hearts >= _maxHearts) {
@@ -314,8 +348,10 @@ class _MainShellState extends State<MainShell> {
     });
   }
 
-  void _onRewardComplete() {
+  Future<void> _onRewardComplete() async {
     final amount = _pendingReward ?? 0;
+    if (!mounted) return;
+    await _presentInterstitial();
     if (!mounted) return;
     setState(() {
       _coins += amount;
