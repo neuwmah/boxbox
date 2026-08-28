@@ -46,20 +46,51 @@ void main() async {
     });
   }
 
-  await Soundtrack.instance.start();
-  await Sfx.instance.preload();
-  unawaited(Ads.instance.initialize());
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  Widget _home = const _LaunchSplash();
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_boot());
+  }
+
+  Future<void> _boot() async {
+    await WidgetsBinding.instance.endOfFrame;
+    await Ads.instance.initializeAndShowLaunchAd();
+    await Soundtrack.instance.start();
+    await Sfx.instance.preload();
+    if (!mounted) return;
+    setState(() => _home = const MainShell());
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: MainShell(),
+      home: _home,
+    );
+  }
+}
+
+class _LaunchSplash extends StatelessWidget {
+  const _LaunchSplash();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      backgroundColor: Colors.black,
+      body: SizedBox.expand(),
     );
   }
 }

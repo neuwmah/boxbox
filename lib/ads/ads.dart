@@ -43,11 +43,23 @@ class Ads {
       _ready = true;
       await AppStateEventNotifier.startListening();
       _appStateSub ??= AppStateEventNotifier.appStateStream.listen(_onAppState);
-      preload();
     } catch (error, stack) {
       debugPrint('AdMob initialize failed: $error');
       debugPrint('$stack');
     }
+  }
+
+  Future<void> initializeAndShowLaunchAd() async {
+    await initialize();
+    if (!supported || adsRemoved || !_ready) return;
+    _showAppOpenWhenReady = false;
+    final ad = await _loadAppOpenAwaitingFirst();
+    if (ad != null) {
+      _appOpen = ad;
+      _appOpenLoadedAt = DateTime.now();
+      await showAppOpenIfAvailable();
+    }
+    preload();
   }
 
   void preload() {
@@ -217,31 +229,41 @@ class Ads {
     return done.future;
   }
 
+  bool get _useTestAds => kDebugMode;
+
   String? get _interstitialId {
+    if (_useTestAds) {
+      return Platform.isAndroid
+          ? AdsIds.testAndroidInterstitial
+          : AdsIds.testIosInterstitial;
+    }
     final id = Platform.isAndroid
         ? AdsIds.androidInterstitial
         : AdsIds.iosInterstitial;
     if (AdsIds.isUsable(id)) return id;
-    return Platform.isAndroid
-        ? AdsIds.testAndroidInterstitial
-        : AdsIds.testIosInterstitial;
+    return null;
   }
 
   String? get _rewardedId {
+    if (_useTestAds) {
+      return Platform.isAndroid
+          ? AdsIds.testAndroidRewarded
+          : AdsIds.testIosRewarded;
+    }
     final id = Platform.isAndroid ? AdsIds.androidRewarded : AdsIds.iosRewarded;
     if (AdsIds.isUsable(id)) return id;
-    if (!kDebugMode) return null;
-    return Platform.isAndroid
-        ? AdsIds.testAndroidRewarded
-        : AdsIds.testIosRewarded;
+    return null;
   }
 
   String? get _appOpenId {
+    if (_useTestAds) {
+      return Platform.isAndroid
+          ? AdsIds.testAndroidAppOpen
+          : AdsIds.testIosAppOpen;
+    }
     final id = Platform.isAndroid ? AdsIds.androidAppOpen : AdsIds.iosAppOpen;
     if (AdsIds.isUsable(id)) return id;
-    return Platform.isAndroid
-        ? AdsIds.testAndroidAppOpen
-        : AdsIds.testIosAppOpen;
+    return null;
   }
 
   void _loadInterstitial() {
@@ -303,6 +325,39 @@ class Ads {
           }
         },
       ),
+    );
+  }
+
+  Future<AppOpenAd?> _loadAppOpenAwaitingFirst() async {
+    for (var attempt = 0; attempt < _maxAttempts; attempt++) {
+      final ad = await _loadAppOpenOnce();
+      if (ad != null) return ad;
+    }
+    return null;
+  }
+
+  Future<AppOpenAd?> _loadAppOpenOnce() {
+    if (!supported || !_ready || adsRemoved) return Future<AppOpenAd?>.value();
+    final adUnitId = _appOpenId;
+    if (adUnitId == null) return Future<AppOpenAd?>.value();
+    final done = Completer<AppOpenAd?>();
+    AppOpenAd.load(
+      adUnitId: adUnitId,
+      request: const AdRequest(),
+      adLoadCallback: AppOpenAdLoadCallback(
+        onAdLoaded: (ad) {
+          debugPrint('App Open loaded.');
+          if (!done.isCompleted) done.complete(ad);
+        },
+        onAdFailedToLoad: (error) {
+          debugPrint('App Open failed to load: $error');
+          if (!done.isCompleted) done.complete(null);
+        },
+      ),
+    );
+    return done.future.timeout(
+      const Duration(seconds: 8),
+      onTimeout: () => null,
     );
   }
 
