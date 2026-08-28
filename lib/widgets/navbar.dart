@@ -106,6 +106,13 @@ class AppNavbar extends StatelessWidget {
                           left: selectedIndex * itemWidth,
                           bottom: 0,
                           width: itemWidth,
+                          height: 1,
+                          child: const ColoredBox(color: Color(0xFF212121)),
+                        ),
+                        Positioned(
+                          left: selectedIndex * itemWidth,
+                          bottom: 0,
+                          width: itemWidth,
                           child: DecoratedBox(
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
