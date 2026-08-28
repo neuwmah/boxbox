@@ -162,26 +162,10 @@ class _PopupBackgroundState extends State<PopupBackground>
     final tg = tint.g * s;
     final tb = tint.b * s;
     return ColorFilter.matrix([
-      tr,
-      tr,
-      tr,
-      0,
-      0,
-      tg,
-      tg,
-      tg,
-      0,
-      0,
-      tb,
-      tb,
-      tb,
-      0,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
+      tr, tr, tr, 0, 0,
+      tg, tg, tg, 0, 0,
+      tb, tb, tb, 0, 0,
+      0, 0, 0, 1, 0,
     ]);
   }
 }

@@ -33,13 +33,12 @@ class AppNavbar extends StatelessWidget {
   static const _maxWidth = 300.0;
   static const _topRadius = Radius.circular(16);
   static const _selectedExtra = 16.0;
-  static const _padTop = 4.0;
-  static const _padBottom = 4.0;
-  static const _iconSize = 32.0;
+  static const _padTop = 8.0;
+  static const _padBottom = 24.0;
+  static const _iconSize = 40.0;
   static const _labelGap = 2.0;
   static const _labelBlock = 14 * 1.4 + 4;
-  static const _barHeight =
-      _padTop + _iconSize + _labelGap + _labelBlock + _padBottom;
+  static const _barHeight = _padTop + _iconSize + _labelGap + _labelBlock + _padBottom;
 
   final int selectedIndex;
   final ValueChanged<int> onDestinationSelected;
@@ -113,18 +112,11 @@ class AppNavbar extends StatelessWidget {
                                 begin: Alignment.topCenter,
                                 end: Alignment.bottomCenter,
                                 colors: [
-                                  Color(0xFF101010),
-                                  Color(0xFF050505),
+                                  Color(0xFF212121),
+                                  Color(0xFF212121),
                                 ],
                               ),
                               borderRadius: _selectedRadius(wide),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Colors.black,
-                                  blurRadius: 4,
-                                  offset: Offset(0, 0),
-                                ),
-                              ],
                             ),
                             child: Padding(
                               padding: const EdgeInsets.only(
@@ -169,7 +161,7 @@ class _NavTabBody extends StatelessWidget {
 }
 
 class NavAssetIcon extends StatelessWidget {
-  const NavAssetIcon(this.asset, {super.key, this.size = 32});
+  const NavAssetIcon(this.asset, {super.key, this.size = 40});
 
   final String asset;
   final double size;
