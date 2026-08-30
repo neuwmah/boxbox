@@ -51,6 +51,7 @@ void main() async {
       backgroundColor: Colors.transparent,
       skipTaskbar: false,
       titleBarStyle: TitleBarStyle.hidden,
+      title: 'BoxBox!',
     );
 
     windowManager.waitUntilReadyToShow(windowOptions, () async {
@@ -119,6 +120,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'BoxBox!',
       debugShowCheckedModeBanner: false,
       builder:
           (context, child) => AnnotatedRegion<SystemUiOverlayStyle>(
