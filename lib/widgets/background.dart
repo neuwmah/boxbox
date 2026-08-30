@@ -2,6 +2,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+const _patternLight = Color(0xFF212121);
+const _patternDark = Color(0xFF111111);
+
 class RectBackground extends StatefulWidget {
   const RectBackground({super.key, this.child});
 
@@ -77,8 +80,6 @@ class _RectPatternPainter extends CustomPainter {
   const _RectPatternPainter();
 
   static const _cell = 25.0;
-  static const _light = Color(0xFF212121);
-  static const _dark = Color(0xFF111111);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -87,12 +88,12 @@ class _RectPatternPainter extends CustomPainter {
     canvas.drawRect(
       Offset.zero & size,
       Paint()
-        ..color = _light
+        ..color = _patternLight
         ..isAntiAlias = false,
     );
 
     final dark = Paint()
-      ..color = _dark
+      ..color = _patternDark
       ..isAntiAlias = false;
     final path = Path();
     final cols = (size.width / _cell).ceil();
@@ -124,7 +125,6 @@ class PopupBackground extends StatefulWidget {
 
 class _PopupBackgroundState extends State<PopupBackground>
     with SingleTickerProviderStateMixin {
-  static const _asset = 'lib/assets/background/highlight.png';
   static const _duration = Duration(seconds: 16);
 
   late final AnimationController _controller;
@@ -132,10 +132,8 @@ class _PopupBackgroundState extends State<PopupBackground>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: _duration);
-    Future<void>.delayed(const Duration(milliseconds: 320), () {
-      if (mounted) _controller.repeat();
-    });
+    _controller = AnimationController(vsync: this, duration: _duration)
+      ..repeat();
   }
 
   @override
@@ -161,12 +159,11 @@ class _PopupBackgroundState extends State<PopupBackground>
             child: SizedBox(
               width: size,
               height: size,
-              child: RepaintBoundary(
-                child: Image.asset(
-                  _asset,
-                  fit: BoxFit.cover,
-                  filterQuality: FilterQuality.low,
-                  gaplessPlayback: true,
+              child: const RepaintBoundary(
+                child: CustomPaint(
+                  painter: _PopupBurstPainter(),
+                  isComplex: true,
+                  child: SizedBox.expand(),
                 ),
               ),
             ),
@@ -185,24 +182,40 @@ class _PopupBackgroundState extends State<PopupBackground>
       },
     );
   }
+}
 
-  Widget _tinted(Widget child) {
-    final tint = widget.tint;
-    if (tint == null) return child;
-    return ColorFiltered(colorFilter: _lumaTint(tint), child: child);
+class _PopupBurstPainter extends CustomPainter {
+  const _PopupBurstPainter();
+
+  static const _rays = 16;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.isEmpty) return;
+
+    final cx = size.width / 2;
+    final cy = size.height / 2;
+    final radius = math.sqrt(cx * cx + cy * cy) + 1;
+
+    canvas.drawRect(
+      Offset.zero & size,
+      Paint()..color = _patternDark,
+    );
+
+    final sweep = 2 * math.pi / _rays;
+    final path = Path();
+    for (var i = 0; i < _rays; i += 2) {
+      final a0 = i * sweep;
+      final a1 = a0 + sweep;
+      path
+        ..moveTo(cx, cy)
+        ..lineTo(cx + radius * math.cos(a0), cy + radius * math.sin(a0))
+        ..lineTo(cx + radius * math.cos(a1), cy + radius * math.sin(a1))
+        ..close();
+    }
+    canvas.drawPath(path, Paint()..color = _patternLight);
   }
 
-  static ColorFilter _lumaTint(Color tint, [double amount = 0.050]) {
-    const source = 5 / 255;
-    final s = amount / source / 3;
-    final tr = tint.r * s;
-    final tg = tint.g * s;
-    final tb = tint.b * s;
-    return ColorFilter.matrix([
-      tr, tr, tr, 0, 0,
-      tg, tg, tg, 0, 0,
-      tb, tb, tb, 0, 0,
-      0, 0, 0, 1, 0,
-    ]);
-  }
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
