@@ -63,7 +63,7 @@ class _ShopPageState extends State<ShopPage>
       child: ListView.separated(
         padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
         itemCount: _products.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 4),
+        separatorBuilder: (_, __) => const SizedBox(height: 6),
         itemBuilder: (context, index) {
           return _ShopProductTile(
             product: _products[index],
@@ -94,7 +94,7 @@ class _ShopProductTile extends StatelessWidget {
   final Animation<double> shine;
   final ui.Image? pile;
 
-  static const _border = Color(0xFF101010);
+  static const _border = Color(0xFF333333);
 
   @override
   Widget build(BuildContext context) {

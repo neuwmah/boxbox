@@ -107,7 +107,7 @@ class _SettingsPanel extends StatelessWidget {
 
   final List<Widget> children;
 
-  static const _border = Color(0xFF101010);
+  static const _border = Color(0xFF333333);
 
   @override
   Widget build(BuildContext context) {
@@ -305,7 +305,7 @@ class _SecondaryButton extends StatelessWidget {
     letterSpacing: -.2,
   );
 
-  static const _depthColor = Color(0xFF313131);
+  static const _depthColor = Color(0xFF333333);
 
   @override
   Widget build(BuildContext context) {
@@ -318,7 +318,7 @@ class _SecondaryButton extends StatelessWidget {
           color: Colors.black,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: const Color(0xFF101010),
+            color: const Color(0xFF333333),
             width: 1.6,
           ),
         ),

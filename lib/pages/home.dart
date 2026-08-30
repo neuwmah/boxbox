@@ -39,7 +39,7 @@ class HomePage extends StatelessWidget {
                   color: Colors.black,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: const Color(0xFF101010),
+                    color: const Color(0xFF333333),
                     width: 1.6,
                   ),
                 ),
