@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:boxbox/sound/sfx.dart';
+import 'package:boxbox/widgets/cubes.dart';
 import 'package:boxbox/widgets/titlebar.dart';
 
 class HomePage extends StatelessWidget {
@@ -16,36 +17,14 @@ class HomePage extends StatelessWidget {
   final VoidCallback? onLevelTap;
   final VoidCallback? onAdsTap;
 
-  static const _scale = 1.0;
-  static const _bgOpacity = 0.0925;
   static const _adsIconSize = 72.0;
-  static const _grayscale = ColorFilter.matrix(<double>[
-    0.2126, 0.7152, 0.0722, 0, 0,
-    0.2126, 0.7152, 0.0722, 0, 0,
-    0.2126, 0.7152, 0.0722, 0, 0,
-    0, 0, 0, 1, 0,
-  ]);
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       fit: StackFit.expand,
       children: [
-        Opacity(
-          opacity: _bgOpacity,
-          child: Transform.scale(
-            scale: _scale,
-            child: ColorFiltered(
-              colorFilter: _grayscale,
-              child: Image.asset(
-                'lib/assets/background/giphy.gif',
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: double.infinity,
-              ),
-            ),
-          ),
-        ),
+        const Positioned.fill(child: CubesBackground()),
         Center(
           child: Transform.translate(
             offset: const Offset(0, 40),

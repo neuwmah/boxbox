@@ -23,7 +23,6 @@ flutter:
   assets:
     - lib/assets/background/sample.png
     - lib/assets/background/highlight.png
-    - lib/assets/background/giphy.gif
     - lib/assets/background/game/1.png
     - lib/assets/background/game/2.png
     - lib/assets/background/game/3.png
