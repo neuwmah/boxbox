@@ -19,7 +19,7 @@ class AppTitleBar extends StatelessWidget {
       ),
       child: DragToMoveArea(
         child: Padding(
-          padding: const EdgeInsets.only(top: 35),
+          padding: const EdgeInsets.only(top: 55),
           child: SizedBox(
             height: 56,
             width: double.infinity,

@@ -56,7 +56,7 @@ class _ContinuePopupState extends State<ContinuePopup>
         children: [
           PopupDim(animation: _controller),
           Positioned(
-            top: 48,
+            top: 68,
             left: 16,
             right: 12,
             child: PopupAppearFade(

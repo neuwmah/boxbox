@@ -485,7 +485,7 @@ class _MainShellState extends State<MainShell> {
               ),
               if (showStatus)
                 Positioned(
-                  top: onHome ? 48 : 48,
+                  top: onHome ? 68 : 68,
                   left: onHome ? 32 : 12,
                   right: onHome ? 32 : 12,
                   child:

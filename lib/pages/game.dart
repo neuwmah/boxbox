@@ -882,7 +882,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
           ),
           if (_assetsReady && _ballsLeft > 0) ...[
             Positioned(
-              top: 40,
+              top: 60,
               left: isTablet ? 0 : 38,
               right: isTablet ? 0 : null,
               height: 48,
@@ -908,7 +908,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
               ),
             ),
             Positioned(
-              top: 52,
+              top: 72,
               left: 0,
               right: 0,
               child: IgnorePointer(

@@ -52,7 +52,7 @@ class InSettingsMenu extends StatelessWidget {
                 ),
               ),
             Positioned(
-              top: 40,
+              top: 60,
               left: isTablet ? 0 : null,
               right: isTablet ? 0 : 32,
               child: Align(
