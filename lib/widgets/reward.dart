@@ -126,7 +126,7 @@ class _RewardOverlayState extends State<RewardOverlay>
         final fadeOut = (1 - ((t - 0.78) / 0.10).clamp(0.0, 1.0));
 
         final pos = _bezier(center, target, flyT);
-        final coinSize = ui.lerpDouble(_showcaseSize, 32, flyT)!;
+        final coinSize = ui.lerpDouble(_showcaseSize, 40, flyT)!;
         final spin = t * math.pi * 6.2 + flyT * math.pi * 2.4;
         final labelOpacity = ((1 - flyT) * fadeOut).clamp(0.0, 1.0);
         final impactT = ((t - 0.76) / 0.18).clamp(0.0, 1.0);

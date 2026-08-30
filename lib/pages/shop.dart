@@ -61,7 +61,7 @@ class _ShopPageState extends State<ShopPage>
   Widget build(BuildContext context) {
     return RectBackground(
       child: ListView.separated(
-        padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+        padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
         itemCount: _products.length,
         separatorBuilder: (_, __) => const SizedBox(height: 4),
         itemBuilder: (context, index) {
@@ -100,10 +100,10 @@ class _ShopProductTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 280),
+        constraints: const BoxConstraints(maxWidth: 400),
         child: Container(
           width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(9, 8, 8, 8),
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
           decoration: BoxDecoration(
             color: Colors.black,
             borderRadius: BorderRadius.circular(8),
@@ -112,11 +112,11 @@ class _ShopProductTile extends StatelessWidget {
           child: Row(
             children: [
               _ShiningPile(shine: shine, pile: pile),
-              const SizedBox(width: 8),
+              const SizedBox(width: 12),
               Expanded(
                 child: _AmountLabel(value: _formatDots(product.amount)),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 12),
               _BuyButton(label: 'BRL ${product.price}'),
             ],
           ),
@@ -293,7 +293,7 @@ class _BuyButton extends StatelessWidget {
 
   static const _base = TextStyle(
     fontSize: 16,
-    fontWeight: FontWeight.w900,
+    fontWeight: FontWeight.w700,
     height: 1,
     letterSpacing: -.2,
   );
@@ -351,7 +351,7 @@ class _BuyButton extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(12),
             child: Stack(
               alignment: Alignment.center,
               children: [

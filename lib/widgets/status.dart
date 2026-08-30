@@ -99,8 +99,8 @@ class _StatusCounter extends StatelessWidget {
 
   static const coinAccent = Color(0xFFF5C518);
   static const heartAccent = Color(0xFFE53935);
-  static const _barHeight = 24.0;
-  static const _iconSize = 32.0;
+  static const _barHeight = 28.0;
+  static const _iconSize = 40.0;
   static const _plusSize = 16.0;
   static const _topRim = 1.2;
   static const _bottomRim = 0.6;
@@ -130,7 +130,7 @@ class _StatusCounter extends StatelessWidget {
                 ),
                 child: SizedBox.expand(
                   child: Padding(
-                    padding: EdgeInsets.only(left: _iconSize * 0.55, right: 8),
+                    padding: EdgeInsets.only(left: _iconSize * 0.70, right: 8),
                     child: Align(
                       alignment: Alignment.center,
                       child: Text(
@@ -140,7 +140,7 @@ class _StatusCounter extends StatelessWidget {
                         style: const TextStyle(
                           color: _text,
                           fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w700,
                           height: 1,
                         ),
                       ),
@@ -171,8 +171,8 @@ class _StatusCounter extends StatelessWidget {
                     _HeartValueLabel(text: iconLabel!),
                   if (showPlus)
                     Positioned(
-                      right: -4,
-                      bottom: -4,
+                      right: -1,
+                      bottom: -1,
                       child: IgnorePointer(
                         child: Container(
                           width: _plusSize,
@@ -180,7 +180,7 @@ class _StatusCounter extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: _plusGreen,
                             shape: BoxShape.circle,
-                            border: Border.all(color: const Color(0xFF101010), width: 1.6),
+                            border: Border.all(color: const Color(0xFF313131), width: 1.6),
                           ),
                           child: const Center(
                             child: SizedBox(

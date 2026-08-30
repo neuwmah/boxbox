@@ -20,7 +20,7 @@ class AppTitleBar extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.only(top: 55),
           child: SizedBox(
-            height: 56,
+            height: 64,
             width: double.infinity,
             child: Center(child: StickerTitle(title: title)),
           ),
