@@ -42,6 +42,7 @@ class GamePage extends StatefulWidget {
     required this.level,
     this.onSpendCoins,
     this.onPrepareReward,
+    this.onCoverBeforeExit,
   });
 
   static const defeatCode = -1;
@@ -50,6 +51,7 @@ class GamePage extends StatefulWidget {
   final int level;
   final bool Function(int amount)? onSpendCoins;
   final ValueChanged<int>? onPrepareReward;
+  final VoidCallback? onCoverBeforeExit;
 
   @override
   State<GamePage> createState() => _GamePageState();
@@ -734,6 +736,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     Soundtrack.instance.releaseGame(_musicSession, restoreHome: false);
     _loadingFade.value = 1;
     if (mounted) setState(() {});
+    widget.onCoverBeforeExit?.call();
     await Future<void>.delayed(_exitLoadingDuration);
     if (!mounted) return;
     if (reward != null && reward > 0) {

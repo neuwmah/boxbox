@@ -122,11 +122,13 @@ class MainShell extends StatefulWidget {
   State<MainShell> createState() => _MainShellState();
 }
 
-class _MainShellState extends State<MainShell> {
+class _MainShellState extends State<MainShell>
+    with SingleTickerProviderStateMixin {
   static const _maxHearts = 5;
   static const _heartRegen = Duration(minutes: 20);
   static const _refillPrice = 900;
   static const _noAdsPriceLabel = 'BRL 59.90';
+  static const _homeLoadingFadeDuration = Duration(milliseconds: 250);
 
   int _selectedIndex = 1;
   int _level = 1;
@@ -143,10 +145,20 @@ class _MainShellState extends State<MainShell> {
   bool _loadingPrecached = false;
   bool _adsRemoved = false;
   bool _adBusy = false;
+  late final AnimationController _homeLoadingFade;
+  Future<void>? _homeLoadingTask;
 
   @override
   void initState() {
     super.initState();
+    _homeLoadingFade = AnimationController(
+      vsync: this,
+      duration: _homeLoadingFadeDuration,
+    )..addStatusListener((status) {
+      if (status == AnimationStatus.dismissed && mounted) {
+        setState(() {});
+      }
+    });
     _heartTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!mounted) return;
       _tickHearts();
@@ -162,6 +174,7 @@ class _MainShellState extends State<MainShell> {
       HardwareKeyboard.instance.removeHandler(_onDebugKey);
     }
     _heartTimer?.cancel();
+    _homeLoadingFade.dispose();
     super.dispose();
   }
 
@@ -171,6 +184,26 @@ class _MainShellState extends State<MainShell> {
     if (_loadingPrecached) return;
     _loadingPrecached = true;
     precacheImage(const AssetImage(loadingAsset), context);
+  }
+
+  void _coverHome() {
+    _homeLoadingTask = null;
+    _homeLoadingFade.value = 1;
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _finishHomeLoading() {
+    return _homeLoadingTask ??= _runHomeLoadingFade();
+  }
+
+  Future<void> _runHomeLoadingFade() async {
+    if (_homeLoadingFade.isDismissed) return;
+    for (var i = 0; i < 5; i++) {
+      if (!mounted) return;
+      await WidgetsBinding.instance.endOfFrame;
+    }
+    if (!mounted || _homeLoadingFade.isDismissed) return;
+    await _homeLoadingFade.reverse();
   }
 
   bool _onDebugKey(KeyEvent event) {
@@ -334,6 +367,7 @@ class _MainShellState extends State<MainShell> {
             level: _level,
             onSpendCoins: _spendCoins,
             onPrepareReward: _onReward,
+            onCoverBeforeExit: _coverHome,
           ),
       transitionDuration: Duration.zero,
       reverseTransitionDuration: Duration.zero,
@@ -341,6 +375,8 @@ class _MainShellState extends State<MainShell> {
     final reward = replace
         ? await Navigator.of(context).pushReplacement<int, int>(route)
         : await Navigator.of(context).push<int>(route);
+    if (!mounted || gen != _playGen) return;
+    await _finishHomeLoading();
     if (!mounted || gen != _playGen) return;
     if (reward == GamePage.defeatCode) {
       await _onDefeat();
@@ -565,6 +601,15 @@ class _MainShellState extends State<MainShell> {
                 setState(() => _displayedCoins = value);
               },
               onComplete: _onRewardComplete,
+            ),
+          ),
+        if (!_homeLoadingFade.isDismissed)
+          Positioned.fill(
+            child: RepaintBoundary(
+              child: FadeTransition(
+                opacity: _homeLoadingFade,
+                child: const LoadingCover(),
+              ),
             ),
           ),
       ],
