@@ -171,7 +171,7 @@ class _StatusCounter extends StatelessWidget {
                     _HeartValueLabel(text: iconLabel!),
                   if (showPlus)
                     Positioned(
-                      right: -1,
+                      right: -2,
                       bottom: -1,
                       child: IgnorePointer(
                         child: Container(
@@ -180,7 +180,7 @@ class _StatusCounter extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: _plusGreen,
                             shape: BoxShape.circle,
-                            border: Border.all(color: const Color(0xFF313131), width: 1.6),
+                            border: Border.all(color: const Color(0xFF333333), width: 1.6),
                           ),
                           child: const Center(
                             child: SizedBox(
