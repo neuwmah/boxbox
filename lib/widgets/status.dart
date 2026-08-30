@@ -130,7 +130,7 @@ class _StatusCounter extends StatelessWidget {
                 ),
                 child: SizedBox.expand(
                   child: Padding(
-                    padding: EdgeInsets.only(left: _iconSize * 0.70, right: 8),
+                    padding: EdgeInsets.only(left: 30, right: 8),
                     child: Align(
                       alignment: Alignment.center,
                       child: Text(
