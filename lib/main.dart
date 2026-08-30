@@ -70,7 +70,11 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  Widget _home = const _LaunchSplash();
+  static const _logoMinDuration = Duration(seconds: 3);
+
+  Widget? _shell;
+  bool _showLaunchLogo = true;
+  bool _showLaunchCover = true;
 
   @override
   void initState() {
@@ -78,13 +82,38 @@ class _MyAppState extends State<MyApp> {
     unawaited(_boot());
   }
 
+  Future<void> _hideLaunchLogo(DateTime until) async {
+    if (!mounted || !_showLaunchLogo) return;
+    final remaining = until.difference(DateTime.now());
+    if (remaining > Duration.zero) {
+      await Future<void>.delayed(remaining);
+    }
+    if (!mounted || !_showLaunchLogo) return;
+    setState(() => _showLaunchLogo = false);
+    await WidgetsBinding.instance.endOfFrame;
+  }
+
   Future<void> _boot() async {
     await WidgetsBinding.instance.endOfFrame;
-    await Ads.instance.initializeAndShowLaunchAd();
+    final logoUntil = DateTime.now().add(_logoMinDuration);
+    await Ads.instance.initializeAndShowLaunchAd(
+      onBeforeShow: () => _hideLaunchLogo(logoUntil),
+    );
+    await _hideLaunchLogo(logoUntil);
     await Soundtrack.instance.start();
     await Sfx.instance.preload();
     if (!mounted) return;
-    setState(() => _home = const MainShell());
+    final homeReady = Completer<void>();
+    setState(() {
+      _shell = MainShell(
+        onFirstHomeReady: () {
+          if (!homeReady.isCompleted) homeReady.complete();
+        },
+      );
+    });
+    await homeReady.future;
+    if (!mounted) return;
+    setState(() => _showLaunchCover = false);
   }
 
   @override
@@ -96,19 +125,39 @@ class _MyAppState extends State<MyApp> {
             value: _systemOverlayStyle,
             child: child ?? const SizedBox.shrink(),
           ),
-      home: _home,
+      home: Stack(
+        fit: StackFit.expand,
+        children: [
+          const ColoredBox(color: Colors.black),
+          if (_shell != null) _shell!,
+          if (_showLaunchCover) _LaunchSplash(showLogo: _showLaunchLogo),
+        ],
+      ),
     );
   }
 }
 
 class _LaunchSplash extends StatelessWidget {
-  const _LaunchSplash();
+  const _LaunchSplash({this.showLogo = true});
+
+  final bool showLogo;
+
+  static const _logoAsset = 'lib/assets/logo.png';
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       backgroundColor: Colors.black,
-      body: SizedBox.expand(),
+      body: showLogo
+          ? const Center(
+              child: Image(
+                image: AssetImage(_logoAsset),
+                width: 240,
+                height: 240,
+                filterQuality: FilterQuality.medium,
+              ),
+            )
+          : const SizedBox.expand(),
     );
   }
 }
@@ -116,7 +165,9 @@ class _LaunchSplash extends StatelessWidget {
 enum _HomePopup { none, start, retry, moreLives, noAds }
 
 class MainShell extends StatefulWidget {
-  const MainShell({super.key});
+  const MainShell({super.key, this.onFirstHomeReady});
+
+  final VoidCallback? onFirstHomeReady;
 
   @override
   State<MainShell> createState() => _MainShellState();
@@ -129,6 +180,15 @@ class _MainShellState extends State<MainShell>
   static const _refillPrice = 900;
   static const _noAdsPriceLabel = 'BRL 59.90';
   static const _homeLoadingFadeDuration = Duration(milliseconds: 250);
+  static const _homeAssets = [
+    loadingAsset,
+    'lib/assets/coin/icon1.png',
+    'lib/assets/heart/icon1.png',
+    'lib/assets/play/home.png',
+    'lib/assets/play/shop.png',
+    'lib/assets/play/settings.png',
+    'lib/assets/ad.png',
+  ];
 
   int _selectedIndex = 1;
   int _level = 1;
@@ -143,6 +203,10 @@ class _MainShellState extends State<MainShell>
   int _playGen = 0;
   int _debugLevelOffset = 0;
   bool _loadingPrecached = false;
+  bool _homeAssetsReady = false;
+  bool _cubesReady = false;
+  bool _adsIconReady = false;
+  bool _firstHomeRevealed = false;
   bool _adsRemoved = false;
   bool _adBusy = false;
   late final AnimationController _homeLoadingFade;
@@ -183,7 +247,39 @@ class _MainShellState extends State<MainShell>
     super.didChangeDependencies();
     if (_loadingPrecached) return;
     _loadingPrecached = true;
-    precacheImage(const AssetImage(loadingAsset), context);
+    unawaited(_precacheHomeAssets());
+  }
+
+  Future<void> _precacheHomeAssets() async {
+    await Future.wait([
+      for (final asset in _homeAssets)
+        precacheImage(AssetImage(asset), context),
+    ]);
+    if (!mounted) return;
+    _homeAssetsReady = true;
+    unawaited(_tryRevealHome());
+  }
+
+  void _onCubesReady() {
+    _cubesReady = true;
+    unawaited(_tryRevealHome());
+  }
+
+  void _onAdsIconReady() {
+    _adsIconReady = true;
+    unawaited(_tryRevealHome());
+  }
+
+  Future<void> _tryRevealHome() async {
+    if (_firstHomeRevealed) return;
+    if (!_homeAssetsReady || !_cubesReady || !_adsIconReady) return;
+    _firstHomeRevealed = true;
+    for (var i = 0; i < 5; i++) {
+      if (!mounted) return;
+      await WidgetsBinding.instance.endOfFrame;
+    }
+    if (!mounted) return;
+    widget.onFirstHomeReady?.call();
   }
 
   void _coverHome() {
@@ -513,7 +609,12 @@ class _MainShellState extends State<MainShell>
                       Expanded(child: ShopPage()),
                     ],
                   ),
-                  HomePage(onLevelTap: _onLevelTap, onAdsTap: _onAdsTap),
+                  HomePage(
+                    onLevelTap: _onLevelTap,
+                    onAdsTap: _onAdsTap,
+                    onCubesReady: _onCubesReady,
+                    onAdsIconReady: _onAdsIconReady,
+                  ),
                   const Column(
                     children: [
                       AppTitleBar(title: 'Settings'),

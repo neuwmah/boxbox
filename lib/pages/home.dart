@@ -12,10 +12,14 @@ class HomePage extends StatelessWidget {
     super.key,
     this.onLevelTap,
     this.onAdsTap,
+    this.onCubesReady,
+    this.onAdsIconReady,
   });
 
   final VoidCallback? onLevelTap;
   final VoidCallback? onAdsTap;
+  final VoidCallback? onCubesReady;
+  final VoidCallback? onAdsIconReady;
 
   static const _adsIconSize = 72.0;
 
@@ -24,7 +28,7 @@ class HomePage extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        const Positioned.fill(child: CubesBackground()),
+        Positioned.fill(child: CubesBackground(onReady: onCubesReady)),
         Center(
           child: Transform.translate(
             offset: const Offset(0, 40),
@@ -51,8 +55,9 @@ class HomePage extends StatelessWidget {
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () => Sfx.instance.tap(onAdsTap),
-              child: const _ShiningAdsIcon(
+              child: _ShiningAdsIcon(
                 size: _adsIconSize,
+                onReady: onAdsIconReady,
               ),
             ),
           ),
@@ -71,9 +76,10 @@ class HomePage extends StatelessWidget {
 }
 
 class _ShiningAdsIcon extends StatefulWidget {
-  const _ShiningAdsIcon({required this.size});
+  const _ShiningAdsIcon({required this.size, this.onReady});
 
   final double size;
+  final VoidCallback? onReady;
 
   @override
   State<_ShiningAdsIcon> createState() => _ShiningAdsIconState();
@@ -95,14 +101,17 @@ class _ShiningAdsIconState extends State<_ShiningAdsIcon>
   }
 
   Future<void> _loadIcon() async {
-    final data = await rootBundle.load('lib/assets/ad.png');
-    final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
-    final frame = await codec.getNextFrame();
-    if (!mounted) {
-      frame.image.dispose();
-      return;
-    }
-    setState(() => _icon = frame.image);
+    try {
+      final data = await rootBundle.load('lib/assets/ad.png');
+      final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
+      final frame = await codec.getNextFrame();
+      if (!mounted) {
+        frame.image.dispose();
+        return;
+      }
+      setState(() => _icon = frame.image);
+    } catch (_) {}
+    if (mounted) widget.onReady?.call();
   }
 
   @override

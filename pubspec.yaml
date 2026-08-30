@@ -28,6 +28,7 @@ flutter:
     - lib/assets/game/3.png
     - lib/assets/game/4.png
     - lib/assets/loading.png
+    - lib/assets/logo.png
     - lib/assets/coin/icon1.png
     - lib/assets/coin/pile.png
     - lib/assets/heart/icon1.png

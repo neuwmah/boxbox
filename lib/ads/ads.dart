@@ -49,7 +49,9 @@ class Ads {
     }
   }
 
-  Future<void> initializeAndShowLaunchAd() async {
+  Future<void> initializeAndShowLaunchAd({
+    Future<void> Function()? onBeforeShow,
+  }) async {
     await initialize();
     if (!supported || adsRemoved || !_ready) return;
     _showAppOpenWhenReady = false;
@@ -57,6 +59,7 @@ class Ads {
     if (ad != null) {
       _appOpen = ad;
       _appOpenLoadedAt = DateTime.now();
+      await onBeforeShow?.call();
       await showAppOpenIfAvailable();
     }
     preload();

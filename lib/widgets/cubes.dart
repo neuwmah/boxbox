@@ -13,7 +13,9 @@ const _plainAlbedo = 0.135;
 const _coloredChance = 0.15;
 
 class CubesBackground extends StatefulWidget {
-  const CubesBackground({super.key});
+  const CubesBackground({super.key, this.onReady});
+
+  final VoidCallback? onReady;
 
   @override
   State<CubesBackground> createState() => _CubesBackgroundState();
@@ -34,21 +36,26 @@ class _CubesBackgroundState extends State<CubesBackground>
   }
 
   Future<void> _load() async {
-    final program = await ui.FragmentProgram.fromAsset('lib/shaders/cubes.frag');
-    final grid = await _buildGridImage();
-    if (!mounted) {
-      grid.dispose();
-      return;
-    }
-    final shader = program.fragmentShader();
-    final repaint = _Repaint();
-    setState(() {
-      _grid = grid;
-      _shader = shader;
-      _repaint = repaint;
-      _painter = _CubesPainter(repaint, shader, grid);
-    });
-    _ticker = createTicker(_onTick)..start();
+    try {
+      final program = await ui.FragmentProgram.fromAsset(
+        'lib/shaders/cubes.frag',
+      );
+      final grid = await _buildGridImage();
+      if (!mounted) {
+        grid.dispose();
+        return;
+      }
+      final shader = program.fragmentShader();
+      final repaint = _Repaint();
+      setState(() {
+        _grid = grid;
+        _shader = shader;
+        _repaint = repaint;
+        _painter = _CubesPainter(repaint, shader, grid);
+      });
+      _ticker = createTicker(_onTick)..start();
+    } catch (_) {}
+    if (mounted) widget.onReady?.call();
   }
 
   void _onTick(Duration elapsed) {
