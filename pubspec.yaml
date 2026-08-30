@@ -23,11 +23,11 @@ flutter:
   shaders:
     - lib/shaders/cubes.frag
   assets:
-    - lib/assets/background/game/1.png
-    - lib/assets/background/game/2.png
-    - lib/assets/background/game/3.png
-    - lib/assets/background/game/4.png
-    - lib/assets/background/logo.png
+    - lib/assets/game/1.png
+    - lib/assets/game/2.png
+    - lib/assets/game/3.png
+    - lib/assets/game/4.png
+    - lib/assets/loading.png
     - lib/assets/coin/icon1.png
     - lib/assets/coin/pile.png
     - lib/assets/heart/icon1.png
@@ -39,7 +39,7 @@ flutter:
     - lib/assets/count/balls2.png
     - lib/assets/count/balls3.png
     - lib/assets/count/balls4.png
-    - lib/assets/ad/icon.png
+    - lib/assets/ad.png
     - lib/assets/floor/grass.png
     - lib/assets/floor/farm.png
     - lib/assets/floor/wood/8.png

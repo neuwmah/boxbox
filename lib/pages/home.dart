@@ -95,7 +95,7 @@ class _ShiningAdsIconState extends State<_ShiningAdsIcon>
   }
 
   Future<void> _loadIcon() async {
-    final data = await rootBundle.load('lib/assets/ad/icon.png');
+    final data = await rootBundle.load('lib/assets/ad.png');
     final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
     final frame = await codec.getNextFrame();
     if (!mounted) {

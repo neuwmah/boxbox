@@ -83,7 +83,7 @@ String ballsBadgeAt(int level) {
   return ballsBadges[index.clamp(0, ballsBadges.length - 1)];
 }
 
-const loadingAsset = 'lib/assets/background/logo.png';
+const loadingAsset = 'lib/assets/loading.png';
 
 class BackgroundSkin {
   const BackgroundSkin({required this.asset, required this.scale});
@@ -94,19 +94,19 @@ class BackgroundSkin {
 
 const backgrounds = <BackgroundSkin>[
   BackgroundSkin(
-    asset: 'lib/assets/background/game/1.png',
+    asset: 'lib/assets/game/1.png',
     scale: 1.025,
   ),
   BackgroundSkin(
-    asset: 'lib/assets/background/game/2.png',
+    asset: 'lib/assets/game/2.png',
     scale: 1.025,
   ),
   BackgroundSkin(
-    asset: 'lib/assets/background/game/3.png',
+    asset: 'lib/assets/game/3.png',
     scale: 1.025,
   ),
   BackgroundSkin(
-    asset: 'lib/assets/background/game/4.png',
+    asset: 'lib/assets/game/4.png',
     scale: 1.025,
   ),
 ];

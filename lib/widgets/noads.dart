@@ -134,7 +134,7 @@ class _NoAdsPopupState extends State<NoAdsPopup>
                                                       MainAxisSize.min,
                                                   children: [
                                                     Image.asset(
-                                                      'lib/assets/ad/icon.png',
+                                                      'lib/assets/ad.png',
                                                       width: _iconSize,
                                                       height: _iconSize,
                                                       fit: BoxFit.contain,
