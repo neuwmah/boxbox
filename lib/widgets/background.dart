@@ -13,9 +13,7 @@ class RectBackground extends StatefulWidget {
 
 class _RectBackgroundState extends State<RectBackground>
     with SingleTickerProviderStateMixin {
-  static const _asset = 'lib/assets/background/sample.png';
-  static const _assetScale = 4.0;
-  static const _tileSize = 1000.0 / _assetScale;
+  static const _tileSize = 250.0;
   static const _duration = Duration(seconds: 16);
 
   late final AnimationController _controller;
@@ -40,7 +38,14 @@ class _RectBackgroundState extends State<RectBackground>
       children: [
         AnimatedBuilder(
           animation: _controller,
-          builder: (context, _) {
+          child: const RepaintBoundary(
+            child: CustomPaint(
+              painter: _RectPatternPainter(),
+              isComplex: true,
+              child: SizedBox.expand(),
+            ),
+          ),
+          builder: (context, child) {
             return LayoutBuilder(
               builder: (context, constraints) {
                 final shift = _tileSize * _controller.value;
@@ -53,14 +58,7 @@ class _RectBackgroundState extends State<RectBackground>
                         top: shift - _tileSize,
                         width: constraints.maxWidth + _tileSize,
                         height: constraints.maxHeight + _tileSize,
-                        child: Image.asset(
-                          _asset,
-                          repeat: ImageRepeat.repeat,
-                          scale: _assetScale,
-                          alignment: Alignment.topLeft,
-                          filterQuality: FilterQuality.none,
-                          gaplessPlayback: true,
-                        ),
+                        child: child!,
                       ),
                     ],
                   ),
@@ -73,6 +71,45 @@ class _RectBackgroundState extends State<RectBackground>
       ],
     );
   }
+}
+
+class _RectPatternPainter extends CustomPainter {
+  const _RectPatternPainter();
+
+  static const _cell = 25.0;
+  static const _light = Color(0xFF212121);
+  static const _dark = Color(0xFF111111);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.isEmpty) return;
+
+    canvas.drawRect(
+      Offset.zero & size,
+      Paint()
+        ..color = _light
+        ..isAntiAlias = false,
+    );
+
+    final dark = Paint()
+      ..color = _dark
+      ..isAntiAlias = false;
+    final path = Path();
+    final cols = (size.width / _cell).ceil();
+    final rows = (size.height / _cell).ceil();
+    for (var row = 0; row < rows; row++) {
+      final y = row * _cell;
+      for (var col = 0; col < cols; col++) {
+        if ((row + col).isOdd) {
+          path.addRect(Rect.fromLTWH(col * _cell, y, _cell, _cell));
+        }
+      }
+    }
+    canvas.drawPath(path, dark);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class PopupBackground extends StatefulWidget {
