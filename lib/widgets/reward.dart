@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:boxbox/widgets/popup.dart';
 import 'package:boxbox/sound/sfx.dart';
 
 class RewardOverlay extends StatefulWidget {
@@ -136,7 +137,7 @@ class _RewardOverlayState extends State<RewardOverlay>
             fit: StackFit.expand,
             children: [
               ColoredBox(
-                color: Colors.black.withValues(alpha: 0.55 * dim * fadeOut),
+                color: Colors.black.withValues(alpha: popupDim * dim * fadeOut),
               ),
               if (impactT > 0.01 && impactT < 1)
                 Positioned(

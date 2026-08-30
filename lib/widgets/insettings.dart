@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:boxbox/widgets/popup.dart';
 import 'package:boxbox/sound/sfx.dart';
 
 class InSettingsMenu extends StatelessWidget {
@@ -47,7 +48,7 @@ class InSettingsMenu extends StatelessWidget {
                   behavior: HitTestBehavior.opaque,
                   onTap: onClose,
                   child: ColoredBox(
-                    color: Colors.black.withValues(alpha: 0.55 * t),
+                    color: Colors.black.withValues(alpha: popupDim * t),
                   ),
                 ),
               ),

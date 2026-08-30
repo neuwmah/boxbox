@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:boxbox/game/level.dart';
 import 'package:boxbox/widgets/background.dart';
-import 'package:boxbox/widgets/titlebar.dart';
+import 'package:boxbox/widgets/popup.dart';
 
 class RetryPopup extends StatefulWidget {
   const RetryPopup({

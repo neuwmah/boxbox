@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:boxbox/sound/sfx.dart';
 import 'package:boxbox/widgets/background.dart';
-import 'package:boxbox/widgets/titlebar.dart';
+import 'package:boxbox/widgets/popup.dart';
 
 class MoreLivesPopup extends StatefulWidget {
   const MoreLivesPopup({
