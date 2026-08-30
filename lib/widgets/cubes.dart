@@ -119,15 +119,15 @@ class _Repaint extends ChangeNotifier {
 }
 
 class _ColorWalk {
-  double r = 0;
-  double g = 0;
-  double b = 255;
+  double r = 121;
+  double g = 11;
+  double b = 136;
   double rs = 0;
   double gs = 0;
   double bs = 0;
-  double rt = 0;
-  double gt = 0;
-  double bt = 255;
+  double rt = 121;
+  double gt = 11;
+  double bt = 136;
   final _rng = math.Random(3);
 
   int _randint(int min, int max) => _rng.nextInt(max) + min;
