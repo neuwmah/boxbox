@@ -27,8 +27,18 @@ bool get _isDesktop {
   return Platform.isWindows || Platform.isLinux || Platform.isMacOS;
 }
 
+const _systemOverlayStyle = SystemUiOverlayStyle(
+  statusBarColor: Colors.transparent,
+  statusBarIconBrightness: Brightness.light,
+  statusBarBrightness: Brightness.dark,
+  systemNavigationBarColor: Colors.transparent,
+  systemNavigationBarIconBrightness: Brightness.light,
+  systemNavigationBarDividerColor: Colors.transparent,
+);
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setSystemUIOverlayStyle(_systemOverlayStyle);
   if (_isDesktop) {
     await windowManager.ensureInitialized();
 
@@ -78,6 +88,11 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      builder:
+          (context, child) => AnnotatedRegion<SystemUiOverlayStyle>(
+            value: _systemOverlayStyle,
+            child: child ?? const SizedBox.shrink(),
+          ),
       home: _home,
     );
   }
