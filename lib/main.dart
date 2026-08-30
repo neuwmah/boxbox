@@ -38,6 +38,9 @@ const _systemOverlayStyle = SystemUiOverlayStyle(
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
   SystemChrome.setSystemUIOverlayStyle(_systemOverlayStyle);
   if (_isDesktop) {
     await windowManager.ensureInitialized();
