@@ -20,6 +20,8 @@ dev_dependencies:
   flutter_lints: ^5.0.0
 flutter:
   uses-material-design: true
+  shaders:
+    - lib/shaders/cubes.frag
   assets:
     - lib/assets/background/sample.png
     - lib/assets/background/highlight.png
