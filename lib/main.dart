@@ -152,8 +152,8 @@ class _LaunchSplash extends StatelessWidget {
           ? const Center(
               child: Image(
                 image: AssetImage(_logoAsset),
-                width: 240,
-                height: 240,
+                width: 300,
+                height: 300,
                 filterQuality: FilterQuality.medium,
               ),
             )
