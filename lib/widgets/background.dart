@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-const _patternLight = Color(0xFF050505);
+const _patternLight = Color(0xFF101010);
 const _patternDark = Color(0xFF000000);
 
 class RectBackground extends StatefulWidget {

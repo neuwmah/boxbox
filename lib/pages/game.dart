@@ -22,14 +22,15 @@ class LoadingCover extends StatelessWidget {
   Widget build(BuildContext context) {
     return const ColoredBox(
       color: Colors.black,
-      child: Image(
-        image: AssetImage(loadingAsset),
-        fit: BoxFit.cover,
-        alignment: Alignment.center,
-        width: double.infinity,
-        height: double.infinity,
-        filterQuality: FilterQuality.medium,
-        gaplessPlayback: true,
+      child: Center(
+        child: Image(
+          image: AssetImage(loadingAsset),
+          fit: BoxFit.contain,
+          width: 100,
+          height: 100,
+          filterQuality: FilterQuality.medium,
+          gaplessPlayback: true,
+        ),
       ),
     );
   }
