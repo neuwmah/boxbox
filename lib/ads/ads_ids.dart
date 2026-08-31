@@ -13,10 +13,6 @@ class AdsIds {
   static const androidAppOpen = 'ca-app-pub-5796139289910595/9882235158';
   static const iosAppOpen = 'ca-app-pub-5796139289910595/9882235158';
 
-  /// Banner
-  static const androidBanner = 'ca-app-pub-5796139289910595/8831665914';
-  static const iosBanner = 'ca-app-pub-5796139289910595/8831665914';
-
   static const testAndroidInterstitial = 'ca-app-pub-3940256099942544/1033173712';
   static const testIosInterstitial = 'ca-app-pub-3940256099942544/4411468910';
   static const testAndroidRewarded = 'ca-app-pub-3940256099942544/5224354917';
