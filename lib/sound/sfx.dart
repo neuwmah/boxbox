@@ -77,6 +77,19 @@ class Sfx extends ChangeNotifier {
     }
   }
 
+  void invalidate() {
+    _coinRepeatGen++;
+    _coinRepeatHandle = null;
+    _touch = null;
+    _hit = null;
+    _fall = null;
+    _fail = null;
+    _shot = null;
+    _gg = null;
+    _coinFinish = null;
+    _coinRepeat = null;
+  }
+
   void playTouch() => _play(_touch, volume);
 
   void playHit() => _play(_hit, hitVolume);

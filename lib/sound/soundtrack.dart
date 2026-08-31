@@ -20,10 +20,12 @@ class Soundtrack extends ChangeNotifier {
   bool _gameActive = false;
   int _gameGen = 0;
   int _gameSession = 0;
+  int _engineGen = 0;
 
   Future<void> start() async {
     if (_started) return;
     _started = true;
+    final gen = _engineGen;
     try {
       final device = _pickDevice(_soloud.listPlaybackDevices());
       await _soloud.init(device: device, bufferSize: 512);
@@ -31,6 +33,7 @@ class Soundtrack extends ChangeNotifier {
         debugPrint('Soundtrack device: ${device?.name ?? 'default'}');
       }
       final source = await _soloud.loadAsset(homeAsset);
+      if (gen != _engineGen) return;
       _homeHandle = await _soloud.play(
         source,
         volume: _homePlaying ? volume : 0,
@@ -38,9 +41,33 @@ class Soundtrack extends ChangeNotifier {
         paused: !_homePlaying,
       );
     } catch (error, stack) {
-      _started = false;
+      if (gen == _engineGen) _started = false;
       debugPrint('Soundtrack start failed: $error');
       debugPrint('$stack');
+    }
+  }
+
+  void shutdown() {
+    _engineGen++;
+    _gameGen++;
+    _started = false;
+    _homeHandle = null;
+    _gameHandle = null;
+    _gameSource = null;
+    try {
+      _soloud.deinit();
+    } catch (error) {
+      debugPrint('Soundtrack shutdown failed: $error');
+    }
+  }
+
+  Future<void> resume() async {
+    await start();
+    if (!_gameActive) return;
+    final gen = _gameGen;
+    await _playGame();
+    if (gen != _gameGen || !_gameActive) {
+      _stopGame();
     }
   }
 

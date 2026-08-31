@@ -36,6 +36,8 @@ class Ads {
   static const _maxAttempts = 3;
   static const _appOpenMaxAge = Duration(hours: 4);
 
+  bool get showingFullscreen => _showingFullscreen;
+
   Future<void> initialize() async {
     if (!supported || adsRemoved || _ready) return;
     try {
@@ -49,20 +51,15 @@ class Ads {
     }
   }
 
-  Future<void> initializeAndShowLaunchAd({
-    Future<void> Function()? onBeforeShow,
-  }) async {
+  Future<bool> prepareLaunchAd() async {
     await initialize();
-    if (!supported || adsRemoved || !_ready) return;
+    if (!supported || adsRemoved || !_ready) return false;
     _showAppOpenWhenReady = false;
     final ad = await _loadAppOpenAwaitingFirst();
-    if (ad != null) {
-      _appOpen = ad;
-      _appOpenLoadedAt = DateTime.now();
-      await onBeforeShow?.call();
-      await showAppOpenIfAvailable();
-    }
-    preload();
+    if (ad == null) return false;
+    _appOpen = ad;
+    _appOpenLoadedAt = DateTime.now();
+    return true;
   }
 
   void preload() {

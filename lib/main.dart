@@ -27,6 +27,11 @@ bool get _isDesktop {
   return Platform.isWindows || Platform.isLinux || Platform.isMacOS;
 }
 
+bool get _isMobile {
+  if (kIsWeb) return false;
+  return Platform.isAndroid || Platform.isIOS;
+}
+
 const _systemOverlayStyle = SystemUiOverlayStyle(
   statusBarColor: Colors.transparent,
   statusBarIconBrightness: Brightness.light,
@@ -70,40 +75,56 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   static const _logoMinDuration = Duration(seconds: 3);
+  static const _launchAdMaxWait = Duration(seconds: 10);
+  static const _launchAdMaxShow = Duration(seconds: 45);
 
   Widget? _shell;
-  bool _showLaunchLogo = true;
-  bool _showLaunchCover = true;
+  bool _showLogo = true;
+  bool _lockInput = true;
+  Future<void>? _audioResume;
 
   @override
   void initState() {
     super.initState();
+    if (_isMobile) {
+      WidgetsBinding.instance.addObserver(this);
+    }
     unawaited(_boot());
   }
 
-  Future<void> _hideLaunchLogo(DateTime until) async {
-    if (!mounted || !_showLaunchLogo) return;
-    final remaining = until.difference(DateTime.now());
-    if (remaining > Duration.zero) {
-      await Future<void>.delayed(remaining);
+  @override
+  void dispose() {
+    if (_isMobile) {
+      WidgetsBinding.instance.removeObserver(this);
     }
-    if (!mounted || !_showLaunchLogo) return;
-    setState(() => _showLaunchLogo = false);
-    await WidgetsBinding.instance.endOfFrame;
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      Soundtrack.instance.shutdown();
+      Sfx.instance.invalidate();
+      _audioResume = null;
+      return;
+    }
+    if (state == AppLifecycleState.resumed) {
+      _audioResume ??= _resumeAudio();
+    }
+  }
+
+  Future<void> _resumeAudio() async {
+    await Soundtrack.instance.resume();
+    await Sfx.instance.preload();
   }
 
   Future<void> _boot() async {
     await WidgetsBinding.instance.endOfFrame;
     final logoUntil = DateTime.now().add(_logoMinDuration);
-    await Ads.instance.initializeAndShowLaunchAd(
-      onBeforeShow: () => _hideLaunchLogo(logoUntil),
-    );
-    await _hideLaunchLogo(logoUntil);
-    await Soundtrack.instance.start();
-    await Sfx.instance.preload();
-    if (!mounted) return;
+    final launchAd = Ads.instance.prepareLaunchAd();
+    final audio = _prepareAudio();
     final homeReady = Completer<void>();
     setState(() {
       _shell = MainShell(
@@ -112,9 +133,41 @@ class _MyAppState extends State<MyApp> {
         },
       );
     });
-    await homeReady.future;
+    await Future.wait([homeReady.future, audio]);
     if (!mounted) return;
-    setState(() => _showLaunchCover = false);
+    final adReady = await _waitLaunchAd(launchAd, logoUntil);
+    if (!mounted) return;
+    setState(() => _showLogo = false);
+    for (var i = 0; i < 3; i++) {
+      await WidgetsBinding.instance.endOfFrame;
+      if (!mounted) return;
+    }
+    if (adReady) {
+      await Ads.instance.showAppOpenIfAvailable().timeout(
+        _launchAdMaxShow,
+        onTimeout: () => false,
+      );
+      if (!mounted) return;
+    }
+    setState(() => _lockInput = false);
+    if (!Ads.instance.showingFullscreen) {
+      Soundtrack.instance.setForeground(true);
+    }
+    Ads.instance.preload();
+  }
+
+  Future<void> _prepareAudio() async {
+    Soundtrack.instance.setForeground(false);
+    await Soundtrack.instance.start();
+    await Sfx.instance.preload();
+  }
+
+  Future<bool> _waitLaunchAd(Future<bool> launchAd, DateTime logoUntil) async {
+    final remaining = logoUntil.difference(DateTime.now());
+    if (remaining > Duration.zero) {
+      await Future<void>.delayed(remaining);
+    }
+    return launchAd.timeout(_launchAdMaxWait, onTimeout: () => false);
   }
 
   @override
@@ -132,7 +185,8 @@ class _MyAppState extends State<MyApp> {
         children: [
           const ColoredBox(color: Colors.black),
           if (_shell != null) _shell!,
-          if (_showLaunchCover) _LaunchSplash(showLogo: _showLaunchLogo),
+          if (_lockInput) const AbsorbPointer(child: SizedBox.expand()),
+          if (_showLogo) const _LaunchSplash(),
         ],
       ),
     );
@@ -140,26 +194,22 @@ class _MyAppState extends State<MyApp> {
 }
 
 class _LaunchSplash extends StatelessWidget {
-  const _LaunchSplash({this.showLogo = true});
-
-  final bool showLogo;
+  const _LaunchSplash();
 
   static const _logoAsset = 'lib/assets/logo.png';
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       backgroundColor: Colors.black,
-      body: showLogo
-          ? const Center(
-              child: Image(
-                image: AssetImage(_logoAsset),
-                width: 300,
-                height: 300,
-                filterQuality: FilterQuality.medium,
-              ),
-            )
-          : const SizedBox.expand(),
+      body: Center(
+        child: Image(
+          image: AssetImage(_logoAsset),
+          width: 300,
+          height: 300,
+          filterQuality: FilterQuality.medium,
+        ),
+      ),
     );
   }
 }
