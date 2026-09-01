@@ -795,8 +795,6 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final isTablet = MediaQuery.sizeOf(context).shortestSide >= 600;
-
     return Scaffold(
       backgroundColor: _assetsReady ? Colors.transparent : Colors.black,
       body: Stack(
@@ -886,15 +884,14 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
           ),
           if (_assetsReady && _ballsLeft > 0) ...[
             Positioned(
-              top: 60,
-              left: isTablet ? 0 : 38,
-              right: isTablet ? 0 : null,
+              top: 93,
+              left: 0,
+              right: 0,
               height: 48,
               child: Align(
-                alignment:
-                    isTablet ? Alignment.center : Alignment.centerLeft,
+                alignment: Alignment.center,
                 child: Transform.translate(
-                  offset: Offset(isTablet ? -100 : 0, 0),
+                  offset: const Offset(-100, 0),
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: () {

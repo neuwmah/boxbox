@@ -37,7 +37,6 @@ class InSettingsMenu extends StatelessWidget {
       builder: (context, _) {
         final t = Curves.easeInOut.transform(animation.value);
         final open = animation.value > 0.001;
-        final isTablet = MediaQuery.sizeOf(context).shortestSide >= 600;
 
         return Stack(
           fit: StackFit.expand,
@@ -53,13 +52,13 @@ class InSettingsMenu extends StatelessWidget {
                 ),
               ),
             Positioned(
-              top: 60,
-              left: isTablet ? 0 : null,
-              right: isTablet ? 0 : 32,
+              top: 93,
+              left: 0,
+              right: 0,
               child: Align(
-                alignment: isTablet ? Alignment.topCenter : Alignment.topRight,
+                alignment: Alignment.topCenter,
                 child: Transform.translate(
-                  offset: Offset(isTablet ? 100 : 0, 0),
+                  offset: const Offset(100, 0),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
