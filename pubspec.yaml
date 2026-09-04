@@ -28,6 +28,7 @@ flutter:
     - lib/assets/game/2.png
     - lib/assets/game/3.png
     - lib/assets/game/4.png
+    - lib/assets/game/5.png
     - lib/assets/loading.png
     - lib/assets/logo.png
     - lib/assets/coin/icon1.png
@@ -41,6 +42,7 @@ flutter:
     - lib/assets/count/balls2.png
     - lib/assets/count/balls3.png
     - lib/assets/count/balls4.png
+    - lib/assets/count/balls5.png
     - lib/assets/ad.png
     - lib/assets/close.png
     - lib/assets/floor/grass.png

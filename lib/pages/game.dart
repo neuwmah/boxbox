@@ -232,7 +232,8 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
     }
   }
 
-  Future<void> _decodeFloor(String asset) async {
+  Future<void> _decodeFloor(String? asset) async {
+    if (asset == null || asset.isEmpty) return;
     if (_floorImages.containsKey(asset)) return;
     final data = await rootBundle.load(asset);
     final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
@@ -864,9 +865,12 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
                     platformFar: _platformFar,
                     platformThickness: _platformThickness,
                     ballRadius: _ballRadius,
-                    floorImage: _floorImages[_floor.asset],
+                    floorImage: _floor.asset == null
+                        ? null
+                        : _floorImages[_floor.asset!],
                     floorTopColor: Color(_floor.topColor),
                     floorBottomColor: Color(_floor.bottomColor),
+                    floorStyle: _floor.style,
                     hitSparks: [
                       for (final spark in _hitSparks)
                         (
@@ -1138,6 +1142,7 @@ class _ScenePainter extends CustomPainter {
     required this.floorImage,
     required this.floorTopColor,
     required this.floorBottomColor,
+    required this.floorStyle,
     required this.hitSparks,
   });
 
@@ -1160,6 +1165,7 @@ class _ScenePainter extends CustomPainter {
   final ui.Image? floorImage;
   final Color floorTopColor;
   final Color floorBottomColor;
+  final FloorStyle floorStyle;
   final List<({_Vec3 pos, double t})> hitSparks;
 
   static const _camY = 3.4;
@@ -1484,7 +1490,39 @@ class _ScenePainter extends CustomPainter {
     }
   }
 
+  void _paintGlassPlatform(Canvas canvas, Size size) {
+    final cz = (platformNear + platformFar) / 2;
+    final hy = platformThickness / 2;
+    final hz = (platformFar - platformNear) / 2;
+    final rot = Quaternion.identity();
+    const glass = Color(0xFF000000);
+    final slabs = <
+        ({
+          _Vec3 pos,
+          Quaternion rot,
+          Color color,
+          BlockShape shape,
+          _Vec3 half,
+        })>[
+      for (var i = 0; i < platformXs.length; i++)
+        (
+          pos: _Vec3(platformXs[i], platformTops[i] - hy, cz),
+          rot: rot,
+          color: glass,
+          shape: BlockShape.box,
+          half: _Vec3(platformHalfW, hy, hz),
+        ),
+    ];
+
+    _paintDepthLayer(canvas, size, slabs, const []);
+  }
+
   void _paintPlatform(Canvas canvas, Size size) {
+    if (floorStyle == FloorStyle.glass) {
+      _paintGlassPlatform(canvas, size);
+      return;
+    }
+
     final cz = (platformNear + platformFar) / 2;
     final hx = platformHalfW;
     final hz = (platformFar - platformNear) / 2;

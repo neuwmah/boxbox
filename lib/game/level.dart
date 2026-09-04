@@ -31,16 +31,28 @@ String levelTitleAt(int level) {
   return '"${levelTitles[clampLevel(level) - 1]}"';
 }
 
+enum FloorStyle { textured, glass }
+
 class FloorSkin {
   const FloorSkin({
-    required this.asset,
-    required this.topColor,
-    required this.bottomColor,
+    this.asset,
+    this.topColor = 0xFF000000,
+    this.bottomColor = 0xFF000000,
+    this.style = FloorStyle.textured,
   });
 
-  final String asset;
+  const FloorSkin.glass()
+      : asset = null,
+        topColor = 0xFF000000,
+        bottomColor = 0xFF000000,
+        style = FloorStyle.glass;
+
+  final String? asset;
   final int topColor;
   final int bottomColor;
+  final FloorStyle style;
+
+  bool get isGlass => style == FloorStyle.glass;
 }
 
 const floors = <FloorSkin>[
@@ -64,6 +76,7 @@ const floors = <FloorSkin>[
     topColor: 0xFF00C800,
     bottomColor: 0xFF000000,
   ),
+  FloorSkin.glass(),
 ];
 
 FloorSkin floorAt(int level) {
@@ -76,6 +89,7 @@ const ballsBadges = <String>[
   'lib/assets/count/balls2.png',
   'lib/assets/count/balls3.png',
   'lib/assets/count/balls4.png',
+  'lib/assets/count/balls5.png',
 ];
 
 String ballsBadgeAt(int level) {
@@ -107,6 +121,10 @@ const backgrounds = <BackgroundSkin>[
   ),
   BackgroundSkin(
     asset: 'lib/assets/game/4.png',
+    scale: 1.025,
+  ),
+  BackgroundSkin(
+    asset: 'lib/assets/game/5.png',
     scale: 1.025,
   ),
 ];
@@ -157,6 +175,7 @@ const levelTitles = <String>[
   'Strong Ape',
   'Evil Plant',
   'Weak Enemy',
+  'Moon',
 ];
 
 const levels = <List<Block>>[
@@ -2208,5 +2227,11 @@ const levels = <List<Block>>[
     Block(6, 5, 23, 0xFFAB5236, box),
     Block(4, 6, 3, 0xFFAB5236, box),
     Block(5, 6, 23, 0xFFAB5236, box),
+  ],
+  // Moon
+  [
+    Block(0, 0, 3, 0xFF000000, box),
+    Block(1, 0, 3, 0xFF000000, box),
+    Block(2, 0, 3, 0xFF000000, box),
   ],
 ];
