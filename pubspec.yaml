@@ -42,6 +42,7 @@ flutter:
     - lib/assets/count/balls3.png
     - lib/assets/count/balls4.png
     - lib/assets/ad.png
+    - lib/assets/close.png
     - lib/assets/floor/grass.png
     - lib/assets/floor/farm.png
     - lib/assets/floor/wood/8.png

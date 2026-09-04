@@ -214,10 +214,7 @@ class _ReturnPopupState extends State<ReturnPopup>
                         Positioned(
                           top: 24,
                           right: 12,
-                          child: PopupCloseButton(
-                            onTap: widget.onClose,
-                            borderColor: PopupShade.borderTint(_shade),
-                          ),
+                          child: PopupCloseButton(onTap: widget.onClose),
                         ),
                       ],
                     ),

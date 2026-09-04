@@ -121,8 +121,22 @@ class PopupShade {
   static const end = Color(0xFF050505);
   static const depth = 4.0;
   static const steps = [4.0, 3.0, 2.0, 1.0];
+  static const radius = 8.0;
+  static const largeRadius = 32.0;
   static const _fillMix = 0.025;
   static const _borderMix = 0.25;
+
+  static BorderRadius corners({
+    double radius = radius,
+    double largeRadius = largeRadius,
+  }) {
+    return BorderRadius.only(
+      topLeft: Radius.circular(largeRadius),
+      topRight: Radius.circular(radius),
+      bottomLeft: Radius.circular(radius),
+      bottomRight: Radius.circular(largeRadius),
+    );
+  }
 
   static LinearGradient gradient([
     Color startColor = start,
@@ -150,14 +164,15 @@ class PopupShade {
 
   static BoxDecoration panel({
     Color? color,
-    double radius = 8,
+    double radius = radius,
+    double largeRadius = largeRadius,
     double borderWidth = 1.6,
   }) {
     final tinted = color != null && color != start;
     return BoxDecoration(
       color: tinted ? null : Colors.black,
       gradient: tinted ? fillGradient(color!) : null,
-      borderRadius: BorderRadius.circular(radius),
+      borderRadius: corners(radius: radius, largeRadius: largeRadius),
       border: Border.all(
         color: tinted ? borderTint(color!) : start,
         width: borderWidth,
@@ -188,7 +203,7 @@ class PopupBodyShade extends StatelessWidget {
             bottom: PopupShade.depth - o,
             child: DecoratedBox(
               decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                borderRadius: PopupShade.corners(),
                 gradient: PopupShade.gradient(color, endColor),
               ),
             ),
@@ -215,6 +230,7 @@ class PopupTitleBadge extends StatelessWidget {
   static const _padding = 10.0;
   static const _borderWidth = 1.0;
   static const _gapBelow = 24.0;
+  static const _radius = 0.0;
 
   static double boxHeight([double fontSize = 24]) =>
       _padding * 2 + fontSize + _borderWidth * 2;
@@ -243,8 +259,9 @@ class PopupTitleBadge extends StatelessWidget {
                       offset: Offset(o, o),
                       child: DecoratedBox(
                         decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(4),
+                          borderRadius: PopupShade.corners(
+                            radius: _radius,
+                            largeRadius: _radius,
                           ),
                           gradient: PopupShade.gradient(shadeColor, endColor),
                         ),
@@ -255,7 +272,8 @@ class PopupTitleBadge extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
                   decoration: PopupShade.panel(
                     color: shadeColor,
-                    radius: 4,
+                    radius: _radius,
+                    largeRadius: _radius,
                     borderWidth: _borderWidth,
                   ),
                   child: StickerTitle(title: title, fontSize: fontSize),
@@ -270,62 +288,25 @@ class PopupTitleBadge extends StatelessWidget {
 }
 
 class PopupCloseButton extends StatelessWidget {
-  const PopupCloseButton({
-    super.key,
-    required this.onTap,
-    this.borderColor = _border,
-  });
+  const PopupCloseButton({super.key, required this.onTap});
 
   final VoidCallback onTap;
-  final Color borderColor;
 
   static const _size = 32.0;
-  static const _border = Color(0xFF101010);
+  static const _asset = 'lib/assets/close.png';
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () => Sfx.instance.tap(onTap),
-      child: Container(
+      child: Image.asset(
+        _asset,
         width: _size,
         height: _size,
-        decoration: BoxDecoration(
-          color: Colors.black,
-          shape: BoxShape.circle,
-          border: Border.all(color: borderColor, width: 1.6),
-        ),
-        child: const Center(
-          child: CustomPaint(
-            size: Size(8, 8),
-            painter: _CloseIconPainter(color: Colors.white, strokeWidth: 2.4),
-          ),
-        ),
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.medium,
       ),
     );
-  }
-}
-
-class _CloseIconPainter extends CustomPainter {
-  const _CloseIconPainter({required this.color, required this.strokeWidth});
-
-  final Color color;
-  final double strokeWidth;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = color
-          ..strokeWidth = strokeWidth
-          ..strokeCap = StrokeCap.round
-          ..style = PaintingStyle.stroke;
-    canvas.drawLine(Offset.zero, Offset(size.width, size.height), paint);
-    canvas.drawLine(Offset(size.width, 0), Offset(0, size.height), paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _CloseIconPainter oldDelegate) {
-    return oldDelegate.color != color || oldDelegate.strokeWidth != strokeWidth;
   }
 }
