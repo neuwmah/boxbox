@@ -269,7 +269,7 @@ class PopupTitleBadge extends StatelessWidget {
                     ),
                   ),
                 Container(
-                  padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
                   decoration: PopupShade.panel(
                     color: shadeColor,
                     radius: _radius,
