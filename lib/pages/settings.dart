@@ -228,7 +228,7 @@ class _PrimaryButton extends StatelessWidget {
           border: Border.all(color: const Color(0xFF2F6B0C), width: 1.4),
           boxShadow: const [
             BoxShadow(
-              color: Color(0x66000000),
+              color: Color(0xFF212121),
               blurRadius: 2,
               offset: Offset(0, 1),
             ),
