@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:boxbox/game/level.dart';
+import 'package:boxbox/sound/sfx.dart';
 import 'package:boxbox/widgets/background.dart';
 import 'package:boxbox/widgets/popup.dart';
 
@@ -195,7 +196,7 @@ class _RetryPopupState extends State<RetryPopup>
                                       Center(
                                         child: GestureDetector(
                                           behavior: HitTestBehavior.opaque,
-                                          onTap: widget.onRetry,
+                                          onTap: () => Sfx.instance.tap(widget.onRetry),
                                           child: Container(
                                             height: 48,
                                             padding: const EdgeInsets.symmetric(
