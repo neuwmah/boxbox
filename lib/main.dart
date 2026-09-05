@@ -473,6 +473,14 @@ class _MainShellState extends State<MainShell>
     await Purchase.instance.showLoading(context);
   }
 
+  void _addShopCoins(int amount) {
+    if (amount <= 0) return;
+    setState(() {
+      _coins += amount;
+      _displayedCoins = _coins;
+    });
+  }
+
   Future<void> _presentInterstitial() async {
     if (_adsRemoved || _adBusy) return;
     _adBusy = true;
@@ -655,10 +663,12 @@ class _MainShellState extends State<MainShell>
               IndexedStack(
                 index: _selectedIndex,
                 children: [
-                  const Column(
+                  Column(
                     children: [
-                      AppTitleBar(title: 'Shop'),
-                      Expanded(child: ShopPage()),
+                      const AppTitleBar(title: 'Shop'),
+                      Expanded(
+                        child: ShopPage(onPurchaseCoins: _addShopCoins),
+                      ),
                     ],
                   ),
                   HomePage(

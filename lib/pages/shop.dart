@@ -6,11 +6,13 @@ import 'package:boxbox/ads/purchase.dart';
 import 'package:boxbox/sound/sfx.dart';
 import 'package:boxbox/widgets/background.dart';
 
-const double kShopPileHeight = 40;
-const double kShopPileWidth = 40;
+const double kShopPileHeight = 48;
+const double kShopPileWidth = 48;
 
 class ShopPage extends StatefulWidget {
-  const ShopPage({super.key});
+  const ShopPage({super.key, this.onPurchaseCoins});
+
+  final ValueChanged<int>? onPurchaseCoins;
 
   @override
   State<ShopPage> createState() => _ShopPageState();
@@ -62,7 +64,7 @@ class _ShopPageState extends State<ShopPage>
   Widget build(BuildContext context) {
     return RectBackground(
       child: ListView.separated(
-        padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+        padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
         itemCount: _products.length,
         separatorBuilder: (_, __) => const SizedBox(height: 6),
         itemBuilder: (context, index) {
@@ -70,6 +72,8 @@ class _ShopPageState extends State<ShopPage>
             product: _products[index],
             shine: _shine,
             pile: _pile,
+            succeed: index == 0,
+            onCoins: widget.onPurchaseCoins,
           );
         },
       ),
@@ -89,11 +93,15 @@ class _ShopProductTile extends StatelessWidget {
     required this.product,
     required this.shine,
     required this.pile,
+    required this.succeed,
+    this.onCoins,
   });
 
   final _ShopProduct product;
   final Animation<double> shine;
   final ui.Image? pile;
+  final bool succeed;
+  final ValueChanged<int>? onCoins;
 
   static const _border = Color(0xFF333333);
 
@@ -118,7 +126,12 @@ class _ShopProductTile extends StatelessWidget {
                 child: _AmountLabel(value: _formatDots(product.amount)),
               ),
               const SizedBox(width: 12),
-              _BuyButton(label: 'BRL ${product.price}'),
+              _BuyButton(
+                label: 'BRL ${product.price}',
+                succeed: succeed,
+                amount: product.amount,
+                onCoins: onCoins,
+              ),
             ],
           ),
         ),
@@ -288,13 +301,21 @@ class _AmountLabel extends StatelessWidget {
 }
 
 class _BuyButton extends StatelessWidget {
-  const _BuyButton({required this.label});
+  const _BuyButton({
+    required this.label,
+    required this.succeed,
+    required this.amount,
+    this.onCoins,
+  });
 
   final String label;
+  final bool succeed;
+  final int amount;
+  final ValueChanged<int>? onCoins;
 
   static const _base = TextStyle(
-    fontSize: 16,
-    fontWeight: FontWeight.w700,
+    fontSize: 18,
+    fontWeight: FontWeight.w900,
     height: 1,
     letterSpacing: -.2,
   );
@@ -305,7 +326,11 @@ class _BuyButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => Sfx.instance.tap(() {
-        Purchase.instance.showLoading(context);
+        Purchase.instance.showLoading(
+          context,
+          success: succeed,
+          onGranted: succeed ? () => onCoins?.call(amount) : null,
+        );
       }),
       child: Container(
       decoration: BoxDecoration(

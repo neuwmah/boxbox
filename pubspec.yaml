@@ -45,6 +45,7 @@ flutter:
     - lib/assets/count/balls5.png
     - lib/assets/ad.png
     - lib/assets/cancel.png
+    - lib/assets/success.png
     - lib/assets/close.png
     - lib/assets/floor/grass.png
     - lib/assets/floor/farm.png

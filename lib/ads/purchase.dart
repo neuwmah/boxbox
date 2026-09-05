@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:boxbox/popups/cancel.dart';
 import 'package:boxbox/popups/popup.dart';
+import 'package:boxbox/popups/success.dart';
 import 'package:flutter/material.dart';
 
 class Purchase {
@@ -13,7 +14,11 @@ class Purchase {
 
   bool _showing = false;
 
-  Future<void> showLoading(BuildContext context) async {
+  Future<void> showLoading(
+    BuildContext context, {
+    bool success = false,
+    VoidCallback? onGranted,
+  }) async {
     if (_showing || !context.mounted) return;
     _showing = true;
     final navigator = Navigator.of(context, rootNavigator: true);
@@ -46,22 +51,24 @@ class Purchase {
       if (navigator.mounted) navigator.pop();
       await closed;
       if (!context.mounted) return;
+      if (success) onGranted?.call();
       await showGeneralDialog<void>(
         context: context,
         useRootNavigator: true,
         barrierDismissible: false,
-        barrierLabel: 'Purchase Cancelled',
+        barrierLabel: success ? 'Purchase success' : 'Purchase cancelled',
         barrierColor: Colors.transparent,
         transitionDuration: Duration.zero,
         transitionBuilder: (context, animation, secondaryAnimation, child) {
           return child;
         },
         pageBuilder: (context, _, __) {
+          void close() => Navigator.of(context, rootNavigator: true).pop();
           return PopScope(
             canPop: false,
-            child: CancelPopup(
-              onClose: () => Navigator.of(context, rootNavigator: true).pop(),
-            ),
+            child: success
+                ? SuccessPopup(onClose: close)
+                : CancelPopup(onClose: close),
           );
         },
       );
