@@ -66,14 +66,13 @@ class InSettingsMenu extends StatelessWidget {
                         width: buttonSize,
                         height: 48,
                         child: Center(
-                          child: GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onTap: () => Sfx.instance.tap(onToggleMenu),
-                            child: const Icon(
+                          child: HudCircleIconButton(
+                            icon: const Icon(
                               Icons.settings,
                               color: Colors.white,
-                              size: iconSize,
+                              size: InSettingsMenu.iconSize,
                             ),
+                            onTap: () => Sfx.instance.tap(onToggleMenu),
                           ),
                         ),
                       ),
@@ -123,6 +122,79 @@ class InSettingsMenu extends StatelessWidget {
     if (span <= 0) return t;
     return ((t - start) / span).clamp(0.0, 1.0);
   }
+}
+
+class HudCircleIconButton extends StatelessWidget {
+  const HudCircleIconButton({
+    super.key,
+    required this.icon,
+    required this.onTap,
+  });
+
+  final Widget icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
+        width: InSettingsMenu.buttonSize,
+        height: InSettingsMenu.buttonSize,
+        alignment: Alignment.center,
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          color: Color(0xFF000000),
+        ),
+        child: icon,
+      ),
+    );
+  }
+}
+
+class HudBackArrowIcon extends StatelessWidget {
+  const HudBackArrowIcon({super.key, this.size = InSettingsMenu.iconSize});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: Size.square(size),
+      painter: _HudBackArrowPainter(),
+    );
+  }
+}
+
+class _HudBackArrowPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.4
+      ..strokeCap = StrokeCap.square
+      ..strokeJoin = StrokeJoin.miter;
+
+    final inset = size.width * 0.18;
+    final cy = size.height / 2;
+    final left = inset;
+    final right = size.width - inset;
+    final head = size.height * 0.28;
+
+    final path = Path()
+      ..moveTo(left + head, cy - head)
+      ..lineTo(left, cy)
+      ..lineTo(left + head, cy + head)
+      ..moveTo(left, cy)
+      ..lineTo(right, cy);
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _AnimatedMenuItem extends StatelessWidget {

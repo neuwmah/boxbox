@@ -896,8 +896,8 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
                 alignment: Alignment.center,
                 child: Transform.translate(
                   offset: const Offset(-100, 0),
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
+                  child: HudCircleIconButton(
+                    icon: const HudBackArrowIcon(),
                     onTap: () => Sfx.instance.tap(() {
                       if (_menuOpen) {
                         _setMenuOpen(false);
@@ -906,7 +906,6 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
                       if (_exiting || _continueOpen || _returnOpen) return;
                       setState(() => _returnOpen = true);
                     }),
-                    child: const Icon(Icons.arrow_back, color: Colors.white),
                   ),
                 ),
               ),
