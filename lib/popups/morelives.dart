@@ -133,9 +133,9 @@ class _MoreLivesPopupState extends State<MoreLivesPopup>
                                                 Padding(
                                                   padding:
                                                       const EdgeInsets.fromLTRB(
-                                                        32,
+                                                        22,
                                                         20,
-                                                        32,
+                                                        22,
                                                         20,
                                                       ),
                                                   child: Column(
