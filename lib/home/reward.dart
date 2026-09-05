@@ -222,7 +222,7 @@ class _RewardAmountLabel extends StatelessWidget {
       textAlign: TextAlign.center,
       style: const TextStyle(
         fontSize: 20,
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w600,
         height: 1,
         letterSpacing: -.4,
         color: Colors.white,

@@ -160,8 +160,7 @@ class _StartPopupState extends State<StartPopup>
                                                             style: TextStyle(
                                                               fontSize: 24,
                                                               fontWeight:
-                                                                  FontWeight
-                                                                      .w900,
+                                                                  FontWeight.w600,
                                                               height: 1,
                                                             ),
                                                           ),
@@ -179,7 +178,7 @@ class _StartPopupState extends State<StartPopup>
                                                       textAlign:
                                                           TextAlign.center,
                                                       style: const TextStyle(
-                                                        fontSize: 14,
+                                                        fontSize: 16,
                                                         fontWeight:
                                                             FontWeight.w600,
                                                         height: 1.4,
@@ -232,7 +231,7 @@ class _StartPopupState extends State<StartPopup>
                                               depthColor: Color(0xFF24580A),
                                               style: TextStyle(
                                                 fontSize: 16,
-                                                fontWeight: FontWeight.w900,
+                                                fontWeight: FontWeight.w600,
                                                 height: 1,
                                                 letterSpacing: -.2,
                                               ),

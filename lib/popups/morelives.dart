@@ -168,8 +168,7 @@ class _MoreLivesPopupState extends State<MoreLivesPopup>
                                                               style: const TextStyle(
                                                                 fontSize: 24,
                                                                 fontWeight:
-                                                                    FontWeight
-                                                                        .w900,
+                                                                    FontWeight.w600,
                                                                 height: 1,
                                                               ),
                                                             ),
@@ -188,7 +187,7 @@ class _MoreLivesPopupState extends State<MoreLivesPopup>
                                                         textAlign:
                                                             TextAlign.center,
                                                         style: TextStyle(
-                                                          fontSize: 14,
+                                                          fontSize: 16,
                                                           fontWeight:
                                                               FontWeight.w600,
                                                           height: 1.4,
@@ -236,10 +235,9 @@ class _MoreLivesPopupState extends State<MoreLivesPopup>
                                                                 color:
                                                                     Colors
                                                                         .white,
-                                                                fontSize: 14,
+                                                                fontSize: 16,
                                                                 fontWeight:
-                                                                    FontWeight
-                                                                        .w700,
+                                                                    FontWeight.w600,
                                                                 height: 1,
                                                               ),
                                                             ),
@@ -297,7 +295,7 @@ class _MoreLivesPopupState extends State<MoreLivesPopup>
                                                   depthColor: Color(0xFF24580A),
                                                   style: TextStyle(
                                                     fontSize: 16,
-                                                    fontWeight: FontWeight.w900,
+                                                    fontWeight: FontWeight.w600,
                                                     height: 1,
                                                     letterSpacing: -.2,
                                                   ),
@@ -341,7 +339,7 @@ class _MoreLivesPopupState extends State<MoreLivesPopup>
                                                   ),
                                                   style: const TextStyle(
                                                     fontSize: 16,
-                                                    fontWeight: FontWeight.w900,
+                                                    fontWeight: FontWeight.w600,
                                                     height: 1,
                                                     letterSpacing: -.2,
                                                   ),
@@ -398,22 +396,16 @@ class _MoreLivesPopupState extends State<MoreLivesPopup>
                                                       Image.asset(
                                                         'lib/assets/heart/icon1.png',
                                                         width: _statusHeartSize,
-                                                        height:
-                                                            _statusHeartSize,
+                                                        height: _statusHeartSize,
                                                         fit: BoxFit.contain,
                                                       ),
                                                       const _StickerLabel(
-                                                        text: '+1',
-                                                        depthColor: Color(
-                                                          0xFF5A1018,
-                                                        ),
-                                                        offsets:
-                                                            _StickerLabel
-                                                                .offsets1,
+                                                        text: '1',
+                                                        depthColor: Color(0xFF5A1018),
+                                                        offsets: _StickerLabel.offsets1,
                                                         style: TextStyle(
-                                                          fontSize: 12,
-                                                          fontWeight:
-                                                              FontWeight.w700,
+                                                          fontSize: 16,
+                                                          fontWeight: FontWeight.w600,
                                                           height: 1,
                                                         ),
                                                       ),
@@ -426,7 +418,7 @@ class _MoreLivesPopupState extends State<MoreLivesPopup>
                                                   depthColor: Color(0xFF4A0804),
                                                   style: TextStyle(
                                                     fontSize: 16,
-                                                    fontWeight: FontWeight.w900,
+                                                    fontWeight: FontWeight.w600,
                                                     height: 1,
                                                     letterSpacing: -.2,
                                                   ),

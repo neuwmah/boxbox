@@ -189,9 +189,9 @@ class _NavLabel extends StatelessWidget {
   final String text;
 
   static const _style = TextStyle(
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: FontWeight.w600,
-    height: 1.4,
+    height: 1.6,
   );
   static const _depthColor = Color(0xFF050505);
   static const _offsets = [

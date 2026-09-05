@@ -151,7 +151,7 @@ class _NoAdsPopupState extends State<NoAdsPopup>
                                                       textAlign:
                                                           TextAlign.center,
                                                       style: TextStyle(
-                                                        fontSize: 14,
+                                                        fontSize: 16,
                                                         fontWeight:
                                                             FontWeight.w600,
                                                         height: 1.4,
@@ -206,7 +206,7 @@ class _NoAdsPopupState extends State<NoAdsPopup>
                                               ),
                                               style: const TextStyle(
                                                 fontSize: 16,
-                                                fontWeight: FontWeight.w900,
+                                                fontWeight: FontWeight.w600,
                                                 height: 1,
                                                 letterSpacing: -.2,
                                               ),

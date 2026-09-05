@@ -142,7 +142,7 @@ class _ReturnPopupState extends State<ReturnPopup>
                                                       textAlign:
                                                           TextAlign.center,
                                                       style: TextStyle(
-                                                        fontSize: 14,
+                                                        fontSize: 16,
                                                         fontWeight:
                                                             FontWeight.w600,
                                                         height: 1.4,
@@ -195,7 +195,7 @@ class _ReturnPopupState extends State<ReturnPopup>
                                               depthColor: Color(0xFF5A1010),
                                               style: TextStyle(
                                                 fontSize: 16,
-                                                fontWeight: FontWeight.w900,
+                                                fontWeight: FontWeight.w600,
                                                 height: 1,
                                                 letterSpacing: -.2,
                                               ),

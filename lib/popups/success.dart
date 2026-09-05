@@ -149,7 +149,7 @@ class _SuccessPopupState extends State<SuccessPopup>
                                                       textAlign:
                                                           TextAlign.center,
                                                       style: TextStyle(
-                                                        fontSize: 14,
+                                                        fontSize: 16,
                                                         fontWeight:
                                                             FontWeight.w600,
                                                         height: 1.4,
@@ -204,7 +204,7 @@ class _SuccessPopupState extends State<SuccessPopup>
                                               depthColor: Color(0xFF24580A),
                                               style: TextStyle(
                                                 fontSize: 16,
-                                                fontWeight: FontWeight.w900,
+                                                fontWeight: FontWeight.w600,
                                                 height: 1,
                                                 letterSpacing: -.2,
                                               ),

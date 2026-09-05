@@ -176,10 +176,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     return MaterialApp(
       title: 'BoxBox!',
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(fontFamily: 'Fredoka'),
       builder:
           (context, child) => AnnotatedRegion<SystemUiOverlayStyle>(
             value: _systemOverlayStyle,
-            child: child ?? const SizedBox.shrink(),
+            child: DefaultTextStyle.merge(
+              style: const TextStyle(fontFamily: 'Fredoka'),
+              child: child ?? const SizedBox.shrink(),
+            ),
           ),
       home: Stack(
         fit: StackFit.expand,

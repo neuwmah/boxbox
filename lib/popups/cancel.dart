@@ -149,9 +149,8 @@ class _CancelPopupState extends State<CancelPopup>
                                                       textAlign:
                                                           TextAlign.center,
                                                       style: TextStyle(
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.w600,
+                                                        fontSize: 16,
+                                                        fontWeight: FontWeight.w600,
                                                         height: 1.4,
                                                       ),
                                                     ),
@@ -204,7 +203,7 @@ class _CancelPopupState extends State<CancelPopup>
                                               depthColor: Color(0xFF24580A),
                                               style: TextStyle(
                                                 fontSize: 16,
-                                                fontWeight: FontWeight.w900,
+                                                fontWeight: FontWeight.w600,
                                                 height: 1,
                                                 letterSpacing: -.2,
                                               ),

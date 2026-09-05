@@ -260,9 +260,8 @@ class _AmountLabel extends StatelessWidget {
 
   static const _base = TextStyle(
     fontSize: 20,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.w600,
     height: 1,
-    letterSpacing: -.2,
   );
 
   @override
@@ -314,10 +313,9 @@ class _BuyButton extends StatelessWidget {
   final ValueChanged<int>? onCoins;
 
   static const _base = TextStyle(
-    fontSize: 16,
-    fontWeight: FontWeight.w900,
+    fontSize: 18,
+    fontWeight: FontWeight.w600,
     height: 1,
-    letterSpacing: -.2,
   );
 
   static const _depthColor = Color(0xFF24580A);

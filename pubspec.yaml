@@ -21,6 +21,10 @@ dev_dependencies:
   flutter_launcher_icons: ^0.14.4
 flutter:
   uses-material-design: true
+  fonts:
+    - family: Fredoka
+      fonts:
+        - asset: lib/assets/fonts/Fredoka.ttf
   shaders:
     - lib/shaders/cubes.frag
   assets:

@@ -41,7 +41,7 @@ class StickerTitle extends StatelessWidget {
     const depthColor = Color(0xFF313131);
     final base = TextStyle(
       fontSize: fontSize,
-      fontWeight: FontWeight.w700,
+      fontWeight: FontWeight.w600,
       height: 1,
       letterSpacing: -.4,
     );

@@ -139,8 +139,8 @@ class _StatusCounter extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           color: _text,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w900,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
                           height: 1,
                         ),
                       ),
@@ -317,8 +317,8 @@ class _HeartValueLabel extends StatelessWidget {
 
   static const _depthColor = Color(0xFF5A1018);
   static const _style = TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.w900,
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
     height: 1,
   );
   static const _offsets = [

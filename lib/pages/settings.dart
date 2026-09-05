@@ -153,7 +153,7 @@ class _ToggleControl extends StatelessWidget {
   static const _labelStyle = TextStyle(
     color: Colors.white,
     fontSize: 12,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.w600,
     height: 1,
   );
 
@@ -201,7 +201,7 @@ class _PrimaryButton extends StatelessWidget {
 
   static const _base = TextStyle(
     fontSize: 16,
-    fontWeight: FontWeight.w900,
+    fontWeight: FontWeight.w600,
     height: 1,
     letterSpacing: -.2,
   );
@@ -300,7 +300,7 @@ class _SecondaryButton extends StatelessWidget {
 
   static const _base = TextStyle(
     fontSize: 16,
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.w600,
     height: 1,
     letterSpacing: -.2,
   );

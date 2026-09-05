@@ -1001,7 +1001,7 @@ class _BallsBadge extends StatelessWidget {
             fit: BoxFit.contain,
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 16),
+            padding: const EdgeInsets.only(top: 14),
             child: ShaderMask(
               blendMode: BlendMode.srcIn,
               shaderCallback: (bounds) {
@@ -1020,9 +1020,9 @@ class _BallsBadge extends StatelessWidget {
                 '$value',
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w900,
-                  height: 1,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                  height: 1.2,
                   letterSpacing: -.4,
                 ),
               ),
@@ -1041,7 +1041,7 @@ class _ClearBanner extends StatelessWidget {
 
   static const _style = TextStyle(
     fontSize: 40,
-    fontWeight: FontWeight.w900,
+    fontWeight: FontWeight.w600,
     fontStyle: FontStyle.italic,
     height: 1,
     letterSpacing: -1.2,
@@ -1111,7 +1111,7 @@ class _ClearBanner extends StatelessWidget {
                 'GG!',
                 style: TextStyle(
                   fontSize: 40,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w600,
                   fontStyle: FontStyle.italic,
                   height: 1,
                   letterSpacing: -1.2,
