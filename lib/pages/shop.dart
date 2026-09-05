@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:boxbox/ads/purchase.dart';
 import 'package:boxbox/sound/sfx.dart';
 import 'package:boxbox/widgets/background.dart';
 
@@ -303,7 +304,9 @@ class _BuyButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: Sfx.instance.playTouch,
+      onTap: () => Sfx.instance.tap(() {
+        Purchase.instance.showLoading(context);
+      }),
       child: Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),

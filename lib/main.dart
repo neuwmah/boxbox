@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:boxbox/ads/ads.dart';
+import 'package:boxbox/ads/purchase.dart';
 import 'package:boxbox/game/level.dart';
 import 'package:boxbox/home/navbar.dart';
 import 'package:boxbox/home/reward.dart';
@@ -465,12 +466,11 @@ class _MainShellState extends State<MainShell>
     setState(() => _homePopup = _HomePopup.noAds);
   }
 
-  void _onPurchaseNoAds() {
-    setState(() {
-      _adsRemoved = true;
-      _homePopup = _HomePopup.none;
-    });
-    Ads.instance.setAdsRemoved(true);
+  Future<void> _onPurchaseNoAds() async {
+    setState(() => _homePopup = _HomePopup.none);
+    await Future<void>.delayed(const Duration(milliseconds: 0));
+    if (!mounted) return;
+    await Purchase.instance.showLoading(context);
   }
 
   Future<void> _presentInterstitial() async {

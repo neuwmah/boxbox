@@ -898,15 +898,14 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
                   offset: const Offset(-100, 0),
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
-                    onTap: () {
-                      Sfx.instance.playTouch();
+                    onTap: () => Sfx.instance.tap(() {
                       if (_menuOpen) {
                         _setMenuOpen(false);
                         return;
                       }
                       if (_exiting || _continueOpen || _returnOpen) return;
                       setState(() => _returnOpen = true);
-                    },
+                    }),
                     child: const Icon(Icons.arrow_back, color: Colors.white),
                   ),
                 ),

@@ -89,10 +89,9 @@ class AppNavbar extends StatelessWidget {
                                     ? const SizedBox.expand()
                                     : GestureDetector(
                                         behavior: HitTestBehavior.opaque,
-                                        onTap: () {
-                                          Sfx.instance.playTouch();
-                                          onDestinationSelected(i);
-                                        },
+                                        onTap: () => Sfx.instance.tap(
+                                          () => onDestinationSelected(i),
+                                        ),
                                         child: Center(
                                           child: destinations[i].icon(
                                             Colors.white,
