@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:boxbox/popups/cancel.dart';
 import 'package:boxbox/popups/popup.dart';
 import 'package:flutter/material.dart';
 
@@ -44,6 +45,26 @@ class Purchase {
       await Future<void>.delayed(duration);
       if (navigator.mounted) navigator.pop();
       await closed;
+      if (!context.mounted) return;
+      await showGeneralDialog<void>(
+        context: context,
+        useRootNavigator: true,
+        barrierDismissible: false,
+        barrierLabel: 'Purchase Cancelled',
+        barrierColor: Colors.transparent,
+        transitionDuration: Duration.zero,
+        transitionBuilder: (context, animation, secondaryAnimation, child) {
+          return child;
+        },
+        pageBuilder: (context, _, __) {
+          return PopScope(
+            canPop: false,
+            child: CancelPopup(
+              onClose: () => Navigator.of(context, rootNavigator: true).pop(),
+            ),
+          );
+        },
+      );
     } finally {
       _showing = false;
     }
