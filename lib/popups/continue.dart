@@ -143,9 +143,9 @@ class _ContinuePopupState extends State<ContinuePopup>
                                               Padding(
                                                 padding:
                                                     const EdgeInsets.fromLTRB(
-                                                      24,
+                                                      20,
                                                       12,
-                                                      24,
+                                                      20,
                                                       20,
                                                     ),
                                                 child: Column(
