@@ -30,7 +30,7 @@ class StatusCounters extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final coinsCounter = ConstrainedBox(
-      constraints: const BoxConstraints(minWidth: 0, maxWidth: 100),
+      constraints: const BoxConstraints(minWidth: 0, maxWidth: 110),
       child: _StatusCounter(
         iconAsset: 'lib/assets/coin/icon1.png',
         accent: _StatusCounter.coinAccent,
@@ -41,7 +41,7 @@ class StatusCounters extends StatelessWidget {
       ),
     );
     final heartsCounter = ConstrainedBox(
-      constraints: const BoxConstraints(minWidth: 0, maxWidth: 100),
+      constraints: const BoxConstraints(minWidth: 0, maxWidth: 110),
       child: _StatusCounter(
         iconAsset: 'lib/assets/heart/icon1.png',
         accent: _StatusCounter.heartAccent,
@@ -101,7 +101,7 @@ class _StatusCounter extends StatelessWidget {
   static const heartAccent = Color(0xFFE53935);
   static const _barHeight = 28.0;
   static const _iconSize = 40.0;
-  static const _plusSize = 16.0;
+  static const _plusSize = 20.0;
   static const _topRim = 1.2;
   static const _bottomRim = 0.6;
   static const _cream = Color(0xFF000000);
@@ -171,7 +171,7 @@ class _StatusCounter extends StatelessWidget {
                     _HeartValueLabel(text: iconLabel!),
                   if (showPlus)
                     Positioned(
-                      right: -2,
+                      right: -8,
                       bottom: -1,
                       child: IgnorePointer(
                         child: Container(
@@ -184,8 +184,8 @@ class _StatusCounter extends StatelessWidget {
                           ),
                           child: const Center(
                             child: SizedBox(
-                              width: 10,
-                              height: 10,
+                              width: 12,
+                              height: 12,
                               child: CustomPaint(
                                 painter: _PlusMarkPainter(),
                               ),
