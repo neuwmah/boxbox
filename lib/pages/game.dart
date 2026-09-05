@@ -7,12 +7,12 @@ import 'package:flutter/services.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'package:cannon_physics/cannon_physics.dart' as cannon;
+import 'package:boxbox/game/insettings.dart';
 import 'package:boxbox/game/level.dart';
+import 'package:boxbox/popups/continue.dart';
+import 'package:boxbox/popups/return.dart';
 import 'package:boxbox/sound/sfx.dart';
 import 'package:boxbox/sound/soundtrack.dart';
-import 'package:boxbox/widgets/continue.dart';
-import 'package:boxbox/widgets/insettings.dart';
-import 'package:boxbox/widgets/return.dart';
 import 'package:vector_math/vector_math.dart' hide Colors, Sphere, Matrix4;
 
 class LoadingCover extends StatelessWidget {

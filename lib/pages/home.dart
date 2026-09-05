@@ -3,8 +3,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:boxbox/home/cubes.dart';
 import 'package:boxbox/sound/sfx.dart';
-import 'package:boxbox/widgets/cubes.dart';
 import 'package:boxbox/widgets/titlebar.dart';
 
 class HomePage extends StatelessWidget {

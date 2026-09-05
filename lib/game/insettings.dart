@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:boxbox/widgets/popup.dart';
+import 'package:boxbox/popups/popup.dart';
 import 'package:boxbox/sound/sfx.dart';
 
 class InSettingsMenu extends StatelessWidget {

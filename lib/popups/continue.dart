@@ -1,30 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:boxbox/game/level.dart';
+import 'package:boxbox/popups/popup.dart';
 import 'package:boxbox/sound/sfx.dart';
 import 'package:boxbox/widgets/background.dart';
-import 'package:boxbox/widgets/popup.dart';
+import 'package:boxbox/widgets/status.dart';
 
-class RetryPopup extends StatefulWidget {
-  const RetryPopup({
+class ContinuePopup extends StatefulWidget {
+  const ContinuePopup({
     super.key,
-    required this.level,
+    required this.coins,
+    required this.price,
+    required this.balls,
     required this.onClose,
-    required this.onRetry,
+    required this.onContinue,
   });
 
-  final int level;
+  final int coins;
+  final int price;
+  final int balls;
   final VoidCallback onClose;
-  final VoidCallback onRetry;
+  final VoidCallback onContinue;
 
   @override
-  State<RetryPopup> createState() => _RetryPopupState();
+  State<ContinuePopup> createState() => _ContinuePopupState();
 }
 
-class _RetryPopupState extends State<RetryPopup>
+class _ContinuePopupState extends State<ContinuePopup>
     with SingleTickerProviderStateMixin {
   static const _shade = Color(0xFF515151);
   static const _shadeEnd = Color(0xFF212121);
-  static const _heartSize = 72.0;
+  static const _coinSize = 32.0;
 
   late final AnimationController _controller;
 
@@ -35,6 +39,7 @@ class _RetryPopupState extends State<RetryPopup>
       vsync: this,
       duration: PopupAppear.duration,
     )..forward();
+    Sfx.instance.playFail();
   }
 
   @override
@@ -50,13 +55,27 @@ class _RetryPopupState extends State<RetryPopup>
         fit: StackFit.expand,
         children: [
           PopupDim(animation: _controller),
+          Positioned(
+            top: 68,
+            left: 16,
+            right: 12,
+            child: PopupAppearFade(
+              animation: _controller,
+              child: StatusCounters(
+                coins: widget.coins,
+                showHearts: false,
+                showCoinPlus: false,
+                gap: 72,
+              ),
+            ),
+          ),
           Center(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
               child: PopupAppearScale(
                 animation: _controller,
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 240),
+                  constraints: const BoxConstraints(maxWidth: 270),
                   child: Material(
                     color: Colors.transparent,
                     child: Stack(
@@ -90,15 +109,12 @@ class _RetryPopupState extends State<RetryPopup>
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      PopupTitleBadge(
-                                        title: 'Level ${clampLevel(widget.level)}',
+                                      const PopupTitleBadge(
+                                        title: 'Continue?',
                                         shadeColor: _shade,
                                       ),
                                       Center(
                                         child: Container(
-                                          constraints: const BoxConstraints(
-                                            minWidth: 150,
-                                          ),
                                           clipBehavior: Clip.antiAlias,
                                           decoration: BoxDecoration(
                                             borderRadius: BorderRadius.circular(
@@ -117,11 +133,10 @@ class _RetryPopupState extends State<RetryPopup>
                                             ),
                                           ),
                                           child: Stack(
-                                            alignment: Alignment.center,
                                             children: [
                                               const Positioned.fill(
                                                 child: PopupBackground(
-                                                  offset: Offset(0, -28),
+                                                  offset: Offset(0, -12),
                                                   tint: _shade,
                                                 ),
                                               ),
@@ -129,53 +144,44 @@ class _RetryPopupState extends State<RetryPopup>
                                                 padding:
                                                     const EdgeInsets.fromLTRB(
                                                       24,
-                                                      20,
+                                                      12,
                                                       24,
                                                       20,
                                                     ),
                                                 child: Column(
                                                   mainAxisSize:
                                                       MainAxisSize.min,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.center,
                                                   children: [
-                                                    SizedBox(
-                                                      width: _heartSize,
-                                                      height: _heartSize,
-                                                      child: Stack(
-                                                        alignment:
-                                                            Alignment.center,
-                                                        children: [
-                                                          Image.asset(
-                                                            'lib/assets/heart/icon1.png',
-                                                            width: _heartSize,
-                                                            height: _heartSize,
-                                                            fit: BoxFit.contain,
-                                                          ),
-                                                          const _StickerLabel(
-                                                            text: '1',
-                                                            depthColor: Color(
-                                                              0xFF5A1018,
-                                                            ),
-                                                            style: TextStyle(
-                                                              fontSize: 24,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w900,
-                                                              height: 1,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    const SizedBox(height: 12),
                                                     _StickerLabel(
-                                                      text: levelTitleAt(
-                                                        widget.level,
-                                                      ),
+                                                      text: '+${widget.balls}',
                                                       depthColor: const Color(
                                                         0xFF212121,
                                                       ),
+                                                      offsets:
+                                                          _StickerLabel
+                                                              .offsets4,
+                                                      innerBorderColor:
+                                                          const Color(
+                                                            0xFFCCCCCC,
+                                                          ),
+                                                      style: const TextStyle(
+                                                        fontSize: 72,
+                                                        fontWeight:
+                                                            FontWeight.w900,
+                                                        height: 1,
+                                                        letterSpacing: -.4,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(height: 6),
+                                                    _StickerLabel(
+                                                      text:
+                                                          'Add ${widget.balls} balls to continue!',
+                                                      depthColor: const Color(
+                                                        0xFF212121,
+                                                      ),
+                                                      offsets:
+                                                          _StickerLabel
+                                                              .offsets2,
                                                       textAlign:
                                                           TextAlign.center,
                                                       style: const TextStyle(
@@ -196,7 +202,7 @@ class _RetryPopupState extends State<RetryPopup>
                                       Center(
                                         child: GestureDetector(
                                           behavior: HitTestBehavior.opaque,
-                                          onTap: () => Sfx.instance.tap(widget.onRetry),
+                                          onTap: () => Sfx.instance.tap(widget.onContinue),
                                           child: Container(
                                             height: 48,
                                             padding: const EdgeInsets.symmetric(
@@ -227,15 +233,64 @@ class _RetryPopupState extends State<RetryPopup>
                                                 ),
                                               ],
                                             ),
-                                            child: const _StickerLabel(
-                                              text: 'Try Again',
-                                              depthColor: Color(0xFF24580A),
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w900,
-                                                height: 1,
-                                                letterSpacing: -.2,
-                                              ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                const _StickerLabel(
+                                                  text: 'Play On',
+                                                  depthColor: Color(0xFF24580A),
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w900,
+                                                    height: 1,
+                                                    letterSpacing: -.2,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 4.5),
+                                                SizedBox(
+                                                  width: _coinSize,
+                                                  height: _coinSize,
+                                                  child: Stack(
+                                                    fit: StackFit.expand,
+                                                    children: [
+                                                      Image.asset(
+                                                        'lib/assets/coin/icon1.png',
+                                                        width: _coinSize,
+                                                        height: _coinSize,
+                                                        fit: BoxFit.contain,
+                                                      ),
+                                                      const DecoratedBox(
+                                                        decoration: BoxDecoration(
+                                                          shape:
+                                                              BoxShape.circle,
+                                                          border:
+                                                              Border.fromBorderSide(
+                                                                BorderSide(
+                                                                  color: Color(
+                                                                    0xFF905D00,
+                                                                  ),
+                                                                  width: 1,
+                                                                ),
+                                                              ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 3),
+                                                _StickerLabel(
+                                                  text: '${widget.price}',
+                                                  depthColor: const Color(
+                                                    0xFF24580A,
+                                                  ),
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w900,
+                                                    height: 1,
+                                                    letterSpacing: -.2,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ),
                                         ),

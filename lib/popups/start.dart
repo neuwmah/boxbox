@@ -1,34 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:boxbox/game/level.dart';
+import 'package:boxbox/popups/popup.dart';
 import 'package:boxbox/sound/sfx.dart';
 import 'package:boxbox/widgets/background.dart';
-import 'package:boxbox/widgets/status.dart';
-import 'package:boxbox/widgets/popup.dart';
 
-class ContinuePopup extends StatefulWidget {
-  const ContinuePopup({
+class StartPopup extends StatefulWidget {
+  const StartPopup({
     super.key,
-    required this.coins,
-    required this.price,
-    required this.balls,
+    required this.level,
     required this.onClose,
-    required this.onContinue,
+    required this.onStart,
   });
 
-  final int coins;
-  final int price;
-  final int balls;
+  final int level;
   final VoidCallback onClose;
-  final VoidCallback onContinue;
+  final VoidCallback onStart;
 
   @override
-  State<ContinuePopup> createState() => _ContinuePopupState();
+  State<StartPopup> createState() => _StartPopupState();
 }
 
-class _ContinuePopupState extends State<ContinuePopup>
+class _StartPopupState extends State<StartPopup>
     with SingleTickerProviderStateMixin {
   static const _shade = Color(0xFF515151);
   static const _shadeEnd = Color(0xFF212121);
-  static const _coinSize = 32.0;
+  static const _heartSize = 72.0;
 
   late final AnimationController _controller;
 
@@ -39,7 +35,6 @@ class _ContinuePopupState extends State<ContinuePopup>
       vsync: this,
       duration: PopupAppear.duration,
     )..forward();
-    Sfx.instance.playFail();
   }
 
   @override
@@ -55,27 +50,13 @@ class _ContinuePopupState extends State<ContinuePopup>
         fit: StackFit.expand,
         children: [
           PopupDim(animation: _controller),
-          Positioned(
-            top: 68,
-            left: 16,
-            right: 12,
-            child: PopupAppearFade(
-              animation: _controller,
-              child: StatusCounters(
-                coins: widget.coins,
-                showHearts: false,
-                showCoinPlus: false,
-                gap: 72,
-              ),
-            ),
-          ),
           Center(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
               child: PopupAppearScale(
                 animation: _controller,
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 270),
+                  constraints: const BoxConstraints(maxWidth: 240),
                   child: Material(
                     color: Colors.transparent,
                     child: Stack(
@@ -109,12 +90,15 @@ class _ContinuePopupState extends State<ContinuePopup>
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const PopupTitleBadge(
-                                        title: 'Continue?',
+                                      PopupTitleBadge(
+                                        title: 'Level ${clampLevel(widget.level)}',
                                         shadeColor: _shade,
                                       ),
                                       Center(
                                         child: Container(
+                                          constraints: const BoxConstraints(
+                                            minWidth: 150,
+                                          ),
                                           clipBehavior: Clip.antiAlias,
                                           decoration: BoxDecoration(
                                             borderRadius: BorderRadius.circular(
@@ -133,10 +117,11 @@ class _ContinuePopupState extends State<ContinuePopup>
                                             ),
                                           ),
                                           child: Stack(
+                                            alignment: Alignment.center,
                                             children: [
                                               const Positioned.fill(
                                                 child: PopupBackground(
-                                                  offset: Offset(0, -12),
+                                                  offset: Offset(0, -28),
                                                   tint: _shade,
                                                 ),
                                               ),
@@ -144,44 +129,53 @@ class _ContinuePopupState extends State<ContinuePopup>
                                                 padding:
                                                     const EdgeInsets.fromLTRB(
                                                       24,
-                                                      12,
+                                                      20,
                                                       24,
                                                       20,
                                                     ),
                                                 child: Column(
                                                   mainAxisSize:
                                                       MainAxisSize.min,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.center,
                                                   children: [
-                                                    _StickerLabel(
-                                                      text: '+${widget.balls}',
-                                                      depthColor: const Color(
-                                                        0xFF212121,
-                                                      ),
-                                                      offsets:
-                                                          _StickerLabel
-                                                              .offsets4,
-                                                      innerBorderColor:
-                                                          const Color(
-                                                            0xFFCCCCCC,
+                                                    SizedBox(
+                                                      width: _heartSize,
+                                                      height: _heartSize,
+                                                      child: Stack(
+                                                        alignment:
+                                                            Alignment.center,
+                                                        children: [
+                                                          Image.asset(
+                                                            'lib/assets/heart/icon1.png',
+                                                            width: _heartSize,
+                                                            height: _heartSize,
+                                                            fit: BoxFit.contain,
                                                           ),
-                                                      style: const TextStyle(
-                                                        fontSize: 72,
-                                                        fontWeight:
-                                                            FontWeight.w900,
-                                                        height: 1,
-                                                        letterSpacing: -.4,
+                                                          const _StickerLabel(
+                                                            text: '1',
+                                                            depthColor: Color(
+                                                              0xFF5A1018,
+                                                            ),
+                                                            style: TextStyle(
+                                                              fontSize: 24,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w900,
+                                                              height: 1,
+                                                            ),
+                                                          ),
+                                                        ],
                                                       ),
                                                     ),
-                                                    const SizedBox(height: 6),
+                                                    const SizedBox(height: 12),
                                                     _StickerLabel(
-                                                      text:
-                                                          'Add ${widget.balls} balls to continue!',
+                                                      text: levelTitleAt(
+                                                        widget.level,
+                                                      ),
                                                       depthColor: const Color(
                                                         0xFF212121,
                                                       ),
-                                                      offsets:
-                                                          _StickerLabel
-                                                              .offsets2,
                                                       textAlign:
                                                           TextAlign.center,
                                                       style: const TextStyle(
@@ -202,7 +196,7 @@ class _ContinuePopupState extends State<ContinuePopup>
                                       Center(
                                         child: GestureDetector(
                                           behavior: HitTestBehavior.opaque,
-                                          onTap: () => Sfx.instance.tap(widget.onContinue),
+                                          onTap: () => Sfx.instance.tap(widget.onStart),
                                           child: Container(
                                             height: 48,
                                             padding: const EdgeInsets.symmetric(
@@ -233,64 +227,15 @@ class _ContinuePopupState extends State<ContinuePopup>
                                                 ),
                                               ],
                                             ),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                const _StickerLabel(
-                                                  text: 'Play On',
-                                                  depthColor: Color(0xFF24580A),
-                                                  style: TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w900,
-                                                    height: 1,
-                                                    letterSpacing: -.2,
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 4.5),
-                                                SizedBox(
-                                                  width: _coinSize,
-                                                  height: _coinSize,
-                                                  child: Stack(
-                                                    fit: StackFit.expand,
-                                                    children: [
-                                                      Image.asset(
-                                                        'lib/assets/coin/icon1.png',
-                                                        width: _coinSize,
-                                                        height: _coinSize,
-                                                        fit: BoxFit.contain,
-                                                      ),
-                                                      const DecoratedBox(
-                                                        decoration: BoxDecoration(
-                                                          shape:
-                                                              BoxShape.circle,
-                                                          border:
-                                                              Border.fromBorderSide(
-                                                                BorderSide(
-                                                                  color: Color(
-                                                                    0xFF905D00,
-                                                                  ),
-                                                                  width: 1,
-                                                                ),
-                                                              ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 3),
-                                                _StickerLabel(
-                                                  text: '${widget.price}',
-                                                  depthColor: const Color(
-                                                    0xFF24580A,
-                                                  ),
-                                                  style: const TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w900,
-                                                    height: 1,
-                                                    letterSpacing: -.2,
-                                                  ),
-                                                ),
-                                              ],
+                                            child: const _StickerLabel(
+                                              text: 'Start',
+                                              depthColor: Color(0xFF24580A),
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w900,
+                                                height: 1,
+                                                letterSpacing: -.2,
+                                              ),
                                             ),
                                           ),
                                         ),

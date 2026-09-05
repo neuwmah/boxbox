@@ -1,29 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:boxbox/game/level.dart';
+import 'package:boxbox/popups/popup.dart';
 import 'package:boxbox/sound/sfx.dart';
 import 'package:boxbox/widgets/background.dart';
-import 'package:boxbox/widgets/popup.dart';
 
-class NoAdsPopup extends StatefulWidget {
-  const NoAdsPopup({
+class RetryPopup extends StatefulWidget {
+  const RetryPopup({
     super.key,
-    required this.priceLabel,
+    required this.level,
     required this.onClose,
-    required this.onPurchase,
+    required this.onRetry,
   });
 
-  final String priceLabel;
+  final int level;
   final VoidCallback onClose;
-  final VoidCallback onPurchase;
+  final VoidCallback onRetry;
 
   @override
-  State<NoAdsPopup> createState() => _NoAdsPopupState();
+  State<RetryPopup> createState() => _RetryPopupState();
 }
 
-class _NoAdsPopupState extends State<NoAdsPopup>
+class _RetryPopupState extends State<RetryPopup>
     with SingleTickerProviderStateMixin {
   static const _shade = Color(0xFF515151);
   static const _shadeEnd = Color(0xFF212121);
-  static const _iconSize = 72.0;
+  static const _heartSize = 72.0;
 
   late final AnimationController _controller;
 
@@ -55,7 +56,7 @@ class _NoAdsPopupState extends State<NoAdsPopup>
               child: PopupAppearScale(
                 animation: _controller,
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 270),
+                  constraints: const BoxConstraints(maxWidth: 240),
                   child: Material(
                     color: Colors.transparent,
                     child: Stack(
@@ -80,21 +81,24 @@ class _NoAdsPopupState extends State<NoAdsPopup>
                                 child: Container(
                                   width: double.infinity,
                                   padding: const EdgeInsets.fromLTRB(
-                                    24,
+                                    16,
                                     0,
-                                    24,
+                                    16,
                                     24,
                                   ),
                                   decoration: PopupShade.panel(color: _shade),
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const PopupTitleBadge(
-                                        title: 'Remove Ads',
+                                      PopupTitleBadge(
+                                        title: 'Level ${clampLevel(widget.level)}',
                                         shadeColor: _shade,
                                       ),
                                       Center(
                                         child: Container(
+                                          constraints: const BoxConstraints(
+                                            minWidth: 150,
+                                          ),
                                           clipBehavior: Clip.antiAlias,
                                           decoration: BoxDecoration(
                                             borderRadius: BorderRadius.circular(
@@ -113,6 +117,7 @@ class _NoAdsPopupState extends State<NoAdsPopup>
                                             ),
                                           ),
                                           child: Stack(
+                                            alignment: Alignment.center,
                                             children: [
                                               const Positioned.fill(
                                                 child: PopupBackground(
@@ -123,34 +128,57 @@ class _NoAdsPopupState extends State<NoAdsPopup>
                                               Padding(
                                                 padding:
                                                     const EdgeInsets.fromLTRB(
-                                                      16,
                                                       24,
-                                                      16,
+                                                      20,
+                                                      24,
                                                       20,
                                                     ),
                                                 child: Column(
                                                   mainAxisSize:
                                                       MainAxisSize.min,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.center,
                                                   children: [
-                                                    Image.asset(
-                                                      'lib/assets/ad.png',
-                                                      width: _iconSize,
-                                                      height: _iconSize,
-                                                      fit: BoxFit.contain,
+                                                    SizedBox(
+                                                      width: _heartSize,
+                                                      height: _heartSize,
+                                                      child: Stack(
+                                                        alignment:
+                                                            Alignment.center,
+                                                        children: [
+                                                          Image.asset(
+                                                            'lib/assets/heart/icon1.png',
+                                                            width: _heartSize,
+                                                            height: _heartSize,
+                                                            fit: BoxFit.contain,
+                                                          ),
+                                                          const _StickerLabel(
+                                                            text: '1',
+                                                            depthColor: Color(
+                                                              0xFF5A1018,
+                                                            ),
+                                                            style: TextStyle(
+                                                              fontSize: 24,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w900,
+                                                              height: 1,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
                                                     ),
                                                     const SizedBox(height: 12),
-                                                    const _StickerLabel(
-                                                      text:
-                                                          'All pop-up ads will be permanently removed!',
-                                                      depthColor: Color(
+                                                    _StickerLabel(
+                                                      text: levelTitleAt(
+                                                        widget.level,
+                                                      ),
+                                                      depthColor: const Color(
                                                         0xFF212121,
                                                       ),
-                                                      offsets:
-                                                          _StickerLabel
-                                                              .offsets2,
                                                       textAlign:
                                                           TextAlign.center,
-                                                      style: TextStyle(
+                                                      style: const TextStyle(
                                                         fontSize: 14,
                                                         fontWeight:
                                                             FontWeight.w600,
@@ -168,7 +196,7 @@ class _NoAdsPopupState extends State<NoAdsPopup>
                                       Center(
                                         child: GestureDetector(
                                           behavior: HitTestBehavior.opaque,
-                                          onTap: () => Sfx.instance.tap(widget.onPurchase),
+                                          onTap: () => Sfx.instance.tap(widget.onRetry),
                                           child: Container(
                                             height: 48,
                                             padding: const EdgeInsets.symmetric(
@@ -199,12 +227,10 @@ class _NoAdsPopupState extends State<NoAdsPopup>
                                                 ),
                                               ],
                                             ),
-                                            child: _StickerLabel(
-                                              text: widget.priceLabel,
-                                              depthColor: const Color(
-                                                0xFF24580A,
-                                              ),
-                                              style: const TextStyle(
+                                            child: const _StickerLabel(
+                                              text: 'Try Again',
+                                              depthColor: Color(0xFF24580A),
+                                              style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w900,
                                                 height: 1,
@@ -246,6 +272,7 @@ class _StickerLabel extends StatelessWidget {
     this.depthColor = const Color(0xFF313131),
     this.offsets = offsets2,
     this.textAlign,
+    this.innerBorderColor,
   });
 
   final String text;
@@ -253,6 +280,7 @@ class _StickerLabel extends StatelessWidget {
   final Color depthColor;
   final List<Offset> offsets;
   final TextAlign? textAlign;
+  final Color? innerBorderColor;
 
   static const offsets2 = [
     Offset(1, 1),
@@ -263,8 +291,29 @@ class _StickerLabel extends StatelessWidget {
     Offset(2, 1),
   ];
 
+  static const offsets4 = [
+    Offset(1, 1),
+    Offset(2, 2),
+    Offset(3, 3),
+    Offset(4, 4),
+    Offset(0, 1),
+    Offset(1, 0),
+    Offset(1, 2),
+    Offset(2, 1),
+    Offset(2, 3),
+    Offset(3, 2),
+    Offset(3, 4),
+    Offset(4, 3),
+  ];
+
   @override
   Widget build(BuildContext context) {
+    final fill = Text(
+      text,
+      textAlign: textAlign,
+      style: style.copyWith(color: Colors.white),
+    );
+
     return Padding(
       padding: const EdgeInsets.all(2),
       child: Stack(
@@ -280,11 +329,21 @@ class _StickerLabel extends StatelessWidget {
                 style: style.copyWith(color: depthColor),
               ),
             ),
-          Text(
-            text,
-            textAlign: textAlign,
-            style: style.copyWith(color: Colors.white),
-          ),
+          if (innerBorderColor == null)
+            fill
+          else
+            ShaderMask(
+              blendMode: BlendMode.srcIn,
+              shaderCallback: (bounds) {
+                return LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [innerBorderColor!, Colors.white],
+                  stops: const [0.0, 0.28],
+                ).createShader(bounds);
+              },
+              child: fill,
+            ),
         ],
       ),
     );

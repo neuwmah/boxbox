@@ -1,26 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:boxbox/game/level.dart';
+import 'package:boxbox/popups/popup.dart';
 import 'package:boxbox/sound/sfx.dart';
 import 'package:boxbox/widgets/background.dart';
-import 'package:boxbox/widgets/popup.dart';
 
-class StartPopup extends StatefulWidget {
-  const StartPopup({
-    super.key,
-    required this.level,
-    required this.onClose,
-    required this.onStart,
-  });
+class ReturnPopup extends StatefulWidget {
+  const ReturnPopup({super.key, required this.onClose, required this.onQuit});
 
-  final int level;
   final VoidCallback onClose;
-  final VoidCallback onStart;
+  final VoidCallback onQuit;
 
   @override
-  State<StartPopup> createState() => _StartPopupState();
+  State<ReturnPopup> createState() => _ReturnPopupState();
 }
 
-class _StartPopupState extends State<StartPopup>
+class _ReturnPopupState extends State<ReturnPopup>
     with SingleTickerProviderStateMixin {
   static const _shade = Color(0xFF515151);
   static const _shadeEnd = Color(0xFF212121);
@@ -56,7 +49,7 @@ class _StartPopupState extends State<StartPopup>
               child: PopupAppearScale(
                 animation: _controller,
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 240),
+                  constraints: const BoxConstraints(maxWidth: 270),
                   child: Material(
                     color: Colors.transparent,
                     child: Stack(
@@ -81,24 +74,21 @@ class _StartPopupState extends State<StartPopup>
                                 child: Container(
                                   width: double.infinity,
                                   padding: const EdgeInsets.fromLTRB(
-                                    16,
+                                    24,
                                     0,
-                                    16,
+                                    24,
                                     24,
                                   ),
                                   decoration: PopupShade.panel(color: _shade),
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      PopupTitleBadge(
-                                        title: 'Level ${clampLevel(widget.level)}',
+                                      const PopupTitleBadge(
+                                        title: 'Are You Sure?',
                                         shadeColor: _shade,
                                       ),
                                       Center(
                                         child: Container(
-                                          constraints: const BoxConstraints(
-                                            minWidth: 150,
-                                          ),
                                           clipBehavior: Clip.antiAlias,
                                           decoration: BoxDecoration(
                                             borderRadius: BorderRadius.circular(
@@ -117,11 +107,10 @@ class _StartPopupState extends State<StartPopup>
                                             ),
                                           ),
                                           child: Stack(
-                                            alignment: Alignment.center,
                                             children: [
                                               const Positioned.fill(
                                                 child: PopupBackground(
-                                                  offset: Offset(0, -28),
+                                                  offset: Offset(0, -22),
                                                   tint: _shade,
                                                 ),
                                               ),
@@ -136,49 +125,23 @@ class _StartPopupState extends State<StartPopup>
                                                 child: Column(
                                                   mainAxisSize:
                                                       MainAxisSize.min,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.center,
                                                   children: [
-                                                    SizedBox(
+                                                    Image.asset(
+                                                      'lib/assets/heart/broken1.png',
                                                       width: _heartSize,
                                                       height: _heartSize,
-                                                      child: Stack(
-                                                        alignment:
-                                                            Alignment.center,
-                                                        children: [
-                                                          Image.asset(
-                                                            'lib/assets/heart/icon1.png',
-                                                            width: _heartSize,
-                                                            height: _heartSize,
-                                                            fit: BoxFit.contain,
-                                                          ),
-                                                          const _StickerLabel(
-                                                            text: '1',
-                                                            depthColor: Color(
-                                                              0xFF5A1018,
-                                                            ),
-                                                            style: TextStyle(
-                                                              fontSize: 24,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w900,
-                                                              height: 1,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
+                                                      fit: BoxFit.contain,
                                                     ),
                                                     const SizedBox(height: 12),
-                                                    _StickerLabel(
-                                                      text: levelTitleAt(
-                                                        widget.level,
-                                                      ),
-                                                      depthColor: const Color(
+                                                    const _StickerLabel(
+                                                      text:
+                                                          'If you give up now, you will lose a life!',
+                                                      depthColor: Color(
                                                         0xFF212121,
                                                       ),
                                                       textAlign:
                                                           TextAlign.center,
-                                                      style: const TextStyle(
+                                                      style: TextStyle(
                                                         fontSize: 14,
                                                         fontWeight:
                                                             FontWeight.w600,
@@ -196,7 +159,7 @@ class _StartPopupState extends State<StartPopup>
                                       Center(
                                         child: GestureDetector(
                                           behavior: HitTestBehavior.opaque,
-                                          onTap: () => Sfx.instance.tap(widget.onStart),
+                                          onTap: () => Sfx.instance.tap(widget.onQuit),
                                           child: Container(
                                             height: 48,
                                             padding: const EdgeInsets.symmetric(
@@ -209,14 +172,14 @@ class _StartPopupState extends State<StartPopup>
                                                 begin: Alignment.topCenter,
                                                 end: Alignment.bottomCenter,
                                                 colors: [
-                                                  Color(0xFFB6F34A),
-                                                  Color(0xFF6FBF1E),
-                                                  Color(0xFF4E9A12),
+                                                  Color(0xFFFF6B6B),
+                                                  Color(0xFFE53935),
+                                                  Color(0xFFB71C1C),
                                                 ],
                                                 stops: [0.0, 0.55, 1.0],
                                               ),
                                               border: Border.all(
-                                                color: const Color(0xFF2F6B0C),
+                                                color: const Color(0xFF7F1010),
                                                 width: 4,
                                               ),
                                               boxShadow: const [
@@ -228,8 +191,8 @@ class _StartPopupState extends State<StartPopup>
                                               ],
                                             ),
                                             child: const _StickerLabel(
-                                              text: 'Start',
-                                              depthColor: Color(0xFF24580A),
+                                              text: 'Quit',
+                                              depthColor: Color(0xFF5A1010),
                                               style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w900,

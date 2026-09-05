@@ -1,23 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:boxbox/popups/popup.dart';
 import 'package:boxbox/sound/sfx.dart';
 import 'package:boxbox/widgets/background.dart';
-import 'package:boxbox/widgets/popup.dart';
 
-class ReturnPopup extends StatefulWidget {
-  const ReturnPopup({super.key, required this.onClose, required this.onQuit});
+class NoAdsPopup extends StatefulWidget {
+  const NoAdsPopup({
+    super.key,
+    required this.priceLabel,
+    required this.onClose,
+    required this.onPurchase,
+  });
 
+  final String priceLabel;
   final VoidCallback onClose;
-  final VoidCallback onQuit;
+  final VoidCallback onPurchase;
 
   @override
-  State<ReturnPopup> createState() => _ReturnPopupState();
+  State<NoAdsPopup> createState() => _NoAdsPopupState();
 }
 
-class _ReturnPopupState extends State<ReturnPopup>
+class _NoAdsPopupState extends State<NoAdsPopup>
     with SingleTickerProviderStateMixin {
   static const _shade = Color(0xFF515151);
   static const _shadeEnd = Color(0xFF212121);
-  static const _heartSize = 72.0;
+  static const _iconSize = 72.0;
 
   late final AnimationController _controller;
 
@@ -84,7 +90,7 @@ class _ReturnPopupState extends State<ReturnPopup>
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       const PopupTitleBadge(
-                                        title: 'Are You Sure?',
+                                        title: 'Remove Ads',
                                         shadeColor: _shade,
                                       ),
                                       Center(
@@ -110,16 +116,16 @@ class _ReturnPopupState extends State<ReturnPopup>
                                             children: [
                                               const Positioned.fill(
                                                 child: PopupBackground(
-                                                  offset: Offset(0, -22),
+                                                  offset: Offset(0, -28),
                                                   tint: _shade,
                                                 ),
                                               ),
                                               Padding(
                                                 padding:
                                                     const EdgeInsets.fromLTRB(
+                                                      16,
                                                       24,
-                                                      20,
-                                                      24,
+                                                      16,
                                                       20,
                                                     ),
                                                 child: Column(
@@ -127,18 +133,21 @@ class _ReturnPopupState extends State<ReturnPopup>
                                                       MainAxisSize.min,
                                                   children: [
                                                     Image.asset(
-                                                      'lib/assets/heart/broken1.png',
-                                                      width: _heartSize,
-                                                      height: _heartSize,
+                                                      'lib/assets/ad.png',
+                                                      width: _iconSize,
+                                                      height: _iconSize,
                                                       fit: BoxFit.contain,
                                                     ),
                                                     const SizedBox(height: 12),
                                                     const _StickerLabel(
                                                       text:
-                                                          'If you give up now, you will lose a life!',
+                                                          'All pop-up ads will be permanently removed!',
                                                       depthColor: Color(
                                                         0xFF212121,
                                                       ),
+                                                      offsets:
+                                                          _StickerLabel
+                                                              .offsets2,
                                                       textAlign:
                                                           TextAlign.center,
                                                       style: TextStyle(
@@ -159,7 +168,7 @@ class _ReturnPopupState extends State<ReturnPopup>
                                       Center(
                                         child: GestureDetector(
                                           behavior: HitTestBehavior.opaque,
-                                          onTap: () => Sfx.instance.tap(widget.onQuit),
+                                          onTap: () => Sfx.instance.tap(widget.onPurchase),
                                           child: Container(
                                             height: 48,
                                             padding: const EdgeInsets.symmetric(
@@ -172,14 +181,14 @@ class _ReturnPopupState extends State<ReturnPopup>
                                                 begin: Alignment.topCenter,
                                                 end: Alignment.bottomCenter,
                                                 colors: [
-                                                  Color(0xFFFF6B6B),
-                                                  Color(0xFFE53935),
-                                                  Color(0xFFB71C1C),
+                                                  Color(0xFFB6F34A),
+                                                  Color(0xFF6FBF1E),
+                                                  Color(0xFF4E9A12),
                                                 ],
                                                 stops: [0.0, 0.55, 1.0],
                                               ),
                                               border: Border.all(
-                                                color: const Color(0xFF7F1010),
+                                                color: const Color(0xFF2F6B0C),
                                                 width: 4,
                                               ),
                                               boxShadow: const [
@@ -190,10 +199,12 @@ class _ReturnPopupState extends State<ReturnPopup>
                                                 ),
                                               ],
                                             ),
-                                            child: const _StickerLabel(
-                                              text: 'Quit',
-                                              depthColor: Color(0xFF5A1010),
-                                              style: TextStyle(
+                                            child: _StickerLabel(
+                                              text: widget.priceLabel,
+                                              depthColor: const Color(
+                                                0xFF24580A,
+                                              ),
+                                              style: const TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w900,
                                                 height: 1,
@@ -235,7 +246,6 @@ class _StickerLabel extends StatelessWidget {
     this.depthColor = const Color(0xFF313131),
     this.offsets = offsets2,
     this.textAlign,
-    this.innerBorderColor,
   });
 
   final String text;
@@ -243,7 +253,6 @@ class _StickerLabel extends StatelessWidget {
   final Color depthColor;
   final List<Offset> offsets;
   final TextAlign? textAlign;
-  final Color? innerBorderColor;
 
   static const offsets2 = [
     Offset(1, 1),
@@ -254,29 +263,8 @@ class _StickerLabel extends StatelessWidget {
     Offset(2, 1),
   ];
 
-  static const offsets4 = [
-    Offset(1, 1),
-    Offset(2, 2),
-    Offset(3, 3),
-    Offset(4, 4),
-    Offset(0, 1),
-    Offset(1, 0),
-    Offset(1, 2),
-    Offset(2, 1),
-    Offset(2, 3),
-    Offset(3, 2),
-    Offset(3, 4),
-    Offset(4, 3),
-  ];
-
   @override
   Widget build(BuildContext context) {
-    final fill = Text(
-      text,
-      textAlign: textAlign,
-      style: style.copyWith(color: Colors.white),
-    );
-
     return Padding(
       padding: const EdgeInsets.all(2),
       child: Stack(
@@ -292,21 +280,11 @@ class _StickerLabel extends StatelessWidget {
                 style: style.copyWith(color: depthColor),
               ),
             ),
-          if (innerBorderColor == null)
-            fill
-          else
-            ShaderMask(
-              blendMode: BlendMode.srcIn,
-              shaderCallback: (bounds) {
-                return LinearGradient(
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                  colors: [innerBorderColor!, Colors.white],
-                  stops: const [0.0, 0.28],
-                ).createShader(bounds);
-              },
-              child: fill,
-            ),
+          Text(
+            text,
+            textAlign: textAlign,
+            style: style.copyWith(color: Colors.white),
+          ),
         ],
       ),
     );
