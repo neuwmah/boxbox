@@ -273,7 +273,7 @@ class PopupTitleBadge extends StatelessWidget {
   final Color shadeColor;
 
   static const _padding = 10.0;
-  static const _hPadding = 16.0;
+  static const _hPadding = 10.0;
   static const _borderWidth = 1.0;
   static const _gapBelow = 24.0;
   static const _pointFactor = 0.45;
