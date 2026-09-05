@@ -140,7 +140,7 @@ class _StatusCounter extends StatelessWidget {
                         style: const TextStyle(
                           color: _text,
                           fontSize: 14,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w900,
                           height: 1,
                         ),
                       ),
@@ -171,7 +171,7 @@ class _StatusCounter extends StatelessWidget {
                     _HeartValueLabel(text: iconLabel!),
                   if (showPlus)
                     Positioned(
-                      right: -8,
+                      right: -6,
                       bottom: -1,
                       child: IgnorePointer(
                         child: Container(
@@ -180,7 +180,7 @@ class _StatusCounter extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: _plusGreen,
                             shape: BoxShape.circle,
-                            border: Border.all(color: const Color(0xFF333333), width: 1.6),
+                            border: Border.all(color: const Color(0xFF212121), width: 1.6),
                           ),
                           child: const Center(
                             child: SizedBox(
@@ -299,7 +299,7 @@ class _PlusMarkPainter extends CustomPainter {
     final arm = size.shortestSide * 0.28;
     final paint = Paint()
       ..color = Colors.white
-      ..strokeWidth = 1.5
+      ..strokeWidth = 1.8
       ..strokeCap = StrokeCap.square
       ..style = PaintingStyle.stroke;
     canvas.drawLine(Offset(c.dx - arm, c.dy), Offset(c.dx + arm, c.dy), paint);
@@ -318,7 +318,7 @@ class _HeartValueLabel extends StatelessWidget {
   static const _depthColor = Color(0xFF5A1018);
   static const _style = TextStyle(
     fontSize: 14,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.w900,
     height: 1,
   );
   static const _offsets = [
