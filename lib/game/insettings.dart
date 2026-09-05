@@ -173,7 +173,7 @@ class _HudBackArrowPainter extends CustomPainter {
     final paint = Paint()
       ..color = Colors.white
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.4
+      ..strokeWidth = 2.0
       ..strokeCap = StrokeCap.square
       ..strokeJoin = StrokeJoin.miter;
 

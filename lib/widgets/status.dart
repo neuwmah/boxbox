@@ -317,9 +317,9 @@ class _HeartValueLabel extends StatelessWidget {
 
   static const _depthColor = Color(0xFF5A1018);
   static const _style = TextStyle(
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: FontWeight.w600,
-    height: 1,
+    height: 1.2,
   );
   static const _offsets = [
     Offset(1, 1),
