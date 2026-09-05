@@ -86,7 +86,6 @@ class _ReturnPopupState extends State<ReturnPopup>
                                       const PopupTitleBadge(
                                         title: 'Are You Sure?',
                                         shadeColor: _shade,
-                                        endColor: _shadeEnd,
                                       ),
                                       Center(
                                         child: Container(

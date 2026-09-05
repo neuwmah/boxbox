@@ -92,7 +92,6 @@ class _RetryPopupState extends State<RetryPopup>
                                       PopupTitleBadge(
                                         title: 'Level ${clampLevel(widget.level)}',
                                         shadeColor: _shade,
-                                        endColor: _shadeEnd,
                                       ),
                                       Center(
                                         child: Container(

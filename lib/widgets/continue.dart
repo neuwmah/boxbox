@@ -112,7 +112,6 @@ class _ContinuePopupState extends State<ContinuePopup>
                                       const PopupTitleBadge(
                                         title: 'Continue?',
                                         shadeColor: _shade,
-                                        endColor: _shadeEnd,
                                       ),
                                       Center(
                                         child: Container(

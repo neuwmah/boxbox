@@ -100,7 +100,6 @@ class _MoreLivesPopupState extends State<MoreLivesPopup>
                                       const PopupTitleBadge(
                                         title: 'More Lives!',
                                         shadeColor: _shade,
-                                        endColor: _shadeEnd,
                                       ),
                                       Padding(
                                         padding: const EdgeInsets.symmetric(

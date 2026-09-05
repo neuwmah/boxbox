@@ -213,33 +213,95 @@ class PopupBodyShade extends StatelessWidget {
   }
 }
 
+class _HexagonBorder extends OutlinedBorder {
+  const _HexagonBorder({super.side, this.pointFactor = 0.45});
+
+  final double pointFactor;
+
+  Path _hexagon(Rect rect) {
+    final point = (rect.height * pointFactor).clamp(0.0, rect.width / 2);
+    return Path()
+      ..moveTo(rect.left + point, rect.top)
+      ..lineTo(rect.right - point, rect.top)
+      ..lineTo(rect.right, rect.center.dy)
+      ..lineTo(rect.right - point, rect.bottom)
+      ..lineTo(rect.left + point, rect.bottom)
+      ..lineTo(rect.left, rect.center.dy)
+      ..close();
+  }
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
+    return _hexagon(rect.deflate(side.width));
+  }
+
+  @override
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
+    return _hexagon(rect);
+  }
+
+  @override
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
+    if (rect.isEmpty || side.style == BorderStyle.none) return;
+    canvas.drawPath(_hexagon(rect), side.toPaint());
+  }
+
+  @override
+  _HexagonBorder copyWith({BorderSide? side, double? pointFactor}) {
+    return _HexagonBorder(
+      side: side ?? this.side,
+      pointFactor: pointFactor ?? this.pointFactor,
+    );
+  }
+
+  @override
+  OutlinedBorder scale(double t) {
+    return _HexagonBorder(side: side.scale(t), pointFactor: pointFactor);
+  }
+}
+
 class PopupTitleBadge extends StatelessWidget {
   const PopupTitleBadge({
     super.key,
     required this.title,
     this.fontSize = 20,
     this.shadeColor = PopupShade.start,
-    this.endColor = PopupShade.end,
   });
 
   final String title;
   final double fontSize;
   final Color shadeColor;
-  final Color endColor;
 
   static const _padding = 10.0;
+  static const _hPadding = 16.0;
   static const _borderWidth = 1.0;
   static const _gapBelow = 24.0;
-  static const _radius = 0.0;
+  static const _pointFactor = 0.45;
 
   static double boxHeight([double fontSize = 24]) =>
       _padding * 2 + fontSize + _borderWidth * 2;
 
   static double overhang([double fontSize = 24]) => boxHeight(fontSize) / 2;
 
+  ShapeDecoration _panel() {
+    final tinted = shadeColor != PopupShade.start;
+    return ShapeDecoration(
+      color: tinted ? null : Colors.black,
+      gradient: tinted ? PopupShade.fillGradient(shadeColor) : null,
+      shape: _HexagonBorder(
+        pointFactor: _pointFactor,
+        side: BorderSide(
+          color: tinted ? PopupShade.borderTint(shadeColor) : PopupShade.start,
+          width: _borderWidth,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final half = overhang(fontSize);
+    final point = boxHeight(fontSize) * _pointFactor;
 
     return SizedBox(
       height: half + _gapBelow,
@@ -250,35 +312,15 @@ class PopupTitleBadge extends StatelessWidget {
         children: [
           Positioned(
             top: -half - 1,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                for (final o in PopupShade.steps)
-                  Positioned.fill(
-                    child: Transform.translate(
-                      offset: Offset(o, o),
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          borderRadius: PopupShade.corners(
-                            radius: _radius,
-                            largeRadius: _radius,
-                          ),
-                          gradient: PopupShade.gradient(shadeColor, endColor),
-                        ),
-                      ),
-                    ),
-                  ),
-                Container(
-                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-                  decoration: PopupShade.panel(
-                    color: shadeColor,
-                    radius: _radius,
-                    largeRadius: _radius,
-                    borderWidth: _borderWidth,
-                  ),
-                  child: StickerTitle(title: title, fontSize: fontSize),
-                ),
-              ],
+            child: Container(
+              padding: EdgeInsets.fromLTRB(
+                _hPadding + point,
+                _padding,
+                _hPadding + point,
+                _padding,
+              ),
+              decoration: _panel(),
+              child: StickerTitle(title: title, fontSize: fontSize),
             ),
           ),
         ],

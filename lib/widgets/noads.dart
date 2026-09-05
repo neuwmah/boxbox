@@ -92,7 +92,6 @@ class _NoAdsPopupState extends State<NoAdsPopup>
                                       const PopupTitleBadge(
                                         title: 'Remove Ads',
                                         shadeColor: _shade,
-                                        endColor: _shadeEnd,
                                       ),
                                       Center(
                                         child: Container(

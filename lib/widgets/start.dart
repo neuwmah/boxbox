@@ -93,7 +93,6 @@ class _StartPopupState extends State<StartPopup>
                                       PopupTitleBadge(
                                         title: 'Level ${clampLevel(widget.level)}',
                                         shadeColor: _shade,
-                                        endColor: _shadeEnd,
                                       ),
                                       Center(
                                         child: Container(
