@@ -6,8 +6,8 @@ import 'package:boxbox/ads/purchase.dart';
 import 'package:boxbox/sound/sfx.dart';
 import 'package:boxbox/widgets/background.dart';
 
-const double kShopPileHeight = 48;
-const double kShopPileWidth = 48;
+const double kShopPileHeight = 40;
+const double kShopPileWidth = 40;
 
 class ShopPage extends StatefulWidget {
   const ShopPage({super.key, this.onPurchaseCoins});
@@ -262,7 +262,7 @@ class _AmountLabel extends StatelessWidget {
     fontSize: 20,
     fontWeight: FontWeight.w700,
     height: 1,
-    letterSpacing: -.4,
+    letterSpacing: -.2,
   );
 
   @override
@@ -314,7 +314,7 @@ class _BuyButton extends StatelessWidget {
   final ValueChanged<int>? onCoins;
 
   static const _base = TextStyle(
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: FontWeight.w900,
     height: 1,
     letterSpacing: -.2,
