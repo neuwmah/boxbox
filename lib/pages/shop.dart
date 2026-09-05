@@ -377,7 +377,7 @@ class _BuyButton extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
             child: Stack(
               alignment: Alignment.center,
               children: [
