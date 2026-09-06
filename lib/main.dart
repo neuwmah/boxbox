@@ -369,6 +369,8 @@ class _MainShellState extends State<MainShell>
         event.logicalKey == LogicalKeyboardKey.backquote) {
       final next = _debugLevelOffset + 10;
       _debugLevelOffset = next >= levels.length ? 0 : next;
+      final slot = ((_level - 1) % 10) + 1;
+      _debugPreviewLevel(_debugLevelOffset + slot);
       return true;
     }
     final level = switch (event.logicalKey) {
@@ -385,7 +387,7 @@ class _MainShellState extends State<MainShell>
       _ => null,
     };
     if (level == null) return false;
-    _debugStartLevel(_debugLevelOffset + level);
+    _debugPreviewLevel(_debugLevelOffset + level);
     return true;
   }
 
@@ -401,14 +403,18 @@ class _MainShellState extends State<MainShell>
     }
   }
 
-  Future<void> _debugStartLevel(int level) async {
+  void _debugPreviewLevel(int level) {
+    final inGame = Navigator.of(context).canPop();
     setState(() {
-      _level = level;
-      _homePopup = _HomePopup.none;
+      _level = clampLevel(level);
+      _selectedIndex = 1;
       _pendingReward = null;
+      _homePopup = _HomePopup.start;
     });
-    final replace = Navigator.of(context).canPop();
-    await _playLevel(debug: true, replace: replace);
+    if (inGame) {
+      _playGen++;
+      Navigator.of(context).pop();
+    }
   }
 
   String get _heartTimerLabel {
