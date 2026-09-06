@@ -3,6 +3,7 @@ import 'package:boxbox/game/level.dart';
 import 'package:boxbox/popups/popup.dart';
 import 'package:boxbox/sound/sfx.dart';
 import 'package:boxbox/widgets/background.dart';
+import 'package:boxbox/widgets/preview.dart';
 
 class StartPopup extends StatefulWidget {
   const StartPopup({
@@ -24,7 +25,7 @@ class _StartPopupState extends State<StartPopup>
     with SingleTickerProviderStateMixin {
   static const _shade = Color(0xFF515151);
   static const _shadeEnd = Color(0xFF212121);
-  static const _heartSize = 72.0;
+  static const _previewSize = 96.0;
 
   late final AnimationController _controller;
 
@@ -121,51 +122,22 @@ class _StartPopupState extends State<StartPopup>
                                             children: [
                                               const Positioned.fill(
                                                 child: PopupBackground(
-                                                  offset: Offset(0, -28),
+                                                  offset: Offset(0, -20),
                                                   tint: _shade,
                                                 ),
                                               ),
                                               Padding(
                                                 padding:
-                                                    const EdgeInsets.fromLTRB(
-                                                      24,
-                                                      20,
-                                                      24,
-                                                      20,
-                                                    ),
+                                                    const EdgeInsets.fromLTRB(20, 24, 20, 20),
                                                 child: Column(
                                                   mainAxisSize:
                                                       MainAxisSize.min,
                                                   crossAxisAlignment:
                                                       CrossAxisAlignment.center,
                                                   children: [
-                                                    SizedBox(
-                                                      width: _heartSize,
-                                                      height: _heartSize,
-                                                      child: Stack(
-                                                        alignment:
-                                                            Alignment.center,
-                                                        children: [
-                                                          Image.asset(
-                                                            'lib/assets/heart/icon1.png',
-                                                            width: _heartSize,
-                                                            height: _heartSize,
-                                                            fit: BoxFit.contain,
-                                                          ),
-                                                          const _StickerLabel(
-                                                            text: '1',
-                                                            depthColor: Color(
-                                                              0xFF5A1018,
-                                                            ),
-                                                            style: TextStyle(
-                                                              fontSize: 24,
-                                                              fontWeight:
-                                                                  FontWeight.w600,
-                                                              height: 1,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
+                                                    LevelPixelArt(
+                                                      level: widget.level,
+                                                      size: _previewSize,
                                                     ),
                                                     const SizedBox(height: 12),
                                                     _StickerLabel(
