@@ -136,16 +136,16 @@ class _ContinuePopupState extends State<ContinuePopup>
                                             children: [
                                               const Positioned.fill(
                                                 child: PopupBackground(
-                                                  offset: Offset(0, -12),
+                                                  offset: Offset(0, -20),
                                                   tint: _shade,
                                                 ),
                                               ),
                                               Padding(
                                                 padding:
                                                     const EdgeInsets.fromLTRB(
-                                                      20,
+                                                      32,
                                                       12,
-                                                      20,
+                                                      32,
                                                       20,
                                                     ),
                                                 child: Column(
@@ -175,7 +175,7 @@ class _ContinuePopupState extends State<ContinuePopup>
                                                     const SizedBox(height: 6),
                                                     _StickerLabel(
                                                       text:
-                                                          'Add ${widget.balls} balls to continue!',
+                                                          'Add ${widget.balls} balls to\ncontinue!',
                                                       depthColor: const Color(
                                                         0xFF212121,
                                                       ),
