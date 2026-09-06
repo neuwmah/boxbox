@@ -172,7 +172,7 @@ class _NoAdsPopupState extends State<NoAdsPopup>
                                           child: Container(
                                             height: 48,
                                             padding: const EdgeInsets.symmetric(
-                                              horizontal: 24,
+                                              horizontal: 20,
                                             ),
                                             decoration: BoxDecoration(
                                               borderRadius:

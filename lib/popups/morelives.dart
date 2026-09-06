@@ -133,9 +133,9 @@ class _MoreLivesPopupState extends State<MoreLivesPopup>
                                                 Padding(
                                                   padding:
                                                       const EdgeInsets.fromLTRB(
-                                                        22,
+                                                        28,
                                                         20,
-                                                        22,
+                                                        28,
                                                         20,
                                                       ),
                                                   child: Column(
@@ -260,7 +260,7 @@ class _MoreLivesPopupState extends State<MoreLivesPopup>
                                           child: Container(
                                             height: 48,
                                             padding: const EdgeInsets.symmetric(
-                                              horizontal: 24,
+                                              horizontal: 20,
                                             ),
                                             decoration: BoxDecoration(
                                               borderRadius:
@@ -357,7 +357,7 @@ class _MoreLivesPopupState extends State<MoreLivesPopup>
                                           child: Container(
                                             height: 48,
                                             padding: const EdgeInsets.symmetric(
-                                              horizontal: 24,
+                                              horizontal: 20,
                                             ),
                                             decoration: BoxDecoration(
                                               borderRadius:

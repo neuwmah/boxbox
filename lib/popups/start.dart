@@ -199,7 +199,7 @@ class _StartPopupState extends State<StartPopup>
                                           child: Container(
                                             height: 48,
                                             padding: const EdgeInsets.symmetric(
-                                              horizontal: 24,
+                                              horizontal: 20,
                                             ),
                                             decoration: BoxDecoration(
                                               borderRadius:

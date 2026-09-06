@@ -76,9 +76,9 @@ class _CancelPopupState extends State<CancelPopup>
                                 child: Container(
                                   width: double.infinity,
                                   padding: const EdgeInsets.fromLTRB(
-                                    24,
+                                    32,
                                     0,
-                                    24,
+                                    32,
                                     24,
                                   ),
                                   decoration: PopupShade.panel(color: _shade),
@@ -171,7 +171,7 @@ class _CancelPopupState extends State<CancelPopup>
                                           child: Container(
                                             height: 48,
                                             padding: const EdgeInsets.symmetric(
-                                              horizontal: 24,
+                                              horizontal: 20,
                                             ),
                                             decoration: BoxDecoration(
                                               borderRadius:
