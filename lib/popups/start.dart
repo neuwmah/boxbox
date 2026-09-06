@@ -251,6 +251,21 @@ class _StartPopupState extends State<StartPopup>
                           right: 12,
                           child: PopupCloseButton(onTap: widget.onClose),
                         ),
+                        Positioned(
+                          left: 8,
+                          bottom: 12,
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () => Sfx.instance.tap(),
+                            child: Image.asset(
+                              'lib/assets/switch.png',
+                              width: PopupCloseButton.size,
+                              height: PopupCloseButton.size,
+                              fit: BoxFit.contain,
+                              filterQuality: FilterQuality.medium,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),

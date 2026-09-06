@@ -334,7 +334,7 @@ class PopupCloseButton extends StatelessWidget {
 
   final VoidCallback onTap;
 
-  static const _size = 32.0;
+  static const size = 32.0;
   static const _asset = 'lib/assets/close.png';
 
   @override
@@ -344,8 +344,8 @@ class PopupCloseButton extends StatelessWidget {
       onTap: () => Sfx.instance.tap(onTap),
       child: Image.asset(
         _asset,
-        width: _size,
-        height: _size,
+        width: size,
+        height: size,
         fit: BoxFit.contain,
         filterQuality: FilterQuality.medium,
       ),
