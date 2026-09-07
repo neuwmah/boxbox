@@ -10,6 +10,7 @@ import 'package:boxbox/pages/game.dart';
 import 'package:boxbox/pages/home.dart';
 import 'package:boxbox/pages/settings.dart';
 import 'package:boxbox/pages/shop.dart';
+import 'package:boxbox/popups/level.dart';
 import 'package:boxbox/popups/morelives.dart';
 import 'package:boxbox/popups/noads.dart';
 import 'package:boxbox/popups/retry.dart';
@@ -219,7 +220,7 @@ class _LaunchSplash extends StatelessWidget {
   }
 }
 
-enum _HomePopup { none, start, retry, moreLives, noAds }
+enum _HomePopup { none, start, retry, moreLives, noAds, level }
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key, this.onFirstHomeReady});
@@ -513,6 +514,21 @@ class _MainShellState extends State<MainShell>
     setState(() => _homePopup = _HomePopup.none);
   }
 
+  void _openLevelPicker() {
+    setState(() => _homePopup = _HomePopup.level);
+  }
+
+  void _closeLevelPicker() {
+    setState(() => _homePopup = _HomePopup.start);
+  }
+
+  void _selectLevel(int level) {
+    setState(() {
+      _level = clampLevel(level);
+      _homePopup = _HomePopup.start;
+    });
+  }
+
   Future<void> _playLevel({bool debug = false, bool replace = false}) async {
     if (!debug && !_consumeHeart()) {
       setState(() => _homePopup = _HomePopup.moreLives);
@@ -733,6 +749,15 @@ class _MainShellState extends State<MainShell>
               level: _level,
               onClose: _closeHomePopup,
               onStart: _playLevel,
+              onSwitch: _openLevelPicker,
+            ),
+          ),
+        if (_homePopup == _HomePopup.level)
+          Positioned.fill(
+            child: LevelPopup(
+              level: _level,
+              onClose: _closeLevelPicker,
+              onSelect: _selectLevel,
             ),
           ),
         if (_homePopup == _HomePopup.retry)

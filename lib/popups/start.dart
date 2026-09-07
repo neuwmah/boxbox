@@ -11,11 +11,13 @@ class StartPopup extends StatefulWidget {
     required this.level,
     required this.onClose,
     required this.onStart,
+    required this.onSwitch,
   });
 
   final int level;
   final VoidCallback onClose;
   final VoidCallback onStart;
+  final VoidCallback onSwitch;
 
   @override
   State<StartPopup> createState() => _StartPopupState();
@@ -164,52 +166,81 @@ class _StartPopupState extends State<StartPopup>
                                         ),
                                       ),
                                       const SizedBox(height: 24),
-                                      Center(
-                                        child: GestureDetector(
-                                          behavior: HitTestBehavior.opaque,
-                                          onTap: () => Sfx.instance.tap(widget.onStart),
-                                          child: Container(
-                                            height: 48,
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 20,
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          GestureDetector(
+                                            behavior: HitTestBehavior.opaque,
+                                            onTap: () => Sfx.instance.tap(
+                                              widget.onSwitch,
                                             ),
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(40),
-                                              gradient: const LinearGradient(
-                                                begin: Alignment.topCenter,
-                                                end: Alignment.bottomCenter,
-                                                colors: [
-                                                  Color(0xFFB6F34A),
-                                                  Color(0xFF6FBF1E),
-                                                  Color(0xFF4E9A12),
-                                                ],
-                                                stops: [0.0, 0.55, 1.0],
+                                            child: Image.asset(
+                                              'lib/assets/switch.png',
+                                              width: PopupCloseButton.size,
+                                              height: PopupCloseButton.size,
+                                              fit: BoxFit.contain,
+                                              filterQuality:
+                                                  FilterQuality.medium,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          GestureDetector(
+                                            behavior: HitTestBehavior.opaque,
+                                            onTap: () => Sfx.instance.tap(
+                                              widget.onStart,
+                                            ),
+                                            child: Container(
+                                              height: 48,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                horizontal: 20,
                                               ),
-                                              border: Border.all(
-                                                color: const Color(0xFF2F6B0C),
-                                                width: 4,
-                                              ),
-                                              boxShadow: const [
-                                                BoxShadow(
-                                                  color: Color(0x66000000),
-                                                  blurRadius: 2,
-                                                  offset: Offset(0, 1),
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(40),
+                                                gradient: const LinearGradient(
+                                                  begin: Alignment.topCenter,
+                                                  end: Alignment.bottomCenter,
+                                                  colors: [
+                                                    Color(0xFFB6F34A),
+                                                    Color(0xFF6FBF1E),
+                                                    Color(0xFF4E9A12),
+                                                  ],
+                                                  stops: [0.0, 0.55, 1.0],
                                                 ),
-                                              ],
-                                            ),
-                                            child: const _StickerLabel(
-                                              text: 'Start',
-                                              depthColor: Color(0xFF24580A),
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w600,
-                                                height: 1,
-                                                letterSpacing: -.2,
+                                                border: Border.all(
+                                                  color: const Color(
+                                                    0xFF2F6B0C,
+                                                  ),
+                                                  width: 4,
+                                                ),
+                                                boxShadow: const [
+                                                  BoxShadow(
+                                                    color: Color(0x66000000),
+                                                    blurRadius: 2,
+                                                    offset: Offset(0, 1),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: const _StickerLabel(
+                                                text: 'Start',
+                                                depthColor: Color(0xFF24580A),
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w600,
+                                                  height: 1,
+                                                  letterSpacing: -.2,
+                                                ),
                                               ),
                                             ),
                                           ),
-                                        ),
+                                          const SizedBox(width: 8),
+                                          const SizedBox(
+                                            width: PopupCloseButton.size,
+                                            height: PopupCloseButton.size,
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
@@ -222,21 +253,6 @@ class _StartPopupState extends State<StartPopup>
                           top: 24,
                           right: 12,
                           child: PopupCloseButton(onTap: widget.onClose),
-                        ),
-                        Positioned(
-                          left: 8,
-                          bottom: 12,
-                          child: GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onTap: () => Sfx.instance.tap(),
-                            child: Image.asset(
-                              'lib/assets/switch.png',
-                              width: PopupCloseButton.size,
-                              height: PopupCloseButton.size,
-                              fit: BoxFit.contain,
-                              filterQuality: FilterQuality.medium,
-                            ),
-                          ),
                         ),
                       ],
                     ),

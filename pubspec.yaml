@@ -52,6 +52,8 @@ flutter:
     - lib/assets/success.png
     - lib/assets/close.png
     - lib/assets/switch.png
+    - lib/assets/arrowleft.png
+    - lib/assets/arrowright.png
     - lib/assets/floor/grass.png
     - lib/assets/floor/farm.png
     - lib/assets/floor/wood/8.png
