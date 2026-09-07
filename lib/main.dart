@@ -564,7 +564,11 @@ class _MainShellState extends State<MainShell>
       await _onDefeat();
       return;
     }
-    if (reward != null && reward > 0) {
+    if (reward == null) {
+      await _presentInterstitial();
+      return;
+    }
+    if (reward > 0) {
       _onReward(reward);
     }
   }
