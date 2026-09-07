@@ -578,7 +578,7 @@ class _MainShellState extends State<MainShell>
     setState(() {
       _hearts = _maxHearts;
       _nextHeartAt = null;
-      _homePopup = _HomePopup.retry;
+      _homePopup = _HomePopup.start;
     });
   }
 
