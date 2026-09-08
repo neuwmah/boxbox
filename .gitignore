@@ -36,3 +36,10 @@ app.*.map.json
 
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
+
+server/node_modules/
+server/package-lock.json
+server/.env
+server/serviceAccountKey.json
+server/ca.pem
+server/ca.b64

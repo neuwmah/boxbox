@@ -1,0 +1,8 @@
+node_modules
+fly.toml
+.dockerignore
+.env
+serviceAccountKey.json
+*.log
+README.md
+sql
