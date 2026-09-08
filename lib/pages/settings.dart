@@ -1,7 +1,15 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:boxbox/api/auth_service.dart';
+import 'package:boxbox/api/save_manager.dart';
+import 'package:boxbox/popups/auth/account.dart';
+import 'package:boxbox/popups/auth/connectcancel.dart';
+import 'package:boxbox/popups/auth/connectsuccess.dart';
+import 'package:boxbox/popups/auth/disconnectcancel.dart';
+import 'package:boxbox/popups/auth/disconnectsuccess.dart';
 import 'package:boxbox/sound/sfx.dart';
 import 'package:boxbox/sound/soundtrack.dart';
 import 'package:boxbox/widgets/background.dart';
@@ -95,9 +103,87 @@ class _SettingsPageState extends State<SettingsPage> {
                 _SecondaryButton(label: 'Privacy', onTap: _openLegalUrl),
               ],
             ),
+            const SizedBox(height: 12),
+            if (AuthService.required) const _AccountButtons(),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _AccountButtons extends StatefulWidget {
+  const _AccountButtons();
+
+  @override
+  State<_AccountButtons> createState() => _AccountButtonsState();
+}
+
+class _AccountButtonsState extends State<_AccountButtons> {
+  bool _busy = false;
+
+  Future<void> _connect() async {
+    if (_busy || !mounted) return;
+    setState(() => _busy = true);
+    try {
+      await AccountFlow.instance.run(
+        context,
+        () async {
+          if (!kIsWeb && Platform.isIOS) {
+            await AuthService.instance.signInApple();
+          } else {
+            await AuthService.instance.signInGoogle();
+          }
+          if (!AuthService.instance.isSignedIn) return false;
+          await SaveManager.instance.rebindAccount();
+          return true;
+        },
+        success: (close) => ConnectSuccessPopup(onClose: close),
+        cancel: (close) => ConnectCancelPopup(onClose: close),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _disconnect() async {
+    if (_busy || !mounted) return;
+    setState(() => _busy = true);
+    try {
+      await AccountFlow.instance.run(
+        context,
+        () async {
+          await SaveManager.instance.forceSync();
+          await AuthService.instance.signOut();
+          await SaveManager.instance.rebindAccount();
+          return !AuthService.instance.isSignedIn;
+        },
+        success: (close) => DisconnectSuccessPopup(onClose: close),
+        cancel: (close) => DisconnectCancelPopup(onClose: close),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: AuthService.instance.user,
+      builder: (context, _) {
+        final signedIn = AuthService.instance.isSignedIn;
+        return Center(
+          child: signedIn
+              ? _SecondaryButton(
+                  label: 'Disconnect',
+                  onTap: _busy ? () {} : _disconnect,
+                )
+              : _PrimaryButton(
+                  label: 'Connect',
+                  onTap: _busy ? null : _connect,
+                ),
+        );
+      },
     );
   }
 }
@@ -195,9 +281,10 @@ class _ToggleControl extends StatelessWidget {
 }
 
 class _PrimaryButton extends StatelessWidget {
-  const _PrimaryButton({required this.label});
+  const _PrimaryButton({required this.label, this.onTap});
 
   final String label;
+  final VoidCallback? onTap;
 
   static const _base = TextStyle(
     fontSize: 16,
@@ -211,7 +298,7 @@ class _PrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: Sfx.instance.tap,
+      onTap: onTap == null ? Sfx.instance.tap : () => Sfx.instance.tap(onTap),
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),

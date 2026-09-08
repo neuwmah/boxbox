@@ -3,7 +3,11 @@ import 'dart:io';
 
 import 'package:boxbox/ads/ads.dart';
 import 'package:boxbox/ads/purchase.dart';
+import 'package:boxbox/api/auth_service.dart';
+import 'package:boxbox/api/save_manager.dart';
+import 'package:boxbox/firebase_options.dart';
 import 'package:boxbox/game/level.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:boxbox/home/navbar.dart';
 import 'package:boxbox/home/reward.dart';
 import 'package:boxbox/pages/game.dart';
@@ -45,6 +49,11 @@ const _systemOverlayStyle = SystemUiOverlayStyle(
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (AuthService.required) {
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    await AuthService.instance.init();
+  }
+  await SaveManager.instance.init();
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
@@ -79,8 +88,8 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   static const _logoMinDuration = Duration(seconds: 3);
-  static const _launchAdMaxWait = Duration(seconds: 10);
-  static const _launchAdMaxShow = Duration(seconds: 45);
+  static const _launchAdMaxWait = Duration(seconds: 60);
+  static const _launchAdMaxShow = Duration(seconds: 60);
 
   Widget? _shell;
   bool _showLogo = true;
@@ -233,8 +242,6 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell>
     with SingleTickerProviderStateMixin {
-  static const _maxHearts = 5;
-  static const _heartRegen = Duration(minutes: 20);
   static const _refillPrice = 900;
   static const _noAdsPriceLabel = 'BRL 59.90';
   static const _homeLoadingFadeDuration = Duration(milliseconds: 250);
@@ -249,11 +256,11 @@ class _MainShellState extends State<MainShell>
   ];
 
   int _selectedIndex = 1;
-  int _level = 1;
-  int _coins = 500;
-  int _displayedCoins = 500;
-  int _hearts = _maxHearts;
-  DateTime? _nextHeartAt;
+  int _level = SaveManager.instance.getLevel();
+  int _coins = SaveManager.instance.getCoins();
+  int _displayedCoins = SaveManager.instance.getCoins();
+  int _hearts = SaveManager.instance.getHearts();
+  DateTime? _nextHeartAt = SaveManager.instance.nextHeartAt;
   int? _pendingReward;
   _HomePopup _homePopup = _HomePopup.none;
   final GlobalKey _coinIconKey = GlobalKey();
@@ -265,14 +272,24 @@ class _MainShellState extends State<MainShell>
   bool _cubesReady = false;
   bool _adsIconReady = false;
   bool _firstHomeRevealed = false;
-  bool _adsRemoved = false;
+  bool _adsRemoved = SaveManager.instance.hasNoAds();
   bool _adBusy = false;
   late final AnimationController _homeLoadingFade;
+  late final Listenable _saveListenable;
   Future<void>? _homeLoadingTask;
 
   @override
   void initState() {
     super.initState();
+    final save = SaveManager.instance;
+    Ads.instance.setAdsRemoved(save.hasNoAds());
+    if (save.hasNoAds()) _adsIconReady = true;
+    _saveListenable = Listenable.merge([
+      save.level,
+      save.coins,
+      save.hearts,
+      save.noAds,
+    ])..addListener(_onSaveChanged);
     _homeLoadingFade = AnimationController(
       vsync: this,
       duration: _homeLoadingFadeDuration,
@@ -292,6 +309,7 @@ class _MainShellState extends State<MainShell>
 
   @override
   void dispose() {
+    _saveListenable.removeListener(_onSaveChanged);
     if (kDebugMode) {
       HardwareKeyboard.instance.removeHandler(_onDebugKey);
     }
@@ -406,8 +424,8 @@ class _MainShellState extends State<MainShell>
 
   void _debugPreviewLevel(int level) {
     final inGame = Navigator.of(context).canPop();
+    SaveManager.instance.setLevel(level);
     setState(() {
-      _level = clampLevel(level);
       _selectedIndex = 1;
       _pendingReward = null;
       _homePopup = _HomePopup.start;
@@ -418,8 +436,24 @@ class _MainShellState extends State<MainShell>
     }
   }
 
+  void _onSaveChanged() {
+    if (!mounted) return;
+    final save = SaveManager.instance;
+    final nextNoAds = save.hasNoAds();
+    Ads.instance.setAdsRemoved(nextNoAds);
+    setState(() {
+      _level = save.getLevel();
+      _coins = save.getCoins();
+      if (_pendingReward == null) _displayedCoins = _coins;
+      _hearts = save.getHearts();
+      _nextHeartAt = save.nextHeartAt;
+      _adsRemoved = nextNoAds;
+      if (_adsRemoved) _adsIconReady = true;
+    });
+  }
+
   String get _heartTimerLabel {
-    if (_hearts >= _maxHearts || _nextHeartAt == null) return 'FULL';
+    if (_hearts >= SaveManager.maxHearts || _nextHeartAt == null) return 'FULL';
     final remaining = _nextHeartAt!.difference(DateTime.now());
     if (remaining.isNegative) return '00:00';
     final totalSeconds = remaining.inSeconds;
@@ -429,40 +463,24 @@ class _MainShellState extends State<MainShell>
   }
 
   void _tickHearts() {
-    if (_hearts >= _maxHearts) {
-      if (_nextHeartAt != null) {
-        setState(() => _nextHeartAt = null);
-      }
-      return;
-    }
-    final next = _nextHeartAt;
-    if (next == null) return;
-    if (DateTime.now().isBefore(next)) {
+    SaveManager.instance.tickHearts();
+    if (!mounted) return;
+    final save = SaveManager.instance;
+    final nextHearts = save.getHearts();
+    final nextAt = save.nextHeartAt;
+    if (nextHearts == _hearts && nextAt == _nextHeartAt) {
+      if (_hearts >= SaveManager.maxHearts || nextAt == null) return;
       setState(() {});
       return;
     }
-
     setState(() {
-      _hearts += 1;
-      if (_hearts >= _maxHearts) {
-        _nextHeartAt = null;
-      } else {
-        _nextHeartAt = DateTime.now().add(_heartRegen);
-      }
+      _hearts = nextHearts;
+      _nextHeartAt = nextAt;
     });
-  }
-
-  void _scheduleHeartRegen() {
-    _nextHeartAt ??= DateTime.now().add(_heartRegen);
   }
 
   bool _consumeHeart() {
-    if (_hearts <= 0) return false;
-    setState(() {
-      _hearts -= 1;
-      _scheduleHeartRegen();
-    });
-    return true;
+    return SaveManager.instance.useHeart();
   }
 
   void _onLevelTap() {
@@ -481,15 +499,15 @@ class _MainShellState extends State<MainShell>
     setState(() => _homePopup = _HomePopup.none);
     await Future<void>.delayed(const Duration(milliseconds: 0));
     if (!mounted) return;
-    await Purchase.instance.showLoading(context);
+    await Purchase.instance.showLoading(
+      context,
+      onGranted: () => SaveManager.instance.setNoAds(true),
+    );
   }
 
   void _addShopCoins(int amount) {
     if (amount <= 0) return;
-    setState(() {
-      _coins += amount;
-      _displayedCoins = _coins;
-    });
+    SaveManager.instance.addCoins(amount);
   }
 
   Future<void> _presentInterstitial() async {
@@ -523,8 +541,8 @@ class _MainShellState extends State<MainShell>
   }
 
   void _selectLevel(int level) {
+    SaveManager.instance.setLevel(level);
     setState(() {
-      _level = clampLevel(level);
       _homePopup = _HomePopup.start;
     });
   }
@@ -537,7 +555,6 @@ class _MainShellState extends State<MainShell>
 
     final gen = ++_playGen;
     setState(() {
-      _level = clampLevel(_level);
       _homePopup = _HomePopup.none;
       _selectedIndex = 1;
     });
@@ -574,10 +591,9 @@ class _MainShellState extends State<MainShell>
   }
 
   void _onRefillLives() {
-    if (!_spendCoins(_refillPrice)) return;
+    if (!SaveManager.instance.spendCoins(_refillPrice)) return;
+    SaveManager.instance.refillHearts();
     setState(() {
-      _hearts = _maxHearts;
-      _nextHeartAt = null;
       _homePopup = _HomePopup.start;
     });
   }
@@ -590,13 +606,8 @@ class _MainShellState extends State<MainShell>
     Soundtrack.instance.restoreHome();
     _adBusy = false;
     if (!earned || !mounted) return;
+    SaveManager.instance.addHeart();
     setState(() {
-      _hearts = (_hearts + 1).clamp(0, _maxHearts);
-      if (_hearts >= _maxHearts) {
-        _nextHeartAt = null;
-      } else {
-        _scheduleHeartRegen();
-      }
       _homePopup = _HomePopup.start;
     });
   }
@@ -604,17 +615,14 @@ class _MainShellState extends State<MainShell>
   void _onReward(int amount) {
     if (amount <= 0) return;
     if (_pendingReward == amount) return;
+    if (_pendingReward != null) {
+      SaveManager.instance.addCoins(_pendingReward!);
+    }
+    SaveManager.instance.addHeart();
     setState(() {
-      if (_pendingReward != null) {
-        _coins += _pendingReward!;
-      }
-      _hearts = (_hearts + 1).clamp(0, _maxHearts);
-      if (_hearts >= _maxHearts) {
-        _nextHeartAt = null;
-      }
       _selectedIndex = 1;
       _pendingReward = amount;
-      _displayedCoins = _coins;
+      _displayedCoins = SaveManager.instance.getCoins();
       _homePopup = _HomePopup.none;
     });
   }
@@ -624,23 +632,18 @@ class _MainShellState extends State<MainShell>
     if (!mounted) return;
     await _presentInterstitial();
     if (!mounted) return;
+    SaveManager.instance.addCoins(amount);
+    SaveManager.instance.setLevel(SaveManager.instance.getLevel() + 1);
     setState(() {
-      _coins += amount;
-      _displayedCoins = _coins;
+      _displayedCoins = SaveManager.instance.getCoins();
       _pendingReward = null;
-      _level = clampLevel(_level + 1);
       _homePopup = _HomePopup.start;
     });
     Soundtrack.instance.restoreHome();
   }
 
   bool _spendCoins(int amount) {
-    if (amount <= 0 || _coins < amount) return false;
-    setState(() {
-      _coins -= amount;
-      _displayedCoins = _coins;
-    });
-    return true;
+    return SaveManager.instance.spendCoins(amount);
   }
 
   @override
@@ -655,7 +658,7 @@ class _MainShellState extends State<MainShell>
       heartTimer: _heartTimerLabel,
       showHearts: onHome,
       showCoinPlus: onHome,
-      showHeartPlus: onHome && _hearts < _maxHearts,
+      showHeartPlus: onHome && _hearts < SaveManager.maxHearts,
       gap: onHome ? 32 : 72,
       coinIconKey: onHome ? _coinIconKey : null,
       onCoinsTap:
@@ -666,7 +669,7 @@ class _MainShellState extends State<MainShell>
               }
               : null,
       onHeartsTap:
-          onHome && _hearts < _maxHearts
+          onHome && _hearts < SaveManager.maxHearts
               ? () {
                 if (blocking) return;
                 setState(() => _homePopup = _HomePopup.moreLives);
@@ -703,7 +706,7 @@ class _MainShellState extends State<MainShell>
                   ),
                   HomePage(
                     onLevelTap: _onLevelTap,
-                    onAdsTap: _onAdsTap,
+                    onAdsTap: _adsRemoved ? null : _onAdsTap,
                     onCubesReady: _onCubesReady,
                     onAdsIconReady: _onAdsIconReady,
                   ),
