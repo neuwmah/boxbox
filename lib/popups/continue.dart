@@ -143,9 +143,9 @@ class _ContinuePopupState extends State<ContinuePopup>
                                               Padding(
                                                 padding:
                                                     const EdgeInsets.fromLTRB(
-                                                      32,
+                                                      24,
                                                       12,
-                                                      32,
+                                                      24,
                                                       20,
                                                     ),
                                                 child: Column(
@@ -175,7 +175,7 @@ class _ContinuePopupState extends State<ContinuePopup>
                                                     const SizedBox(height: 6),
                                                     _StickerLabel(
                                                       text:
-                                                          'Add ${widget.balls} balls to\ncontinue!',
+                                                          'Add ${widget.balls} balls to continue!',
                                                       depthColor: const Color(
                                                         0xFF212121,
                                                       ),
