@@ -52,7 +52,7 @@ class InSettingsMenu extends StatelessWidget {
                 ),
               ),
             Positioned(
-              top: 93,
+              top: 108.8,
               left: 0,
               right: 0,
               child: Align(
@@ -276,37 +276,40 @@ class _MenuIconButton extends StatelessWidget {
             ),
           ],
         ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Positioned.fill(
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: FractionallySizedBox(
-                  widthFactor: 1,
-                  heightFactor: 0.42,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.white.withValues(alpha: enabled ? 0.18 : 0.06),
-                          Colors.white.withValues(alpha: 0),
-                        ],
+        child: ClipOval(
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Positioned.fill(
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: FractionallySizedBox(
+                    widthFactor: 1,
+                    heightFactor: 0.42,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.white.withValues(
+                              alpha: enabled ? 0.18 : 0.06,
+                            ),
+                            Colors.white.withValues(alpha: 0),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-            Icon(
-              icon,
-              color: enabled ? Colors.white : const Color(0xFF6A6A6A),
-              size: InSettingsMenu.iconSize,
-            ),
-          ],
+              Icon(
+                icon,
+                color: enabled ? Colors.white : const Color(0xFF6A6A6A),
+                size: InSettingsMenu.iconSize,
+              ),
+            ],
+          ),
         ),
       ),
     );

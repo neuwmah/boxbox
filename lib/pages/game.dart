@@ -157,6 +157,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   double _outOfBallsTimer = 0;
   bool _exiting = false;
   bool _continueOpen = false;
+  bool _continueUsed = false;
   bool _returnOpen = false;
   bool _menuOpen = false;
   bool _vibration = true;
@@ -705,7 +706,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
   }
 
   void _offerContinueOrExit() {
-    if (_coins < _continueCost) {
+    if (_continueUsed || _coins < _continueCost) {
       _exitGame(GamePage.defeatCode);
       return;
     }
@@ -723,6 +724,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
       _coins -= _continueCost;
       _ballsLeft = _continueBalls;
       _continueOpen = false;
+      _continueUsed = true;
       _outOfBallsTimer = 0;
     });
   }
@@ -829,8 +831,8 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
                 onTapDown: (details) => _throwBall(details.localPosition),
                 child: ImageFiltered(
                   imageFilter: ui.ImageFilter.blur(
-                    sigmaX: 0.55,
-                    sigmaY: 0.55,
+                    sigmaX: 0,
+                    sigmaY: 0,
                     tileMode: TileMode.decal,
                   ),
                   child: RepaintBoundary(
@@ -888,7 +890,7 @@ class _GamePageState extends State<GamePage> with TickerProviderStateMixin {
           ),
           if (_assetsReady && _ballsLeft > 0) ...[
             Positioned(
-              top: 93,
+              top: 108.8,
               left: 0,
               right: 0,
               height: 48,
@@ -991,8 +993,8 @@ class _BallsBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 88,
-      height: 90,
+      width: 120,
+      height: 120,
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -1001,7 +1003,7 @@ class _BallsBadge extends StatelessWidget {
             fit: BoxFit.contain,
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 14),
+            padding: const EdgeInsets.only(top: 18),
             child: ShaderMask(
               blendMode: BlendMode.srcIn,
               shaderCallback: (bounds) {
@@ -1020,7 +1022,7 @@ class _BallsBadge extends StatelessWidget {
                 '$value',
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 24,
+                  fontSize: 40,
                   fontWeight: FontWeight.w600,
                   height: 1.2,
                   letterSpacing: -.4,
@@ -1301,18 +1303,6 @@ class _ScenePainter extends CustomPainter {
     final fill = Paint()
       ..style = PaintingStyle.fill
       ..isAntiAlias = true;
-    final seam = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = _edgeWidth
-      ..strokeJoin = StrokeJoin.round
-      ..strokeCap = StrokeCap.round
-      ..isAntiAlias = true;
-    final edge = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = _edgeWidth
-      ..strokeJoin = StrokeJoin.round
-      ..strokeCap = StrokeCap.round
-      ..isAntiAlias = true;
     final gloss = Paint()..style = PaintingStyle.fill;
 
     for (final item in items) {
@@ -1345,13 +1335,6 @@ class _ScenePainter extends CustomPainter {
             : null;
         canvas.drawPath(path, fill);
         fill.shader = null;
-
-        if (alpha >= 1) {
-          seam.color = color;
-          canvas.drawPath(path, seam);
-        }
-        edge.color = _edgeColor(color);
-        canvas.drawPath(path, edge);
 
         if (item.shiny && bounds.shortestSide > 4) {
           final r = bounds.shortestSide * 0.18;
