@@ -2,18 +2,10 @@
 
 Recreational casual money farming game.
 
-- Assets: `/.appstore`
-- Description:
-```
-Welcome to BoxBox!
-Get ready for the most cool pixel arts! Step into a vibrant 3D arena where every throw counts — aim your shot, slam into stacks of cubes and watch entire sculptures collapse in the most addictive way.
-Each level is a brand-new puzzle. One clean hit can trigger a chain reaction that sends the whole structure tumbling down. Easy to play from the first tap, but full of skill and precision for players who love the perfect throw.
-From wooden floors to glassy stages, BoxBox! brings the ultimate aim – throw – big experience!
-Key Features
-- Stunning high-quality 3D physics
-- Satisfying destruction: collapsing cubes, flying pieces & chain reactions
-- Skill-based throw mechanics that reward perfect aim
-- Simple tap controls, endlessly fun progression
-The cubes are stacked!
-Throw the first ball and let the show begin!
-```
+## Stack
+
+The client is built with Flutter (Dart), utilizing `cannon_physics` for physics simulation, `flutter_soloud` for audio processing, and `google_mobile_ads` for ad integration. Authentication is managed through Firebase Auth with native Google and Apple Sign-In support. On the backend, the API is powered by Node.js, Express, and PostgreSQL, integrated with Firebase Admin, while deployment and hosting for both `server/` and `.web/` are handled on Fly.io.
+
+## Structure
+
+The project root centers around the `lib/` directory, which houses the core Flutter application code, including game logic, UI components, assets, and shaders. The `server/` folder contains the backend API, and `.appstore/` holds the store listing assets and metadata. Lastly, dedicated platform folders (android, ios, web, windows, macos, and linux) manage native configuration and build targets.
